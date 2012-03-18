@@ -8,6 +8,6 @@ database to recognize songs and to correctly tag them. Additionally, the
 program shall have the capability to find album art online and attach it to
 songs.
 
-Testing framework can be found under test/
+Testing framework can be found under tests/
 
 r3
