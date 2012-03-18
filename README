@@ -1,0 +1,13 @@
+r3tagger
+
+author: r3 (ryan.roler@gmail.com)
+
+R3tagger is a work that will develop into a fully automated tagging solution
+for users of popular file formats. The tagger will use the open musicbrainz
+database to recognize songs and to correctly tag them. Additionally, the
+program shall have the capability to find album art online and attach it to
+songs.
+
+Testing framework can be found under test/
+
+r3
