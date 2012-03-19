@@ -15,8 +15,8 @@ class TestBlankSong(object):
 
     artist == 'testArtist'
     title == 'testAlbum'
-    track_no == '01'
-    year == '2012'
+    tracknumber == '01'
+    date == '2012'
     genre == 'testGenre'
 
     Additionally, it will be checked that the file exists.
@@ -28,13 +28,10 @@ class TestBlankSong(object):
         """Setup: Copy Song to temporary file and instantiate"""
         TestBlankSong.temp_song = tempfile.NamedTemporaryFile(delete=True)
 
-        song = Song.Song(
-                path = TestBlankSong.temp_song.name,
-                artist = "testArtist",
-                title = "testTitle",
-                track_no = "01",
-                year = "2012",
-                genre = "testGenre")
+        fields = dict(artist = "testArtist", title = "testTitle",
+                      tracknumber = "01", date = "2012", genre = "testGenre")
+
+        song = Song.Song(TestBlankSong.temp_song.name, fields)
 
         return song
 
@@ -60,11 +57,11 @@ class TestBlankSong(object):
     def test_title(self, song):
         assert song.title == 'testTitle'
 
-    def test_track_no(self, song):
-        assert song.track_no == '01'
+    def test_tracknumber(self, song):
+        assert song.tracknumber == '01'
 
-    def test_year(self, song):
-        assert song.year == '2012'
+    def test_date(self, song):
+        assert song.date == '2012'
 
     def test_genre(self, song):
         assert song.genre == 'testGenre'
@@ -75,8 +72,8 @@ class TestReadSong(object):
 
     artist == 'testArtist'
     title == 'testTitle'
-    track_no == '01'
-    year == '2012'
+    tracknumber == '01'
+    date == '2012'
     genre == 'testGenre'
 
     These expected values coorespend with tagged_dummy.ogg file in
@@ -109,11 +106,11 @@ class TestReadSong(object):
     def test_read_title(self, song):
         assert song.title == 'testTitle'
 
-    def test_read_track_no(self, song):
-        assert song.track_no == '00'
+    def test_read_tracknumber(self, song):
+        assert song.tracknumber == '01'
 
-    def test_read_year(self, song):
-        assert song.year == '2012'
+    def test_read_date(self, song):
+        assert song.date == '2012'
 
     def test_read_genre(self, song):
         assert song.genre == 'testGenre'
@@ -124,8 +121,8 @@ class TestWriteSong(object):
 
     artist == 'altArtist'
     title == 'altTitle'
-    track_no == '00'
-    year == '1999'
+    tracknumber == '00'
+    date == '1999'
     genre == 'altGenre'
 
     These values are written to a temporary test file. The song is then closed
@@ -144,12 +141,11 @@ class TestWriteSong(object):
             TestWriteSong.dir = tempfile.mkdtemp()
 
             orig_path = os.path.join('test_songs', TestWriteSong.filename)
-            dest_path = os.path.join(TestWriteSong.dir,
-                    TestWriteSong.filename)
+            dest_path = os.path.join(TestWriteSong.dir, TestWriteSong.filename)
 
             shutil.copyfile(orig_path, dest_path)
-            TestWriteSong.song = Song.Song(dest_path)
-            return TestWriteSong.song
+            TestWriteSong.song = dest_path
+            return Song.Song(dest_path)
 
         def pytest_funcarg__song(self, request):
             """Dependency Injection: Song"""
@@ -172,13 +168,13 @@ class TestWriteSong(object):
             song.title = 'altTitle'
             assert song.title == 'altTitle'
 
-        def test_write_track_no(self, song):
-            song.track_no = '00'
-            assert song.track_no == '00'
+        def test_write_tracknumber(self, song):
+            song.tracknumber = '00'
+            assert song.tracknumber == '00'
 
-        def test_write_year(self, song):
-            song.year = '1999'
-            assert song.year == '1999'
+        def test_write_date(self, song):
+            song.date = '1999'
+            assert song.date == '1999'
 
         def test_write_genre(self, song):
             song.genre = 'altGenre'
@@ -188,7 +184,7 @@ class TestWriteSong(object):
         # Setup 'song' funcarg and setup/teardown
         def setup_song(self):
             """Setup: Open edited dummy song"""
-            return Song.Song(TestWriteSong.filename)
+            return Song.Song(TestWriteSong.song)
 
         def teardown_song(self, song):
             """Teardown: Delete directory containing dummy file"""
@@ -207,11 +203,11 @@ class TestWriteSong(object):
         def test_read_altered_title(self, song):
             assert song.title == 'altTitle'
 
-        def test_read_altered_track_no(self, song):
-            assert song.track_no == '00'
+        def test_read_altered_tracknumber(self, song):
+            assert song.tracknumber == '00'
 
-        def test_read_altered_year(self, song):
-            assert song.year == '1999'
+        def test_read_altered_date(self, song):
+            assert song.date == '1999'
 
         def test_read_altered_genre(self, song):
             assert song.genre == 'altGenre'
