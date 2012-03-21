@@ -41,6 +41,9 @@ class TestReadSong(object):
     def test_read_artist(self, song):
         assert song.artist == [u'testArtist']
 
+    def test_read_album(self, song):
+        assert song.album == [u'testAlbum']
+
     def test_read_title(self, song):
         assert song.title == [u'testTitle']
 
@@ -103,6 +106,11 @@ class TestWriteSong(object):
             assert song.artist == [u'altArtist']
             song()
 
+        def test_write_album(self, song):
+            song.album = 'altAlbum'
+            assert song.album == [u'altAlbum']
+            song()
+
         def test_write_title(self, song):
             song.title = 'altTitle'
             assert song.title == [u'altTitle']
@@ -142,6 +150,9 @@ class TestWriteSong(object):
         # Read tests
         def test_read_altered_artist(self, song):
             assert song.artist == [u'altArtist']
+
+        def test_read_altered_album(self, song):
+            assert song.album == [u'altAlbum']
 
         def test_read_altered_title(self, song):
             assert song.title == [u'altTitle']

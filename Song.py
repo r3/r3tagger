@@ -11,7 +11,9 @@ from mutagen.flac import FLAC
 class Song(object):
     """Path to a file and metadata that represents a song"""
 
-    _supported_fields = ('artist', 'title', 'tracknumber', 'date', 'genre')
+    _supported_fields = ('artist', 'album', 'title',
+                         'tracknumber', 'date', 'genre')
+
     _supported_filetypes = {'flac':FLAC, 'ogg':OggVorbis}
 
     def __init__(self, path, fields=None):
