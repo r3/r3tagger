@@ -5,8 +5,8 @@ Date: 03.17.2012"""
 
 import os.path
 
-from mutagen.flac import FLAC
 from mutagen.oggvorbis import OggVorbis
+from mutagen.flac import FLAC
 
 class Song(object):
     """Path to a file and metadata that represents a song"""
@@ -28,27 +28,41 @@ class Song(object):
         Compatible files: flac (*.flac), ogg vorbis (*.ogg)
         """
 
-        self._song_file = None
         self.path = path
+        self._song_file = None
+        self._connect_to_file()
 
         if fields:
             for field in Song._supported_fields:
-                setattr(self, field, fields.get(field, None))
+                self._song_file[field] = fields.get(field, None)
+
+    def __setattr__(self, attr, val):
+        if attr in Song._supported_fields:
+            self._song_file[attr] = val
         else:
-            self._get_fields_from_file()
+            self.__dict__[attr] = val
+
+    def __getattr__(self, attr):
+        if attr in Song._supported_fields:
+            return self._song_file.get(attr, '')
+        else:
+            return self.__dict__(attr)
+
 
     def _connect_to_file(self):
+        """Opens a file and determines type. File will be opened
+        (if compatible) with codec and metadata will be read in.
+        """
         def determine_type():
+            """Determine codec to use in opening file depending on extension"""
             extension = os.path.splitext(self.path)[-1][1:]
+            print self.path
+            print extension
             return Song._supported_filetypes[extension]
 
         song_type = determine_type()
         self._song_file = song_type(self.path)
 
-    def _get_fields_from_file(self):
-        if not self._song_file:
-            self._connect_to_file()
-
-        for field in Song._supported_fields:
-            # Mutagen returns tags as unicode in a list.
-            setattr(self, field, self._song_file.get(field, [None])[0])
+    def _update_file(self):
+        """Saves updated metadata to file."""
+        self._song_file.save()
