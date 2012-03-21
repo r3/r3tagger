@@ -101,22 +101,27 @@ class TestWriteSong(object):
         def test_write_artist(self, song):
             song.artist = 'altArtist'
             assert song.artist == [u'altArtist']
+            song()
 
         def test_write_title(self, song):
             song.title = 'altTitle'
             assert song.title == [u'altTitle']
+            song()
 
         def test_write_tracknumber(self, song):
             song.tracknumber = '00'
             assert song.tracknumber == [u'00']
+            song()
 
         def test_write_date(self, song):
             song.date = '1999'
             assert song.date == [u'1999']
+            song()
 
         def test_write_genre(self, song):
             song.genre = 'altGenre'
             assert song.genre == [u'altGenre']
+            song()
 
     class TestReadBundle:
         # Setup 'song' funcarg and setup/teardown

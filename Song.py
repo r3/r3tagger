@@ -35,6 +35,9 @@ class Song(object):
         if fields:
             for field in Song._supported_fields:
                 self._song_file[field] = fields.get(field, None)
+    def __call__(self):
+        """Shortcut to _update_file: Saves updated metadata to file."""
+        self._update_file()
 
     def __setattr__(self, attr, val):
         if attr in Song._supported_fields:
@@ -48,7 +51,6 @@ class Song(object):
         else:
             return self.__dict__(attr)
 
-
     def _connect_to_file(self):
         """Opens a file and determines type. File will be opened
         (if compatible) with codec and metadata will be read in.
@@ -56,8 +58,6 @@ class Song(object):
         def determine_type():
             """Determine codec to use in opening file depending on extension"""
             extension = os.path.splitext(self.path)[-1][1:]
-            print self.path
-            print extension
             return Song._supported_filetypes[extension]
 
         song_type = determine_type()
