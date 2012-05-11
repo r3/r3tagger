@@ -127,6 +127,10 @@ class TestAcoustid(object):
     """Provides a test suite for ensuring that fingerprints are properly
        generated from an mp3 file. Asserts that a newly made fingerprint
        matches one pregenerated and stored in a file (it's a long string)
+
+       Fingerpring: test_songs/PublicDomainFingerprint.txt
+       Musicbrainz Page for song:
+        http://musicbrainz.org/recording/f037f7cf-7454-4b55-9dfe-06e8ea641e40
     """
 
     dir = None
@@ -135,13 +139,13 @@ class TestAcoustid(object):
 
     def setup_song(self):
         """Setup: Setup copy of dummy song"""
-        TestWriteSong.dir = tempfile.mkdtemp()
+        TestAcoustid.dir = tempfile.mkdtemp()
 
-        orig_path = os.path.join('test_songs', TestWriteSong.filename)
-        dest_path = os.path.join(TestWriteSong.dir, TestWriteSong.filename)
+        orig_path = os.path.join('test_songs', TestAcoustid.filename)
+        dest_path = os.path.join(TestAcoustid.dir, TestAcoustid.filename)
 
         shutil.copyfile(orig_path, dest_path)
-        TestWriteSong.song = dest_path
+        TestAcoustid.song = dest_path
         return Song.Song(dest_path)
 
     def pytest_funcarg__song(self, request):
@@ -151,4 +155,4 @@ class TestAcoustid(object):
 
     def test_acoustid(self, song):
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
-            assert fingerprint == song.fingerprint
+            assert ''.join(fingerprint) == song.fingerprint

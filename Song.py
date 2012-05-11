@@ -7,6 +7,8 @@ import os.path
 
 from mutagen.oggvorbis import OggVorbis
 from mutagen.flac import FLAC
+from mutagen.easyid3 import EasyID3
+import acoustid
 
 
 class Song(object):
@@ -15,7 +17,7 @@ class Song(object):
     _supported_fields = ('artist', 'album', 'title',
                          'tracknumber', 'date', 'genre')
 
-    _supported_filetypes = {'flac': FLAC, 'ogg': OggVorbis}
+    _supported_filetypes = {'flac': FLAC, 'ogg': OggVorbis, 'mp3': EasyID3}
 
     def __init__(self, path, fields=None):
         """Instantiate Song object
@@ -81,3 +83,9 @@ class Song(object):
     def bitrate(self):
         """Bitrate of song (160000)"""
         return self._song_file.info.bitrate
+
+    @property
+    def fingerprint(self):
+        """Returns the Acoustid fingerprint"""
+        _, fingerprint = acoustid.fingerprint_file(self.path)
+        return fingerprint
