@@ -65,7 +65,11 @@ class Song(object):
         def determine_type():
             """Determine codec to use in opening file depending on extension"""
             extension = os.path.splitext(self.path)[-1][1:]
-            return Song._supported_filetypes[extension]
+            result = Song._supported_filetypes.get(extension, None)
+            if result is None:
+                raise NotImplemented
+            else:
+                return result
 
         song_type = determine_type()
         self._song_file = song_type(self.path)

@@ -1,0 +1,18 @@
+test_Song.py
+    > Write test that tries to instantiate a Song object on an
+      unrecognized file format (extension). Should raise
+      NotImplemented exception:
+
+        import pytest
+        with pytest.raises(NotImplemented):
+            Song.Song('unsupported.file')
+
+        http://pytest.org/latest/assert.html
+
+    > Extract OGGVORBIS only code and create superclass for testing
+    > Write test that reads/writes MP3 metadata extends superclass
+    > Write test that reads/writes FLAC metadata extends superclass
+
+test_Album.py
+    > Create test that attempts to find common tags amongst
+      Songs that fails to succeed.
