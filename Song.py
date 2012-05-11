@@ -56,7 +56,11 @@ class Song(object):
         if attr in Song._supported_fields:
             return self._song_file.get(attr, '')
         else:
-            return self.__dict__[attr]
+            result = self.__dict__.get(attr, None)
+            if result is None:
+                raise AttributeError
+            else:
+                return result
 
     def _connect_to_file(self):
         """Opens a file and determines type. File will be opened
@@ -67,7 +71,7 @@ class Song(object):
             extension = os.path.splitext(self.path)[-1][1:]
             result = Song._supported_filetypes.get(extension, None)
             if result is None:
-                raise NotImplemented
+                raise NotImplementedError
             else:
                 return result
 
