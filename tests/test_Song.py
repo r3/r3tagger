@@ -5,57 +5,6 @@ import shutil
 import os
 import Song
 
-class TestReadSong(object):
-    """Provides a test suite for reading pretagged songs
-
-    artist == 'testArtist'
-    title == 'testTitle'
-    tracknumber == '01'
-    date == '2012'
-    genre == 'testGenre'
-
-    These expected values coorespend with tagged_dummy.ogg file in
-    the test_songs folder. As no changes are made to the file, it
-    is not copied like in some other tests.
-    """
-
-    filename = 'tagged_dummy.ogg'
-
-    # Setup copy of test file
-    def setup_song(self):
-        """Setup: Open tagged dummy song"""
-        return Song.Song(os.path.join('test_songs', TestReadSong.filename))
-
-    def pytest_funcarg__song(self, request):
-        """Dependency Injection: Song"""
-        return request.cached_setup(self.setup_song, scope='class')
-
-    # Ensure file exists
-    def test_song_has_path(self, song):
-        assert hasattr(song, 'path')
-
-    def test_file_exists(self, song):
-        assert os.path.isfile(song.path)
-
-    # Read tests
-    def test_read_artist(self, song):
-        assert song.artist == [u'testArtist']
-
-    def test_read_album(self, song):
-        assert song.album == [u'testAlbum']
-
-    def test_read_title(self, song):
-        assert song.title == [u'testTitle']
-
-    def test_read_tracknumber(self, song):
-        assert song.tracknumber == [u'01']
-
-    def test_read_date(self, song):
-        assert song.date == [u'2012']
-
-    def test_read_genre(self, song):
-        assert song.genre == [u'testGenre']
-
 
 class TestWriteSong(object):
     """Provides a test suite for writing and reading fields
@@ -165,3 +114,10 @@ class TestWriteSong(object):
 
         def test_read_altered_genre(self, song):
             assert song.genre == [u'altGenre']
+
+        def test_read_length(self, song):
+            def near(reference, test_num, bounds=0.05):
+                return (reference - bounds) < test_num < (reference + bounds)
+
+            #0.7886621315192743 is the length given in manual tests
+            assert near(song.length, 0.788)

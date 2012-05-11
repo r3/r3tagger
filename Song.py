@@ -8,13 +8,14 @@ import os.path
 from mutagen.oggvorbis import OggVorbis
 from mutagen.flac import FLAC
 
+
 class Song(object):
     """Path to a file and metadata that represents a song"""
 
     _supported_fields = ('artist', 'album', 'title',
                          'tracknumber', 'date', 'genre')
 
-    _supported_filetypes = {'flac':FLAC, 'ogg':OggVorbis}
+    _supported_filetypes = {'flac': FLAC, 'ogg': OggVorbis}
 
     def __init__(self, path, fields=None):
         """Instantiate Song object
@@ -34,9 +35,11 @@ class Song(object):
         self._song_file = None
         self._connect_to_file()
 
-        if fields:
+        # Fill in tags if given a dict
+        if fields is not None:
             for field in Song._supported_fields:
                 self._song_file[field] = fields.get(field, None)
+
     def __call__(self):
         """Shortcut to _update_file: Saves updated metadata to file."""
         self._update_file()
@@ -51,7 +54,7 @@ class Song(object):
         if attr in Song._supported_fields:
             return self._song_file.get(attr, '')
         else:
-            return self.__dict__(attr)
+            return self.__dict__[attr]
 
     def _connect_to_file(self):
         """Opens a file and determines type. File will be opened
@@ -68,3 +71,13 @@ class Song(object):
     def _update_file(self):
         """Saves updated metadata to file."""
         self._song_file.save()
+
+    @property
+    def length(self):
+        """Song length in seconds"""
+        return self._song_file.info.length
+
+    @property
+    def bitrate(self):
+        """Bitrate of song (160000)"""
+        return self._song_file.info.bitrate
