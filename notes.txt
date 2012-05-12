@@ -1,0 +1,12 @@
+http://stackoverflow.com/questions/409949/how-do-you-embed-album-art-into-an-mp3-using-python  # imbed art
+http://www.id3.org/id3v2.4.0-frames  # ID3 tag keywords
+# Musicbrainz
+http://users.musicbrainz.org/~matt/python-musicbrainz2/html/
+http://bugs.musicbrainz.org/browser/python-musicbrainz2/trunk/examples
+
+#READ:
+# http://users.musicbrainz.org/~matt/python-musicbrainz2/html/musicbrainz2.webservice.Query-class.html
+# 
+# http://users.musicbrainz.org/~matt/python-musicbrainz2/html/musicbrainz2.webservice.ArtistFilter-class.html
+# http://users.musicbrainz.org/~matt/python-musicbrainz2/html/musicbrainz2.webservice.TrackFilter-class.html
+#

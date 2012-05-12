@@ -4,6 +4,7 @@ import tempfile
 import shutil
 import os
 import Song
+import pytest
 
 
 class TestWriteSong(object):
@@ -148,6 +149,10 @@ class TestAcoustid(object):
         TestAcoustid.song = dest_path
         return Song.Song(dest_path)
 
+    def teardown_song(self, song):
+        """Teardown: Delete directory containing dummy file"""
+        shutil.rmtree(TestAcoustid.dir)
+
     def pytest_funcarg__song(self, request):
         """Dependency Injection: Song"""
         return request.cached_setup(self.setup_song,
@@ -156,3 +161,47 @@ class TestAcoustid(object):
     def test_acoustid(self, song):
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
             assert ''.join(fingerprint) == song.fingerprint
+
+
+class TestFailures(object):
+    """Provides a test suite for ensuring that fingerprints are properly
+       generated from an mp3 file. Asserts that a newly made fingerprint
+       matches one pregenerated and stored in a file (it's a long string)
+
+       Fingerpring: test_songs/PublicDomainFingerprint.txt
+       Musicbrainz Page for song:
+        http://musicbrainz.org/recording/f037f7cf-7454-4b55-9dfe-06e8ea641e40
+    """
+
+    dir = None
+    song = None
+    filename = 'PublicDomainSong.mp3'
+
+    def setup_song(self):
+        """Setup: Setup copy of dummy song"""
+        TestAcoustid.dir = tempfile.mkdtemp()
+
+        orig_path = os.path.join('test_songs', TestAcoustid.filename)
+        dest_path = os.path.join(TestAcoustid.dir, TestAcoustid.filename)
+
+        shutil.copyfile(orig_path, dest_path)
+        TestAcoustid.song = dest_path
+        return Song.Song(dest_path)
+
+    def teardown_song(self, song):
+        """Teardown: Delete directory containing dummy file"""
+        shutil.rmtree(TestAcoustid.dir)
+
+    def pytest_funcarg__song(self, request):
+        """Dependency Injection: Song"""
+        return request.cached_setup(self.setup_song,
+                scope='class')
+
+    def test_unsupported_file(self):
+        path = os.path.join('test_songs', 'Unsupported.file')
+        with pytest.raises(NotImplementedError):
+            Song.Song(path)
+
+    def test_missing_attrib(self, song):
+        with pytest.raises(AttributeError):
+            getattr(song, 'asnbrlAlkhasf')
