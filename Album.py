@@ -40,9 +40,7 @@ class Album(object):
 
     def _find_shared_tags(self):
         """Determines the fields that are shared between each of the Album's
-           songs. Stored as sets in a dict keyed on the field name:
-
-                dict(artist='someArtist', album='someAlbum' ... )
+           songs and adds these to the Album's fields.
         """
 
         def add_fields_from_song(song):
@@ -70,6 +68,10 @@ class Album(object):
            A float between 0.0 and 1.0 representing the quality of the match
            will be returned.
         """
+        def stringify_tracks(tracks):
+            result = sorted([str(x) for x in tracks])
+            return ''.join(result)
+
         first = []
         second = []
 
@@ -79,7 +81,7 @@ class Album(object):
                 second.append(getattr(other, attrib))
 
         if hasattr(self, 'tracks') and hasattr(other, 'tracks'):
-            first.append(''.join([str(x) for x in getattr(self, 'tracks')]))
-            second.append(''.join([str(x) for x in getattr(other, 'tracks')]))
+            first.append(stringify_tracks(getattr(self, 'tracks')))
+            second.append(stringify_tracks(getattr(other, 'tracks')))
 
         return difflib.SequenceMatcher(None, first, second).ratio()
