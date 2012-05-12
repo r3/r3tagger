@@ -82,6 +82,4 @@ class Album(object):
             first.append(''.join([str(x) for x in getattr(self, 'tracks')]))
             second.append(''.join([str(x) for x in getattr(other, 'tracks')]))
 
-        print first
-        print second
         return difflib.SequenceMatcher(None, first, second).ratio()
