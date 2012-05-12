@@ -54,13 +54,16 @@ class Song(object):
 
     def __getattr__(self, attr):
         if attr in Song._supported_fields:
-            return self._song_file.get(attr, '')
+            return self._song_file.get(attr, '')[0]
         else:
             result = self.__dict__.get(attr, None)
             if result is None:
                 raise AttributeError
             else:
                 return result
+
+    def __str__(self):
+        return str(self.title)
 
     def _connect_to_file(self):
         """Opens a file and determines type. File will be opened

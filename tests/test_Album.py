@@ -110,12 +110,13 @@ class TestAlbumMatching(object):
         descriptor['artist'] = 'SomeArtist'
         descriptor['date'] = '2012'
         descriptor['genre'] = 'SomeGenre'
-        descriptor['tracks'] = ['01', '02', '03', '04', '05']
+        descriptor['tracks'] = ['SomeTrack01', 'SomeTrack02', 'SomeTrack03',
+                                'SomeTrack04', 'SomeTrack05']
         return Album(descriptor)
 
     def pytest_funcarg__matchingmock(self, request):
         """Dependency Injection: Album"""
-        return request.cached_setup(self.setup_album, scope='class')
+        return request.cached_setup(self.setup_matchingmock, scope='class')
 
     def setup_similarmock(self):
         """Setup: Creates a test album with 5 dummy songs on it"""
@@ -124,12 +125,12 @@ class TestAlbumMatching(object):
         descriptor['artist'] = 'SomeArtist'
         descriptor['date'] = '2012'
         descriptor['genre'] = 'SomeGenre'
-        descriptor['tracks'] = ['01', '02', '03', '04']
+        descriptor['tracks'] = ['SomeTrack01', 'SomeTrack02', 'SomeTrack03']
         return Album(descriptor)
 
     def pytest_funcarg__similarmock(self, request):
         """Dependency Injection: Album"""
-        return request.cached_setup(self.setup_album, scope='class')
+        return request.cached_setup(self.setup_similarmock, scope='class')
 
     def setup_differentmock(self):
         """Setup: Creates a test album with 5 dummy songs on it"""
@@ -138,12 +139,12 @@ class TestAlbumMatching(object):
         descriptor['artist'] = 'SomeOtherArtist'
         descriptor['date'] = '1985'
         descriptor['genre'] = 'SomeOtherGenre'
-        descriptor['tracks'] = ['01', '02']
+        descriptor['tracks'] = ['SomeTrack01', 'SomeTrack02']
         return Album(descriptor)
 
     def pytest_funcarg__differentmock(self, request):
         """Dependency Injection: Album"""
-        return request.cached_setup(self.setup_album, scope='class')
+        return request.cached_setup(self.setup_differentmock, scope='class')
 
     def setup_album(self):
         """Setup: Creates a test album with 5 dummy songs on it"""
