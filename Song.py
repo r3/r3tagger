@@ -69,16 +69,16 @@ class Song(object):
         """Opens a file and determines type. File will be opened
         (if compatible) with codec and metadata will be read in.
         """
-        def determine_type():
+        def determine_type(path):
             """Determine codec to use in opening file depending on extension"""
-            extension = os.path.splitext(self.path)[-1][1:]
+            extension = os.path.splitext(path)[-1][1:]
             result = Song._supported_filetypes.get(extension, None)
             if result is None:
                 raise NotImplementedError
             else:
                 return result
 
-        song_type = determine_type()
+        song_type = determine_type(self.path)
         self._song_file = song_type(self.path)
 
     def _update_file(self):

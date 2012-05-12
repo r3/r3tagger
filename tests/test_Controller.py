@@ -13,6 +13,7 @@ class TestCreateAlbum(object):
     """Tests the creation of an album from a path"""
 
     path = None
+    persist_album = None
 
     # Setup/teardown methods as well as dependency injection
     def setup_path(self):
@@ -27,7 +28,7 @@ class TestCreateAlbum(object):
 
         return dest_path
 
-    def teardown_path(self, album):
+    def teardown_path(self, request):
         """Teardown: Destroys test album and cleans up temp files"""
         shutil.rmtree(TestCreateAlbum.path)
 
@@ -44,7 +45,31 @@ class TestCreateAlbum(object):
         """Dependency Injection: Album"""
         return request.cached_setup(self.setup_controller, scope='module')
 
-    def test_single_album(self, path):
-        persist_album = shelve.open('SomeAlbumInstance.shelve')['SomeAlbum']
+    def setup_persist(self):
+        """Setup: Creates a test album with 5 dummy songs on it"""
+        tempdir = tempfile.mkdtemp()
+
+        orig_path = 'SomeAlbumInstance.shelve'
+        dest_path = os.path.join(tempdir, 'SomeAlbumInstance.shelve')
+
+        shutil.copyfile(orig_path, dest_path)
+        TestCreateAlbum.persist_album = dest_path
+
+        return shelve.open(dest_path)['SomeAlbum']
+
+    def teardown_persist(self, request):
+        """Teardown: Destroys test album and cleans up temp files"""
+        os.remove(TestCreateAlbum.persist_album)
+
+    def pytest_funcarg__persist(self, request):
+        """Dependency Injection: Album"""
+        return request.cached_setup(self.setup_persist, self.teardown_persist,
+                scope='class')
+
+    def test_single_album(self, path, persist):
         test_album = Controller.build_albums(path).next()
-        assert persist_album.match(test_album) == 1.0
+        assert persist.match(test_album) == 1.0
+
+    def test_recursive_albums(self, path, persist):
+        for album in Controller.build_albums(path, True):
+            assert persist.match(album) == 1.0

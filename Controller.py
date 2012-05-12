@@ -5,15 +5,17 @@
 """
 
 #import queries
-import os
+from os import (listdir, walk)
+from os.path import (isfile, join)
 from Album import Album
 from Song import Song
 
 
 def build_albums(path, recursive=False):
     if recursive is False:
-        for _, _, files in os.walk(path):
-            yield Album([Song(os.path.join(path, x)) for x in files])
+        files = [join(path, x) for x in listdir(path)]
+        yield Album([Song(x) for x in files if isfile(x)])
     else:
-        files = os.listdir(path)
-        yield Album([Song(os.path.join(path, x)) for x in files])
+        for _, _, files in walk(path):
+            tracks = [join(path, x) for x in files]
+            yield Album([Song(x) for x in tracks if isfile(x)])
