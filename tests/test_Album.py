@@ -4,6 +4,8 @@ import shutil
 import os
 import tempfile
 
+import mock_MusicbrainzQueries as musicbrainz
+
 from Song import Song
 from Album import Album
 
@@ -175,7 +177,7 @@ class TestAlbumMatching(object):
         assert album.match(matchingmock) == 1.0
 
     def test_similar_match(self, album, similarmock):
-        assert 0 < album.match(similarmock) < 1.0
+        assert album.match(similarmock) == 0.8
 
     def test_no_match(self, album, differentmock):
         assert album.match(differentmock) == 0.0
