@@ -9,10 +9,15 @@ requires: Python 2.7 -   http://python.org/
           PyTest -       http://pytest.org/
 
 R3tagger is a work that will develop into a fully automated tagging solution
-for users of popular file formats. The tagger will use the open musicbrainz
-database to recognize songs and to correctly tag them. Additionally, the
-program shall have the capability to find album art online and attach it to
-songs.
+for users of popular file formats. The tagger will use musicbrainz and acoustid
+to fingerprint and recognize songs and to correctly tag them. Albums will
+handle cases where tracks cannot be identified by fingerprinting using a
+custom algorithm (outlined in UseCases.txt) to attempt using existing tags to
+recognize a song. Should that fail, the program will attempt to find the
+significant parts of the file path to identify the song. I may throw in
+Last.fm recognition as well to supplement the musicbrainz system. Additionally,
+the program shall have the capability to find album art online and attach it
+to songs.
 
 Testing framework can be found under tests/
 
@@ -23,6 +28,6 @@ created and have testing (using PyTest). I'm now creating a mock of the future
 musicbrainz interface so that work can begin on the controller module. Once the
 controller module is able to identify songs by looking up a fingerprint and
 editing the file's metadata, I'll replace the mock with a real interface to
-musicbrainz.
+musicbrainz. The controller is under active construction as well.
 
 r3

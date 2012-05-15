@@ -1,0 +1,64 @@
+> Song has has artist, track, and album fields
+   > Find album using artist and album title
+    > Update tags
+
+> Song is recognized by fingerprint
+   > Lookup song and determine albums that the song is on
+    > If necessary, recognize the next track by fingerprint (or existing tags)
+      and attempt to find the album that contains both
+     > Update tags
+
+> Song has existing track and artist fields
+   > Find track with artist to determine album
+    > If song exists on multiple albums, proceed to the next song and attempt
+      to find the album that contains both
+     > Update tags
+
+> Song has existing track and album fields
+   > Find album
+     > Update tags
+
+> Song has existing artist and album fields
+   > Find album
+     > Update tags
+
+> Song only has existing track field
+   > Find albums that contain song
+     > Attempt to match to local album
+       > Update tags
+
+> Song only has existing artist field
+   > Find albums by artist
+     > Attempt to match to local album
+       > Update tags
+
+> Song only has existing album field
+  > Find album
+    > Update tags
+
+Notes:
+* "Find album" consists of determining the album that contains the song(s) and
+  ensuring that it matches existing tags and album track length.
+
+* In attempting to find an album, search musicbrainz for a "Release Group"
+  http://musicbrainz.org/doc/Release_Group
+  Once a release group is found, we need to determine WHICH release it is
+
+* If any of the above fail, we can jump into Last.fm fingerprint mode, and
+  then to matching by path information (album/artist/track in Song.path)
+
+* Iterate through the tracks until one is found with the most information
+  filled in from (artist, album, track). Once the best track is found, try to
+  walk through the above means of identification.
+
+* Musicbrainz2-python use examples
+  http://bugs.musicbrainz.org/browser/python-musicbrainz2/trunk/examples
+
+* Check out beets identification routines:
+  http://beets.radbox.org/
+
+* Picard Musicbrainz tagger:
+  https://github.com/musicbrainz/picard
+
+* Musicbrainz Schema information:
+  http://wiki.musicbrainz.org/Next_Generation_Schema

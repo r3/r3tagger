@@ -2,7 +2,14 @@ test_Song.py
     > Extract OGGVORBIS only code and create superclass for testing
     > Write test that reads/writes MP3 metadata extends superclass
     > Write test that reads/writes FLAC metadata extends superclass
+    > There should be tests and test files for each supported format
 
 test_Album.py
     > Create test that attempts to find common tags amongst
       Songs that fails to succeed.
+
+Controller.py
+    > Continue production
+
+test_Controller.py
+    > Lead production
