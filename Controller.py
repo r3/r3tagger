@@ -4,9 +4,10 @@
     algorithms and querier of the Musicbrainz database
 """
 
-#import queries
 from os import (listdir, walk)
 from os.path import (isfile, join)
+
+from queries import Musicbrainz
 from Album import Album
 from Song import Song
 

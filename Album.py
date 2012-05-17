@@ -3,8 +3,6 @@
 Author: r3 (ryan.roler@gmail.com)
 Date: 03.17.2012"""
 
-import difflib
-
 
 class Album(object):
     """Contains a list of songs and metadata that describes an album.
@@ -68,20 +66,23 @@ class Album(object):
            A float between 0.0 and 1.0 representing the quality of the match
            will be returned.
         """
-        def stringify_tracks(tracks):
-            result = sorted([str(x) for x in tracks])
-            return ''.join(result)
 
-        first = []
-        second = []
+        shared_fields = 0.0
+        matches = 0.0
 
         for attrib in Album._supported_fields:
             if hasattr(self, attrib) and hasattr(other, attrib):
-                first.append(getattr(self, attrib))
-                second.append(getattr(other, attrib))
+                shared_fields += 1
+                if getattr(self, attrib) == getattr(other, attrib):
+                    matches += 1
 
         if hasattr(self, 'tracks') and hasattr(other, 'tracks'):
-            first.append(stringify_tracks(getattr(self, 'tracks')))
-            second.append(stringify_tracks(getattr(other, 'tracks')))
+            shared_fields += 1
 
-        return difflib.SequenceMatcher(None, first, second).ratio()
+            self_tracks = [str(x) for x in self]
+            other_tracks = [str(x) for x in other]
+
+            if sorted(self_tracks) == sorted(other_tracks):
+                matches += 1
+
+        return matches / shared_fields
