@@ -12,7 +12,8 @@ Description:
     Creates a 'Backoff' class to be used as a decorator for functions that
     require a delay between the resolutions of those functions. The delay
     can be blocking or nonblocking as designated by the decorator's second
-    parameter.
+    parameter. Nonblocking functions do not currently allow for return
+    values.
 
     # blocking example:
 
@@ -38,9 +39,9 @@ Description:
 
 from __future__ import print_function
 import datetime
-import threading
-import sched
-import time
+
+from threading import Timer
+from time import sleep
 
 
 class Backoff():
@@ -70,10 +71,10 @@ class Backoff():
     def __call__(self, func):
         def wrapper(*args, **kwargs):
             if self.free():
-                func(*args, **kwargs)
                 self._update()
+                return func(*args, **kwargs)
             else:
-                self._schedule(func, *args, **kwargs)
+                return self._schedule(func, *args, **kwargs)
 
         return wrapper
 
@@ -84,26 +85,19 @@ class Backoff():
         def days_to_seconds(days):
             return days * 24 * 60
 
-        def synch_event(func, *args, **kwargs):
-            def event():
-                func(*args, **kwargs)
-
-            return event
-
         backoff = cls.next_call - datetime.datetime.now()
         seconds = days_to_seconds(backoff.days) + backoff.seconds
 
-        if not cls.blocking:
-            action = threading.Timer(seconds, func, args, kwargs)
-            action.start()
+        if cls.blocking:
+            sleep(seconds)
+            cls._update()
+            return func(*args, **kwargs)
         else:
-            priority = 1
-            scheduler = sched.scheduler(time.time, time.sleep)
-            event = synch_event(func, *args, **kwargs)
-            scheduler.enter(seconds, priority, event, ())
-            scheduler.run()
-
-        cls._update()
+            # TODO: Return a Queue containing the thread from which
+            #       a return value may be derived when it resolves
+            action = Timer(seconds, func, args, kwargs)
+            action.start()
+            cls._update()
 
     @classmethod
     def _update(cls):
@@ -130,7 +124,7 @@ if __name__ == '__main__':
     invoked_time = {}
     last_resolution = datetime.datetime.now()
 
-    # Decorated function:
+    # Decorated function (Blocking):
     @Backoff(5)
     def simple_func(name):
         resolved = datetime.datetime.now()
