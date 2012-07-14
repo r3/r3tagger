@@ -22,9 +22,17 @@ def _find_artist(artist):
 
 
 @Backoff(DELAY)
-def _find_release_group(title):
+def _find_release_group(title, artist=None):
     """Returns iterable of releaseGroups"""
-    filt = ws.ReleaseGroupFilter(title)
+    if artist:
+        # TODO: Figure out why my Lucene searches aren't working
+        raise NotImplementedError("Lucene searches not implemented")
+        pattern = '"{}" AND artist:"{}"'.format(title, artist)  # Lucene
+    else:
+        pattern = title
+
+    filt = ws.ReleaseGroupFilter(pattern)
+
     try:
         query = ws.Query()
         results = query.getReleaseGroups(filt)
@@ -38,7 +46,11 @@ def _find_release_group(title):
 
 @Backoff(DELAY)
 def _find_title(title):
-    """Returns iterable of Artist Ids"""
+    """Returns iterable of Artist Ids
+        Really should be called from either:
+        _find_title_releases
+        _find_title_artists
+    """
     try:
         query = ws.Query()
         filt = ws.TrackFilter(title)
@@ -51,13 +63,14 @@ def _find_title(title):
     return results
 
 
-# === Slightly refined interfaces to get IDs ===
 def _find_title_releases(title):
+    """Function for interpreting title based searches as releases"""
     results = _find_title(title)
     return [x.getTrack().getReleases()[0].getId() for x in results]
 
 
 def _find_title_artists(title):
+    """Function for interpreting title based searches as artists"""
     results = _find_title(title)
     return [x.getTrack().getArtist().getId() for x in results]
 
@@ -107,29 +120,40 @@ def _lookup_release_id(ident):
 
 # === High level query interfaces ===
 
-
-def get_artist(artist):
-    """Retrieve musicbrainz artist object from artist name"""
-    for artist_ident in find_artist_id(artist):
-        yield lookup_artist_id(artist_ident)
-
 def get_album(title, artist=None):
     """Retrieve musicbrainz album object from album title
-       If returned album is not desired, increment result for the next
-       most likely candidate. Iterates over remaining candidates if requested.
+        If returned album is not desired, increment result for the next
+        most likely candidate. Iterates over remaining candidates if requested.
     """
     if artist:
-        ident = find_album_id(title, artist)
+        idents = _find_release_group(title, artist)
     else:
-        ident = find_album_id(title)
-    for album_id in ident:
-        yield lookup_album_id(album_id)
+        idents = _find_release_group(title)
 
+    for release_group_id in idents:
+        release_group = _lookup_release_group_id(release_group_id)
+        for release in release_group.getReleases():
+            yield _lookup_release_id(release.getId())
+
+
+def get_artist(name):
+    """Retrieve musicbrainz artist object from name
+    Results will be an iterator of possible artists sorted in descending
+    order by the likelyhood of the match
+    """
+    idents = _find_artist(name)
+
+    for artist_id in idents:
+        yield _lookup_artist_id(artist_id)
+
+
+# === Query resultant objects ===
 def album_track_count(album):
     """Given a musicbrainz album object, determine the number of tracks
        Used in conjunction with get_album results
     """
     return len(album.getTracks())
+
 
 def album_tracks(album):
     """Given a musicbrainz album object, retrieve track list
@@ -137,11 +161,13 @@ def album_tracks(album):
     """
     return [x.getTitle() for x in album.getTracks()]
 
+
 def album_artist(album):
     """Given a msuicbrainz album object, retrieve artist
        Used in conjuction with get_album results
     """
     return album.getArtist().getName()
+
 
 def album_year(album):
     """Given a musicbrainz album object, retrieve release date
@@ -150,12 +176,14 @@ def album_year(album):
     date = album.getReleaseEvents()[0].getDate()
     return date.split('-')[0]
 
+
 def artist_releases(artist):
     """Given a musicbrainz artist object, retrieve album releases
        Used in conjunction with get_artist results
     """
     for release in artist.getReleases():
-        yield lookup_album_id(release.getId())
+        yield _lookup_release_group_id(release.getId())
+
 
 def query_album(album, tags):
     """Given a musicbrainz album object, retrieve it and query requested tags.
