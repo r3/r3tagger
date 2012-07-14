@@ -1,8 +1,23 @@
+import logging
+logging.basicConfig(filename='musicbrainz.log', level=logging.WARNING)
+
+from datetime import datetime, timedelta
+
 import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 
 from Backoff import Backoff
 DELAY = 5  # Seconds between query to API
+
+debug = datetime.now()
+x = timedelta(0)
+
+
+def ding(name):
+    global debug
+    now = datetime.now()
+    logging.warning("TIMING: {} (since last request) from {}".format(now - debug, name))
+    debug = now
 
 
 # === ID Finding ===
@@ -13,10 +28,15 @@ def _find_artist(artist):
         query = ws.Query()
         filt = ws.ArtistFilter(name=artist)
 
+        logging.info("Query (getArtists) - {}".format(datetime.now()))
+        ding('_find_artist')
         results = query.getArtists(filt)
     except ws.WebServiceError, e:
         if '503' in e:
-            _find_artist(artist)
+            logging.debug('Error 503: Too many requests')
+            return _find_artist(artist)
+        else:
+            logging.error('Error: {}'.format(e))
 
     return [x.getArtist().getId() for x in results]
 
@@ -35,11 +55,15 @@ def _find_release_group(title, artist=None):
 
     try:
         query = ws.Query()
+        logging.info("Query (getReleaseGroups) - {}".format(datetime.now()))
+        ding('_find_release_group')
         results = query.getReleaseGroups(filt)
     except ws.WebServiceError, e:
-        print("Error!")
         if '503' in e:
+            logging.debug('Error 503: Too many requests')
             return _find_release_group(title)
+        else:
+            logging.error('Error: {}'.format(e))
 
     return [x.getReleaseGroup().getId() for x in results]
 
@@ -56,10 +80,15 @@ def _find_title(title):
         query = ws.Query()
         filt = ws.TrackFilter(title)
 
+        logging.info("Query (getTrack) - {}".format(datetime.now()))
+        ding('_find_title')
         results = query.getTracks(filt)
     except ws.WebServiceError, e:
         if '503' in e:
-            _find_title_releases(title)
+            logging.debug('Error 503: Too many requests')
+            return _find_title_releases(title)
+        else:
+            logging.error('Error: {}'.format(e))
 
     return [x.getTrack() for x in results]
 
@@ -86,10 +115,15 @@ def _lookup_release_group_id(ident):
         query = ws.Query()
         filt = ws.ReleaseGroupIncludes(artist=True, releases=True)
 
+        logging.info("Query (getReleaseGroupById) - {}".format(datetime.now()))
+        ding('_lookup_release_group_id')
         return query.getReleaseGroupById(ident, filt)
     except ws.WebServiceError, e:
         if '503' in e:
+            logging.debug('Error 503: Too many requests')
             return _lookup_release_group_id(ident)
+        else:
+            logging.error('Error: {}'.format(e))
 
 
 @Backoff(DELAY)
@@ -101,10 +135,15 @@ def _lookup_artist_id(ident):
                 releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM),
                 tags=True, releaseGroups=True)
 
+        logging.info("Query (getArtistById) - {}".format(datetime.now()))
+        ding('_lookup_artist_id')
         return query.getArtistById(ident, filt)
     except ws.WebServiceError, e:
         if '503' in e:
+            logging.debug('Error 503: Too many requests')
             return _lookup_artist_id(ident)
+        else:
+            logging.error('Error: {}'.format(e))
 
 
 @Backoff(DELAY)
@@ -115,10 +154,15 @@ def _lookup_release_id(ident):
         filt = ws.ReleaseIncludes(artist=True, tracks=True,
                 releaseEvents=True)
 
+        logging.info("Query (getReleaseById) - {}".format(datetime.now()))
+        ding('_lookup_release_id')
         return query.getReleaseById(ident, filt)
     except ws.WebServiceError, e:
         if '503' in e:
+            logging.debug('Error 503: Too many requests')
             return _lookup_release_id(ident)
+        else:
+            logging.error('Error: {}'.format(e))
 
 
 # === High level query interfaces ===
@@ -141,6 +185,9 @@ def get_album(title, artist=None):
 
     for release_group_id in idents:
         release_group = _lookup_release_group_id(release_group_id)
+        if not release_group:
+            logging.debug("ID: '{}' returned no releaseGroup object".format(
+                release_group_id))
         for release in release_group.getReleases():
             yield _lookup_release_id(release.getId())
 
