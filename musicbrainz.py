@@ -122,10 +122,16 @@ def _lookup_release_id(ident):
 
 def get_album(title, artist=None):
     """Retrieve musicbrainz album object from album title
-        If returned album is not desired, increment result for the next
-        most likely candidate. Iterates over remaining candidates if requested.
+        Returns a generator of musicbrainz artist objects sorted by
+        the most likely in descending order
+
+        Note: queries with 'artist' are not currently supported
+              as Lucene searches in _find_release_group aren't
+              working.
     """
     if artist:
+        # TODO: Fix Lucene searching in _find_release_group
+        raise NotImplementedError("Lucene searches not implemented")
         idents = _find_release_group(title, artist)
     else:
         idents = _find_release_group(title)
@@ -138,8 +144,8 @@ def get_album(title, artist=None):
 
 def get_artist(name):
     """Retrieve musicbrainz artist object from name
-    Results will be an iterator of possible artists sorted in descending
-    order by the likelyhood of the match
+        Returns a generator of musicbrainz artist objects sorted by
+        the most likely in descending order
     """
     idents = _find_artist(name)
 
@@ -148,62 +154,25 @@ def get_artist(name):
 
 
 # === Query resultant objects ===
-def album_track_count(album):
-    """Given a musicbrainz album object, determine the number of tracks
-       Used in conjunction with get_album results
+def album_tags(album):
+    """Collects tags for an album
+        Returns a dictionary with the following fields:
+        tracks, artist, year, title
     """
-    return len(album.getTracks())
+    results = {}
+
+    results['tracks'] = [x.getTitle() for x in album.getTracks()]
+    results['artist'] = album.getArtist().getName()
+    results['year'] = album.getEarliestReleaseDate().split('-')[0]
+    results['title'] = album.getTitle()
+
+    return results
 
 
-def album_tracks(album):
-    """Given a musicbrainz album object, retrieve track list
-       Used in conjunction with get_album results
-    """
-    return [x.getTitle() for x in album.getTracks()]
-
-
-def album_artist(album):
-    """Given a msuicbrainz album object, retrieve artist
-       Used in conjuction with get_album results
-    """
-    return album.getArtist().getName()
-
-
-def album_year(album):
-    """Given a musicbrainz album object, retrieve release date
-       Used in conjunction with get_album results
-    """
-    date = album.getReleaseEvents()[0].getDate()
-    return date.split('-')[0]
-
-
-def artist_releases(artist):
+def artist_release(artist):
     """Given a musicbrainz artist object, retrieve album releases
-       Used in conjunction with get_artist results
+        Returns a generator of musicbrainz release objects sorted by
+        the most likely in descending order
+
     """
-    for release in artist.getReleases():
-        yield _lookup_release_group_id(release.getId())
-
-
-def query_album(album, tags):
-    """Given a musicbrainz album object, retrieve it and query requested tags.
-       Requested information will be returned in a dictionary keyed by tags
-       argument. Track titles, if requested, will be returned in a tuple
-       (mapped to 'track') and returned in the order that they appear on the
-       album. No numbering will be present but can be derived from length.
-    """
-
-    mapping = dict(artist='album.getArtist().getName()',
-                   album='album.getTitle()',
-                   year='album.getEarliestReleaseDate()')
-    res = dict()
-
-    for tag in tags:
-        if tag in mapping:
-            res[tag] = eval(mapping[tag])
-        elif tag in ('title', 'track'):
-            res[tag] = album_tracks(album)
-        else:
-            raise Exception("Requested bad information ({})".format(tag))
-
-    return res
+    return (_lookup_release_id(x.getId()) for x in artist.getReleases())
