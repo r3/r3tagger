@@ -44,6 +44,7 @@ def _find_release_group(title, artist=None):
     return [x.getReleaseGroup().getId() for x in results]
 
 
+# TODO: Unused so far. Untested.
 @Backoff(DELAY)
 def _find_title(title):
     """Returns iterable of Artist Ids
@@ -60,19 +61,21 @@ def _find_title(title):
         if '503' in e:
             _find_title_releases(title)
 
-    return results
+    return [x.getTrack() for x in results]
 
 
+# TODO: See _find_title above
 def _find_title_releases(title):
     """Function for interpreting title based searches as releases"""
     results = _find_title(title)
-    return [x.getTrack().getReleases()[0].getId() for x in results]
+    return [x.getReleases()[0].getId() for x in results]
 
 
+# TODO: See _find_title above
 def _find_title_artists(title):
     """Function for interpreting title based searches as artists"""
     results = _find_title(title)
-    return [x.getTrack().getArtist().getId() for x in results]
+    return [x.getArtist().getId() for x in results]
 
 
 # === Look-ups of IDs ===
@@ -169,7 +172,7 @@ def album_tags(album):
     return results
 
 
-def artist_release(artist):
+def artist_releases(artist):
     """Given a musicbrainz artist object, retrieve album releases
         Returns a generator of musicbrainz release objects sorted by
         the most likely in descending order
