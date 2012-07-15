@@ -4,8 +4,6 @@ import shutil
 import os
 import tempfile
 
-import mock_MusicbrainzQueries as musicbrainz
-
 from Song import Song
 from Album import Album
 
@@ -105,48 +103,30 @@ class TestAlbumMatching(object):
     """Tests the Album's ability to fuzzy match other Album instances"""
 
     # Setup/teardown methods as well as dependency injection
-    def setup_matchingmock(self):
-        """Setup: Creates a test album with 5 dummy songs on it"""
-        descriptor = dict()
-        descriptor['album'] = 'SomeAlbum'
-        descriptor['artist'] = 'SomeArtist'
-        descriptor['date'] = '2012'
-        descriptor['genre'] = 'SomeGenre'
-        descriptor['tracks'] = ['SomeTrack01', 'SomeTrack02', 'SomeTrack03',
-                                'SomeTrack04', 'SomeTrack05']
-        return Album(descriptor)
-
     def pytest_funcarg__matchingmock(self, request):
-        """Dependency Injection: Album"""
-        return request.cached_setup(self.setup_matchingmock, scope='class')
-
-    def setup_similarmock(self):
-        """Setup: Creates a test album with 5 dummy songs on it"""
-        descriptor = dict()
-        descriptor['album'] = 'SomeAlbum'
-        descriptor['artist'] = 'SomeArtist'
-        descriptor['date'] = '2012'
-        descriptor['genre'] = 'SomeGenre'
-        descriptor['tracks'] = ['SomeTrack01', 'SomeTrack02', 'SomeTrack03']
+        descriptor = {'album': 'SomeAlbum',
+                      'artist': 'SomeArtist',
+                      'date': '2012',
+                      'genre': 'SomeGenre',
+                      'tracks': ['SomeTrack01', 'SomeTrack02', 'SomeTrack03',
+                                 'SomeTrack04', 'SomeTrack05']}
         return Album(descriptor)
 
     def pytest_funcarg__similarmock(self, request):
-        """Dependency Injection: Album"""
-        return request.cached_setup(self.setup_similarmock, scope='class')
-
-    def setup_differentmock(self):
-        """Setup: Creates a test album with 5 dummy songs on it"""
-        descriptor = dict()
-        descriptor['album'] = 'SomeOtherAlbum'
-        descriptor['artist'] = 'SomeOtherArtist'
-        descriptor['date'] = '1985'
-        descriptor['genre'] = 'SomeOtherGenre'
-        descriptor['tracks'] = ['SomeTrack01', 'SomeTrack02']
+        descriptor = {'album': 'SomeAlbum',
+                      'artist': 'SomeArtist',
+                      'date': '2012',
+                      'genre': 'SomeGenre',
+                      'tracks': ['SomeTrack01', 'SomeTrack02', 'SomeTrack03']}
         return Album(descriptor)
 
     def pytest_funcarg__differentmock(self, request):
-        """Dependency Injection: Album"""
-        return request.cached_setup(self.setup_differentmock, scope='class')
+        descriptor = {'album': 'SomeOtherAlbum',
+                      'artist': 'SomeOtherArtist',
+                      'date': '1985',
+                      'genre': 'SomeOtherGenre',
+                      'tracks': ['SomeOtherTrack01', 'SomeOtherTrack02']}
+        return Album(descriptor)
 
     def setup_album(self):
         """Setup: Creates a test album with 5 dummy songs on it"""
@@ -177,7 +157,7 @@ class TestAlbumMatching(object):
         assert album.match(matchingmock) == 1.0
 
     def test_similar_match(self, album, similarmock):
-        assert album.match(similarmock) == 0.8
+        assert 0.78 >= album.match(similarmock) >= 0.77
 
     def test_no_match(self, album, differentmock):
         assert album.match(differentmock) == 0.0

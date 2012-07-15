@@ -36,6 +36,7 @@ class Album(object):
     def __iter__(self):
         return iter(self.tracks)
 
+    # TODO: Refactor into controller?
     def _find_shared_tags(self):
         """Determines the fields that are shared between each of the Album's
            songs and adds these to the Album's fields.
@@ -60,29 +61,25 @@ class Album(object):
                 setattr(self, name, tag)
 
     def match(self, other):
-        """Determines the match quality between self and another Album based
-           on attributes: Artist, album, date, genre, and tracks. If a field
-           is None in either compared Album, that attribute is not compared.
-           A float between 0.0 and 1.0 representing the quality of the match
-           will be returned.
+        """Compares albums based on supported fields
+        This implementation will only take tracks into account if both
+        Album objects have tracks. If only one, or neither have tracks,
+        only the supported fields (Album._supported_fields) are used.
         """
 
-        shared_fields = 0.0
-        matches = 0.0
+        fields = self.__class__._supported_fields
+        albums = []
 
-        for attrib in Album._supported_fields:
-            if hasattr(self, attrib) and hasattr(other, attrib):
-                shared_fields += 1
-                if getattr(self, attrib) == getattr(other, attrib):
-                    matches += 1
+        for album in (self, other):
+            info = {getattr(album, field) for field in fields}
+            if self.tracks and other.tracks:
+                info.update([str(x) for x in album.tracks])
+            albums.append(info)
 
-        if hasattr(self, 'tracks') and hasattr(other, 'tracks'):
-            shared_fields += 1
+        first, second = albums
 
-            self_tracks = [str(x) for x in self]
-            other_tracks = [str(x) for x in other]
+        nc = len(first.intersection(second))
+        na = len(first)
+        nb = len(second)
 
-            if sorted(self_tracks) == sorted(other_tracks):
-                matches += 1
-
-        return matches / shared_fields
+        return float(nc) / (na + nb - nc)
