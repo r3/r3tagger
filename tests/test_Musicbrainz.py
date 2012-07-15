@@ -35,24 +35,14 @@ class TestReadAlbum(object):
 
     @staticmethod
     def same_mb_object(first, second):
-        if hasattr(first, 'getId') and hasattr(second, 'getId'):
+        try:
             return first.getId() == second.getId()
-        else:
-            try:
-                for a, b in zip(first, second):
-                    if a.getId() != b.getId():
-                        print("{} differs from {}".format(a, b))
-                        print("A:\n{}".format(a.__dict__.keys()))
-                        print("A Tag: {}".format(a._id))
-                        print('\n')
-                        print("B:\n{}".format(b.__dict__.keys()))
-                        print("B Tag: {}".format(b._id))
-                        return False
+        except AttributeError:
+            for a, b in zip(first, second):
+                if a.getId() != b.getId():
+                    return False
 
-                return True
-            except TypeError:
-                print("First:\n\ttype: {}".format(type(first)))
-                print("Second:\n\ttype: {}".format(type(second)))
+            return True
 
     # Test Methods
     def test__find_artist(self, responses):
@@ -99,11 +89,13 @@ class TestReadAlbum(object):
 
     def test_get_album(self, responses):
         response = responses['get_album:Nevermind']
-        assert self.same_mb_object(response, musicbrainz.get_album(ALBUM))
+        assert self.same_mb_object(response,
+                musicbrainz.get_album(ALBUM).next())
 
     def test_get_artist(self, responses):
         response = responses['get_artist:Nirvana']
-        assert self.same_mb_object(response, musicbrainz.get_artist(ARTIST))
+        assert self.same_mb_object(response,
+                musicbrainz.get_artist(ARTIST).next())
 
     #def test_album_tags(self, artist, responses):
         #TODO: Build artist funcarg and complete

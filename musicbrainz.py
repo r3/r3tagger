@@ -183,6 +183,9 @@ def get_album(title, artist=None):
     else:
         idents = _find_release_group(title)
 
+    # TODO: I'm not happy with this algorithm, it feels weak
+    # Supplying every release in a release group before trying the next
+    # release sounds like a bad idea. Improvements?
     for release_group_id in idents:
         release_group = _lookup_release_group_id(release_group_id)
         if not release_group:
