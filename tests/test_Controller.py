@@ -6,8 +6,6 @@ import os
 import tempfile
 import Controller
 
-#import mock_MusicbrainzQueries as queries
-
 
 class TestCreateAlbum(object):
     """Tests the creation of an album from a path"""
@@ -46,7 +44,9 @@ class TestCreateAlbum(object):
         return request.cached_setup(self.setup_controller, scope='module')
 
     def setup_persist(self):
-        """Setup: Creates a test album with 5 dummy songs on it"""
+        """Setup: Creates a test album with 5 dummy songs on it
+        Constructed from pickeled data
+        """
         tempdir = tempfile.mkdtemp()
 
         orig_path = 'SomeAlbumInstance.shelve'
@@ -73,3 +73,56 @@ class TestCreateAlbum(object):
     def test_recursive_albums(self, path, persist):
         for album in Controller.build_albums(path, True):
             assert persist.match(album) == 1.0
+
+
+class TestAlbumManipulation():
+    def setup_album(self):
+        tempdir = tempfile.mkdtemp()
+
+        orig_path = 'test_songs/album'
+        dest_path = os.path.join(tempdir, 'album')
+
+        shutil.copytree(orig_path, dest_path)
+
+        return Controller.build_albums(dest_path, False).next()
+
+    def teardown_album(self, album):
+        album_path = os.path.dirname(album.tracks[0].path)
+        root = os.path.dirname(album_path)
+        shutil.rmtree(root)
+
+    def pytest_funcarg__album(self, request):
+        return request.cached_setup(self.setup_album, self.teardown_album,
+                scope='function')
+
+    def test_album(self, album):
+        """Simply ensure that the test album is what I expect"""
+        assert album.artist == 'SomeArtist'
+        assert album.album == 'SomeAlbum'
+        assert album.date == '2012'
+        assert album.genre == 'SomeGenre'
+        assert len(album.tracks) == 5
+
+    def test_rename_album_default_pattern(self, album):
+        songs_path = os.path.dirname(album.tracks[0])
+        folder_path = os.path.dirname(songs_path)
+        root = os.path.dirname(folder_path)
+
+        Controller.rename_album(album)
+
+        newpath = "{} - {}".format(album.date, album.album)
+        album_path = os.path.join(root, newpath)
+
+        assert os.path.isdir(album_path)
+
+        for track in album:
+            assert os.path.dirname(track.path) == album_path
+
+    def test_rename_tracks_default_pattern(self, album):
+        Controller.rename_tracks(album)
+
+        path = os.path.dirname(album.tracks[0])
+        pattern = os.join(path, 'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
+
+        for track in [pattern.format(x, x) for x in range(1, 6)]:
+            assert os.path.exists(track)
