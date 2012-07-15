@@ -123,6 +123,8 @@ class TestAlbumManipulation():
 
         path = os.path.dirname(album.tracks[0])
         pattern = os.join(path, 'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
+        track_paths = [pattern.format(x, x) for x in range(1, 6)]
 
-        for track in [pattern.format(x, x) for x in range(1, 6)]:
+        for path, track in zip(track_paths, album):
+            assert track.path == path
             assert os.path.exists(track)
