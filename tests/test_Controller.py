@@ -87,8 +87,7 @@ class TestAlbumManipulation():
         return Controller.build_albums(dest_path, False).next()
 
     def teardown_album(self, album):
-        album_path = os.path.dirname(album.tracks[0].path)
-        root = os.path.dirname(album_path)
+        root = os.path.dirname(album.path)
         shutil.rmtree(root)
 
     def pytest_funcarg__album(self, request):
@@ -104,16 +103,15 @@ class TestAlbumManipulation():
         assert len(album.tracks) == 5
 
     def test_rename_album_default_pattern(self, album):
-        songs_path = os.path.dirname(album.tracks[0])
-        folder_path = os.path.dirname(songs_path)
-        root = os.path.dirname(folder_path)
+        root = os.path.dirname(album.path)
 
         Controller.rename_album(album)
 
         newpath = "{} - {}".format(album.date, album.album)
         album_path = os.path.join(root, newpath)
 
-        assert os.path.isdir(album_path)
+        assert album_path == album.path
+        assert os.path.exists(album_path)
 
         for track in album:
             assert os.path.dirname(track.path) == album_path

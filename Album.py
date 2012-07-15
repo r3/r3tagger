@@ -19,6 +19,7 @@ class Album(object):
             for attrib in ('album', 'artist', 'date', 'genre', 'tracks'):
                 setattr(self, attrib, arg.get(attrib, None))
         else:
+            self.path = None
             self.album = None
             self.artist = None
             self.date = None

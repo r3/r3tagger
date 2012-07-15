@@ -49,6 +49,9 @@ class TestReadAlbum(object):
 
         assert count == 5
 
+    #def test_mapping(self, album):
+        #assert "{date} - {artist}".format(album) == '2012 - SomeArtist'
+
     def test_title(self, album):
         assert album.album == 'SomeAlbum'
 
