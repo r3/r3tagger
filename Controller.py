@@ -25,7 +25,10 @@ def _set_album_path(album, path):
 
 
 def build_albums(path, recursive=False):
-    def affect_album(album, path):
+    def affect_album(files, path):
+        tracks = [os.path.join(path, x) for x in files]
+        album = Album([Track(x) for x in tracks if os.path.isfile(x)])
+
         _set_album_path(album, path)
 
         for field, shared_value in find_shared_tags(album).items():
@@ -34,14 +37,10 @@ def build_albums(path, recursive=False):
         return album
 
     if recursive is False:
-        tracks = [os.path.join(path, x) for x in os.listdir(path)]
-        album = Album([Track(x) for x in tracks if os.path.isfile(x)])
-        yield affect_album(album, path)
+        yield affect_album(os.listdir(path), path)
     else:
         for root, _, files in os.walk(path):
-            tracks = [os.path.join(path, x) for x in files]
-            album = Album([Track(x) for x in tracks if os.path.isfile(x)])
-            yield affect_album(album, root)
+            yield affect_album(files, root)
 
 
 def rename_album(album, pattern=None):
