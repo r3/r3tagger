@@ -1,15 +1,26 @@
-"""Album Class
+"""r3tagger.model.Album
 
-Author: r3 (ryan.roler@gmail.com)
-Date: 03.17.2012"""
+Provides models:
+    Album
+    Represents an album of Tracks
+"""
 
 
 class Album(object):
-    """Contains a list of songs and metadata that describes an album.
-       May be instantiated either using a collection of Song objects,
-       or a dictionary of attribute values. Typically, such a populated
-       dictionary might be returned by an external library in attempts
-       to describe an album for comparison with another album.
+    """Contains a list of track and metadata that describes an album.
+
+    May be instantiated either using a collection of Track objects,
+    or a dictionary of attribute values. Typically, such a populated
+    dictionary might be returned by an external library in attempts
+    to describe an album for comparison with another album.
+
+    Provides Methods:
+        match(other:Album)
+        Provides a rating of similarity with another Album in [0, 1]
+
+        Album.supported_fields()
+        Class method accessor for discovering string representations of
+        fields supported by the Album (eg. 'artist', 'album', 'genre')
     """
 
     _supported_fields = ('artist', 'album', 'date', 'genre')
@@ -28,15 +39,16 @@ class Album(object):
             self.tracks = arg
 
     def __call__(self):
-        """Saves update metadata for the songs in this album"""
-        for song in self:
-            song()
+        """Passes call to each Track in the Album"""
+        for track in self:
+            track()
 
     def __iter__(self):
         return iter(self.tracks)
 
     def match(self, other):
         """Compares albums based on supported fields
+
         This implementation will only take tracks into account if both
         Album objects have tracks. If only one, or neither have tracks,
         only the supported fields (Album._supported_fields) are used.
@@ -58,3 +70,11 @@ class Album(object):
         nb = len(second)
 
         return float(nc) / (na + nb - nc)
+
+    @classmethod
+    def supported_fields(cls):
+        """Determine the supported fields of the Album
+
+        example result: ('artist', 'album', 'genre')
+        """
+        return cls._supported_fields

@@ -1,3 +1,24 @@
+"""r3tagger.query.Musicbrainz
+
+Handles queries directed at the Musicbrainz database. Acts as a more
+friendly interface than the required musicbrainz2, and provides the
+expected methods of a query:
+
+Provided Functions:
+    get_album(title:str, artist=None:str)
+    Provides an iterator of musicbrainz2 releases #TODO: Make these Albums!
+    Currently, the artist parameter is not functional.
+
+    get_artist(artist:str)
+    Provides an iterator of musicbrainz2 artists #TODO: Make a model!
+
+    album_tags(album:musicbrainz2.Release)
+    Provides a dict of fields from a release.
+
+    artist_releases(artist:musicbrainz2.Artist)
+    Provide an iterator of musicbrainz2  releases. #TODO: Make these Albums!
+"""
+
 import logging
 logging.basicConfig(filename='musicbrainz.log', level=logging.DEBUG)
 
@@ -145,12 +166,12 @@ def _lookup_release_id(ident):
 
 def get_album(title, artist=None):
     """Retrieve musicbrainz album object from album title
-        Returns a generator of musicbrainz artist objects sorted by
-        the most likely in descending order
 
-        Note: queries with 'artist' are not currently supported
-              as Lucene searches in _find_release_group aren't
-              working.
+    Returns a generator of musicbrainz artist objects sorted by
+    the most likely in descending order
+
+    Note: queries with 'artist' are not currently supported
+    as Lucene searches in _find_release_group aren't working.
     """
     if artist:
         # TODO: Fix Lucene searching in _find_release_group
@@ -173,8 +194,9 @@ def get_album(title, artist=None):
 
 def get_artist(name):
     """Retrieve musicbrainz artist object from name
-        Returns a generator of musicbrainz artist objects sorted by
-        the most likely in descending order
+
+    Returns a generator of musicbrainz artist objects sorted by the most
+    likely in descending order
     """
     idents = _find_artist(name)
 
@@ -185,8 +207,9 @@ def get_artist(name):
 # === Query resultant objects ===
 def album_tags(album):
     """Collects tags for an album
-        Returns a dictionary with the following fields:
-        tracks, artist, year, title
+
+    Returns a dictionary with the following fields:
+    tracks, artist, year, title
     """
     results = {}
 
@@ -200,8 +223,8 @@ def album_tags(album):
 
 def artist_releases(artist):
     """Given a musicbrainz artist object, retrieve album releases
-        Returns a generator of musicbrainz release objects sorted by
-        the most likely in descending order
 
+    Returns a generator of musicbrainz release objects sorted by
+    the most likely in descending order
     """
     return (_lookup_release_id(x.getId()) for x in artist.getReleases())

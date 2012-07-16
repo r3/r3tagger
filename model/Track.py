@@ -1,18 +1,21 @@
-"""Track Class
+"""r3tagger.model.Track
 
-Author: r3 (ryan.roler@gmail.com)
-Date: 03.17.2012"""
+Provides models:
+    Track
+    Represents a music file on disc at a given path
+"""
 
 import os.path
+
+import acoustid
 
 from mutagen.oggvorbis import OggVorbis
 from mutagen.flac import FLAC
 from mutagen.easyid3 import EasyID3
-import acoustid
 
 
 class Track(object):
-    """Path to a file and metadata that represents a song"""
+    """Path to a file and metadata that represents a track"""
 
     _supported_fields = ('artist', 'album', 'title',
                          'tracknumber', 'date', 'genre')
@@ -23,7 +26,7 @@ class Track(object):
         """Instantiate Track object
 
         Requires a filepath for a song file to represent and accepts an
-        optional fields parameter for specifying the songs fields. If
+        optional fields parameter for specifying that song's fields. If
         such a dictionary is passed, it will be used exclusively to fill
         the field tag data of the Track instance.
 

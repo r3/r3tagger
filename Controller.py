@@ -3,10 +3,17 @@
 Handles the processing and construction of Albums of Tracks
 
 Provided Functions:
-    build_albums(album:Album, path:str) - Produce iterables of Albums on path
-    find_shared_tags(album:Album) - Collects shard fields into a dict
-    rename_album(album:Album) - Renames an Album
-    rename_tracks(target:model) - Renames Track or Tracks in an Album
+    build_albums(album:Album, path:str)
+    Produce iterables of Albums on path
+
+    find_shared_tags(album:Album)
+    Collects shard fields into a dict
+
+    rename_album(album:Album)
+    Renames an Album
+
+    rename_tracks(target:model)
+    Renames Track or Tracks in an Album
 """
 
 import os
