@@ -119,10 +119,11 @@ class TestAlbumManipulation():
     def test_rename_tracks_default_pattern(self, album):
         Controller.rename_tracks(album)
 
-        path = os.path.dirname(album.tracks[0])
-        pattern = os.join(path, 'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
-        track_paths = [pattern.format(x, x) for x in range(1, 6)]
+        path = os.path.dirname(album.tracks[0].path)
+        pattern = os.path.join(path,
+                'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
+        track_paths = [pattern.format(x, x) for x in range(5, 0, -1)]
 
         for path, track in zip(track_paths, album):
             assert track.path == path
-            assert os.path.exists(track)
+            assert os.path.exists(track.path)

@@ -63,5 +63,28 @@ def rename_album(album, pattern=None):
     _set_album_path(album, destination)
 
 
-def rename_tracks(album, pattern=None):
-    pass
+def rename_tracks(target, pattern=None):
+    default_pattern = "{artist} - {tracknumber} - {title}"
+
+    if pattern is None:
+        pattern = default_pattern
+
+    def rename_track(track, pattern):
+        extension = os.path.splitext(track.path)[-1]
+        root = os.path.dirname(track.path)
+
+        supported_fields = track.__class__._supported_fields
+        fields = {field: getattr(track, field) for field in supported_fields}
+        name = pattern.format(**fields) + extension
+
+        destination = os.path.join(root, name)
+        shutil.move(track.path, destination)
+        track.path = destination
+
+    if isinstance(target, Album):
+        for track in target:
+            rename_track(track, pattern)
+    elif isinstance(target, Song):
+        rename_track(target, pattern)
+    else:
+        assert False
