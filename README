@@ -6,7 +6,7 @@ requires: Python 2.7 -   http://python.org/
           Musicbrainz2 - http://musicbrainz.org/doc/python-musicbrainz2
           Acoustid -     http://acoustid.org/fingerprinter
           Chromaprint -  http://acoustid.org/chromaprint
-          PyTest -       http://pytest.org/
+          PyTest -       http://pytest.org/  # Only needed for tests
 
 R3tagger is a work that will develop into a fully automated tagging solution
 for users of popular file formats. The tagger will use musicbrainz and acoustid
@@ -21,13 +21,11 @@ to songs.
 
 Testing framework can be found under tests/
 
-Immediate plans can be found in TODO and notes.txt
+Immediate plans can be found in thoughts/
 
-The status of the project: Data models representing Songs and Albums have been
-created and have testing (using PyTest). I'm now creating a mock of the future
-musicbrainz interface so that work can begin on the controller module. Once the
-controller module is able to identify songs by looking up a fingerprint and
-editing the file's metadata, I'll replace the mock with a real interface to
-musicbrainz. The controller is under active construction as well.
+The models are complete and under test. A controller has been started and is
+wholly under test. An interface to musicbrainz has been created and is mostly
+under test. A Backoff decorater resource has been created to handle the query
+restrictions posed by the musicbrainz api.
 
 r3

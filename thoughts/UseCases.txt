@@ -1,3 +1,6 @@
+These are possible combinations of using a Query interface to recognize music.
+Use this in creating the recognition library.
+
 > Song has has artist, track, and album fields
    > Find album using artist and album title
     > Update tags

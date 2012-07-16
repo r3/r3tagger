@@ -1,0 +1,83 @@
+IMMEDIATE GOALS
+
+    Path Manipulation
+The algorithm for grabbing path stuff is done a lot.
+It would be useful to build a helper function to take
+care of this kind of thing.
+
+                Use :: desired path
+    ========================================
+    _set_album_path :: /path/to/album/ | song.ogg
+    rename_album    :: /path/to/ | album/song.ogg
+    rename_tracks   :: /path/to/album/song | .ogg  # in sub func
+
+Since this is common in many libraries, perhaps make a
+path manipulation library.
+
+ __________________________________________________
+
+    Class Grabbing
+Grabbing 'Album._supported_files' through
+'instance.__class__' is getting tiresome. Examples of use:
+
+    Controller.rename_album
+    Album.match
+    Track.Track.__init__
+    Track.Track.__setattr__
+    Track.Track.__getattr__
+    Track.Track._connect_to_file.determine_type
+
+ __________________________________________________
+
+    ConfigParser
+I need to get a configuration up sooner than later or
+I'll continue to have hardcoded defaults in my source. I'd
+rather remove these to a config file where they can be
+changed and better tested.
+
+ __________________________________________________
+
+    Tune Queries and Agent Strings
+Queries can be amped up, particularly since testing now no
+longer requires querying the remote Musicbrainz API.
+Create an agent string for the queries.
+
+ __________________________________________________
+
+    Untested Functions
+My Musicbrainz library has functions that are not under test:
+_find_title{,_{artists,releases}}
+
+            Fix it.
+ __________________________________________________
+
+    Documentation
+Documentation is starting to fall behind. Let's get up on that
+Maybe figure out Sphinx and keep some docs built for the public
+APIs.
+ __________________________________________________
+
+    Lucene isn't just Icecream
+Album searches (a relatively weak point) could be vastly
+improved if I could provide an artist too. Figure out Lucene
+searches and enable them in the interface of Musicbrainz.
+ __________________________________________________
+
+    Refactor into Query
+Refactor the Musicbrainz library into an instance of a Query.
+The Query will be a superclass providing a set public interface.
+Subclassing Queries (like Musicbrainz) will follow this contract
+exactly. For now, just use what's public in Musicbrainz. From
+there, attach it as a generic "Query" that can be used by the
+controller. Now is a good time to do that since it isn't
+integrated yet. From there, we can create other Queries like
+an API for last.fm which can be used as an alternative.
+ __________________________________________________
+
+    Integrate Tagging
+Should the actual action of changing a file's tag be taken by
+individual Track objects, or in the Controller? I'm thinking
+that the Track will handle manipulation of the file it 
+represents, acting as a proxy object to that file. The
+Controller will instigate tagging changes. Unless I can think
+of a better design.

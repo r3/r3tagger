@@ -1,0 +1,27 @@
+The controller builds album objects.
+
+Has a library for album/track recognition.
+# TODO: Build recognition! That'll be easy!
+
+Has a config file that supplies settings.
+
+The controller manipulates those album objects:
+    * Rename files
+
+    rename(target, pattern=None):
+        """Renames the target (either Album or Track) according to that
+        resource's associated tags, as specified in the pattern. If the
+        pattern is not specified, one will be retrieved from the config
+        file, or a default will be used.
+        """
+        if isinstance(target, Album):
+            _do_albumy_stuff
+        elif isinstance(target, Song):
+            _do_songy_stuff
+        else:
+            raise NotImplementedError("Target should be an Album or Song")
+
+    * Edit tags
+    * Supply information about an album or track
+    * Find suitable album art
+    * Use the music recognition library to find tags
