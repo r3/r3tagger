@@ -52,15 +52,12 @@ def _find_artist(artist):
 def _find_release_group(title, artist=None):
     """Returns iterable of releaseGroups"""
     if artist:
-        # TODO: Figure out why my Lucene searches aren't working
-        raise NotImplementedError("Lucene searches not implemented")
-        pattern = '"{}" AND artist:"{}"'.format(title, artist)  # Lucene
+        pattern = '"{}" AND artist:"{}"'.format(title, artist)
     else:
         pattern = title
 
-    filt = ws.ReleaseGroupFilter(pattern)
-
     try:
+        filt = ws.ReleaseGroupFilter(query=pattern)
         query = ws.Query()
         results = query.getReleaseGroups(filt)
     except ws.WebServiceError, e:
@@ -77,9 +74,9 @@ def _find_release_group(title, artist=None):
 @Backoff(DELAY)
 def _find_title(title):
     """Returns iterable of Artist Ids
-        Really should be called from either:
-        _find_title_releases
-        _find_title_artists
+    Really should be called from either:
+    _find_title_releases
+    _find_title_artists
     """
     try:
         query = ws.Query()
@@ -169,13 +166,8 @@ def get_album(title, artist=None):
 
     Returns a generator of musicbrainz artist objects sorted by
     the most likely in descending order
-
-    Note: queries with 'artist' are not currently supported
-    as Lucene searches in _find_release_group aren't working.
     """
     if artist:
-        # TODO: Fix Lucene searching in _find_release_group
-        raise NotImplementedError("Lucene searches not implemented")
         idents = _find_release_group(title, artist)
     else:
         idents = _find_release_group(title)
