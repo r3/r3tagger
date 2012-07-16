@@ -25,17 +25,23 @@ def _set_album_path(album, path):
 
 
 def build_albums(path, recursive=False):
-    if recursive is False:
-        files = [os.path.join(path, x) for x in os.listdir(path)]
-        album = Album([Track(x) for x in files if os.path.isfile(x)])
+    def affect_album(album, path):
         _set_album_path(album, path)
-        yield album
+
+        for field, shared_value in find_shared_tags(album).items():
+            setattr(album, field, shared_value)
+
+        return album
+
+    if recursive is False:
+        tracks = [os.path.join(path, x) for x in os.listdir(path)]
+        album = Album([Track(x) for x in tracks if os.path.isfile(x)])
+        yield affect_album(album, path)
     else:
         for root, _, files in os.walk(path):
             tracks = [os.path.join(path, x) for x in files]
             album = Album([Track(x) for x in tracks if os.path.isfile(x)])
-            _set_album_path(album, root)
-            yield album
+            yield affect_album(album, root)
 
 
 def rename_album(album, pattern=None):
@@ -88,3 +94,20 @@ def rename_tracks(target, pattern=None):
     except TypeError:
         # If you can't iterate, it's a Track
         rename_track(target, pattern)
+
+
+def find_shared_tags(album):
+    """Finds field shared by all tracks on a given album
+    Returns a dictionary mapping of fields to shared values.
+    """
+    def is_shared(field, album):
+        if len({getattr(x, field) for x in album.tracks}) == 1:
+            return field
+
+    result = {}
+
+    for field in album.__class__._supported_fields:
+        if is_shared(field, album):
+            result[field] = getattr(album.tracks[0], field)
+
+    return result

@@ -44,7 +44,7 @@ class Album(object):
         """
 
         def add_fields_from_song(song):
-            for field in Album._supported_fields:
+            for field in self.__class__._supported_fields:
                 tag = getattr(song, field)
                 tracker.setdefault(field, set()).add(tag)
 
