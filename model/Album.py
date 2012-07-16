@@ -54,7 +54,7 @@ class Album(object):
         only the supported fields (Album._supported_fields) are used.
         """
 
-        fields = self.__class__._supported_fields
+        fields = self.supported_fields()
         albums = []
 
         for album in (self, other):

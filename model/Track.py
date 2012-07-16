@@ -42,7 +42,7 @@ class Track(object):
 
         # Fill in tags if given a dict
         if fields is not None:
-            for field in self.__class__._supported_fields:
+            for field in self.supported_fields():
                 self._song_file[field] = fields.get(field, None)
 
     def __call__(self):
@@ -50,13 +50,13 @@ class Track(object):
         self._update_file()
 
     def __setattr__(self, attr, val):
-        if attr in self.__class__._supported_fields:
+        if attr in self.supported_fields():
             self._song_file[attr] = val
         else:
             self.__dict__[attr] = val
 
     def __getattr__(self, attr):
-        if attr in self.__class__._supported_fields:
+        if attr in self.supported_fields():
             return self._song_file.get(attr, '')[0]
         else:
             result = self.__dict__.get(attr, None)
@@ -75,7 +75,7 @@ class Track(object):
         def determine_type(path):
             """Determine codec to use in opening file depending on extension"""
             extension = os.path.splitext(path)[-1][1:]
-            result = self.__class__._supported_filetypes.get(extension)
+            result = self.supported_filetypes().get(extension)
             if result is None:
                 error = "Extension '{}' is not supported"
                 raise NotImplementedError(error.format(extension))
@@ -104,3 +104,11 @@ class Track(object):
         """Returns the Acoustid fingerprint"""
         _, fingerprint = acoustid.fingerprint_file(self.path)
         return fingerprint
+
+    @classmethod
+    def supported_fields(cls):
+        return cls._supported_fields
+
+    @classmethod
+    def supported_filetypes(cls):
+        return cls._supported_filetypes

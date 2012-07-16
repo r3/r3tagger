@@ -80,7 +80,7 @@ def rename_album(album, pattern=None):
     if pattern is None:
         pattern = default_pattern
 
-    supported_fields = album.__class__._supported_fields
+    supported_fields = album.supported_fields()
     fields = {field: getattr(album, field) for field in supported_fields}
     name = pattern.format(**fields)
 
@@ -121,7 +121,7 @@ def rename_tracks(target, pattern=None):
         extension = os.path.splitext(track.path)[-1]
         root = os.path.dirname(track.path)
 
-        supported_fields = track.__class__._supported_fields
+        supported_fields = track.supported_fields()
         fields = {field: getattr(track, field) for field in supported_fields}
         name = pattern.format(**fields) + extension
 
@@ -148,7 +148,7 @@ def find_shared_tags(album):
 
     result = {}
 
-    for field in album.__class__._supported_fields:
+    for field in album.supported_fields():
         if is_shared(field, album):
             result[field] = getattr(album.tracks[0], field)
 

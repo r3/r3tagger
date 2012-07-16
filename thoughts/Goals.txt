@@ -16,19 +16,6 @@ path manipulation library.
 
  __________________________________________________
 
-    Class Grabbing
-Grabbing 'Album._supported_files' through
-'instance.__class__' is getting tiresome. Examples of use:
-
-    Controller.rename_album
-    Album.match
-    Track.Track.__init__
-    Track.Track.__setattr__
-    Track.Track.__getattr__
-    Track.Track._connect_to_file.determine_type
-
- __________________________________________________
-
     ConfigParser
 I need to get a configuration up sooner than later or
 I'll continue to have hardcoded defaults in my source. I'd
@@ -46,21 +33,14 @@ Create an agent string for the queries.
 
     Untested Functions
 My Musicbrainz library has functions that are not under test:
-_find_title{,_{artists,releases}}
+_find_title{,_{artists,releases}}. Also, the Lucene version
+of searching in _find_release_group and get_albums
 
-            Fix it.
- __________________________________________________
+New ones to test: Track.supported_filetypes
+                  Track.supported_fields
+                  Album.supported_fields
 
-    Documentation
-Documentation is starting to fall behind. Let's get up on that
-Maybe figure out Sphinx and keep some docs built for the public
-APIs.
- __________________________________________________
-
-    Lucene isn't just Icecream
-Album searches (a relatively weak point) could be vastly
-improved if I could provide an artist too. Figure out Lucene
-searches and enable them in the interface of Musicbrainz.
+        Fix it. In general, add more tests
  __________________________________________________
 
     Refactor into Query
