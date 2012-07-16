@@ -4,8 +4,8 @@ import shutil
 import os
 import tempfile
 
-from Track import Track
 from Album import Album
+from Controller import build_albums
 
 
 class TestReadAlbum(object):
@@ -24,11 +24,8 @@ class TestReadAlbum(object):
         shutil.copytree(orig_path, dest_path)
         TestReadAlbum.path = dest_path
 
-        pattern = 'test_songs/album/{:0>2}.ogg'
-
-        tracks = [Track(pattern.format(x)) for x in range(1, 6)]
-
-        return Album(tracks)
+        album_iterator = build_albums(dest_path)
+        return album_iterator.next()
 
     def teardown_album(self, album):
         """Teardown: Destroys test album and cleans up temp files"""
@@ -48,9 +45,6 @@ class TestReadAlbum(object):
             count += 1
 
         assert count == 5
-
-    #def test_mapping(self, album):
-        #assert "{date} - {artist}".format(album) == '2012 - SomeArtist'
 
     def test_title(self, album):
         assert album.album == 'SomeAlbum'
@@ -141,11 +135,8 @@ class TestAlbumMatching(object):
         shutil.copytree(orig_path, dest_path)
         TestReadAlbum.path = dest_path
 
-        pattern = 'test_songs/album/{:0>2}.ogg'
-
-        tracks = [Track(pattern.format(x)) for x in range(1, 6)]
-
-        return Album(tracks)
+        album_iterator = build_albums(dest_path)
+        return album_iterator.next()
 
     def teardown_album(self, album):
         """Teardown: Destroys test album and cleans up temp files"""

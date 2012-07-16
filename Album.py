@@ -27,8 +27,6 @@ class Album(object):
 
             self.tracks = arg
 
-            self._find_shared_tags()
-
     def __call__(self):
         """Saves update metadata for the songs in this album"""
         for song in self:
@@ -36,30 +34,6 @@ class Album(object):
 
     def __iter__(self):
         return iter(self.tracks)
-
-    # TODO: Refactor into controller?
-    def _find_shared_tags(self):
-        """Determines the fields that are shared between each of the Album's
-           songs and adds these to the Album's fields.
-        """
-
-        def add_fields_from_song(song):
-            for field in self.__class__._supported_fields:
-                tag = getattr(song, field)
-                tracker.setdefault(field, set()).add(tag)
-
-        def is_shared(field_set):
-            return len(field_set) == 1
-
-        tracker = dict()
-
-        for song in self.tracks:
-            add_fields_from_song(song)
-
-        for name, field in tracker.items():
-            if is_shared(field):
-                tag = field.pop()
-                setattr(self, name, tag)
 
     def match(self, other):
         """Compares albums based on supported fields
