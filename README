@@ -1,5 +1,6 @@
 r3tagger
 
+license: GPL 3
 author: r3 (ryan.roler@gmail.com)
 requires: Python 2.7 -   http://python.org/
           Mutagen -      http://code.google.com/p/mutagen/
