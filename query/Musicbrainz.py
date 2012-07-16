@@ -201,14 +201,14 @@ def album_tags(album):
     """Collects tags for an album
 
     Returns a dictionary with the following fields:
-    tracks, artist, year, title
+    tracks, artist, date, album
     """
     results = {}
 
     results['tracks'] = [x.getTitle() for x in album.getTracks()]
     results['artist'] = album.getArtist().getName()
-    results['year'] = album.getEarliestReleaseDate().split('-')[0]
-    results['title'] = album.getTitle()
+    results['date'] = album.getEarliestReleaseDate().split('-')[0]
+    results['album'] = album.getTitle()
 
     return results
 

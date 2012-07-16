@@ -98,8 +98,28 @@ class TestReadAlbum(object):
         assert self.same_mb_object(response,
                 Musicbrainz.get_artist(ARTIST).next())
 
-    #def test_album_tags(self, artist, responses):
-        #TODO: Build artist funcarg and complete
+    def test_album_tags(self, responses):
+        ident = ('http://musicbrainz.org/release/'
+                 'b52a8f31-b5ab-34e9-92f4-f5b7110220f0')
+
+        response = {'artist': u"Nirvana",
+                    'album': u"Nevermind",
+                    'date': u"1991",
+                    'tracks': [u'Smells Like Teen Spirit',
+                               u'In Bloom',
+                               u'Come as You Are',
+                               u'Breed',
+                               u'Lithium',
+                               u'Polly',
+                               u'Territorial Pissings',
+                               u'Drain You',
+                               u'Lounge Act',
+                               u'Stay Away',
+                               u'On a Plain',
+                               u'Something in the Way / Endless, Nameless']
+                    }
+
+        assert Musicbrainz.album_tags(responses[ident]) == response
 
     #def test_artist_releases(self, artist, responses)
         #TODO: Build artist funcarg and complete
