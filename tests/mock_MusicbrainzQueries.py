@@ -40,7 +40,7 @@ def getReleaseById(*args, **kwargs):
 
 def inject_mocks(module):
     """Injects mock functions into musicbrainz library"""
-    assert module.__name__ == 'Musicbrainz'
+    assert module.__name__ == 'r3tagger.query.Musicbrainz'
 
     funcs = {'getArtists': getArtists,
              'getReleaseGroups': getReleaseGroups,

@@ -1,7 +1,8 @@
-"""Tests the Album object"""
-import Musicbrainz
-import mock_MusicbrainzQueries
 import shelve
+
+import mock_MusicbrainzQueries
+
+from r3tagger.query import Musicbrainz
 
 RESPONSES = 'MusicbrainzResponses.shelve'
 SONG = 'Smells Like Teen Spirit'

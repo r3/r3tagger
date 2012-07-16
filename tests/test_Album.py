@@ -4,8 +4,8 @@ import shutil
 import os
 import tempfile
 
-from Album import Album
-from Controller import build_albums
+from r3tagger.model.Album import Album
+from r3tagger.Controller import build_albums
 
 
 class TestReadAlbum(object):

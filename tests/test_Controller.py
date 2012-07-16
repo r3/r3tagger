@@ -4,7 +4,8 @@ import shelve
 import shutil
 import os
 import tempfile
-import Controller
+
+from r3tagger import Controller
 
 
 class TestCreateAlbum(object):

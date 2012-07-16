@@ -1,10 +1,9 @@
-"""Tests the Track object"""
-
 import tempfile
 import shutil
 import os
-import Track
 import pytest
+
+from r3tagger.model import Track
 
 
 class TestWriteTrack(object):
