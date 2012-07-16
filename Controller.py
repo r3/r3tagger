@@ -8,8 +8,8 @@ import os
 import shutil
 #from queries import Musicbrainz
 
-from Album import Album
-from Track import Track
+from r3tagger.model.Album import Album
+from r3tagger.model.Track import Track
 
 
 def _set_album_path(album, path):
