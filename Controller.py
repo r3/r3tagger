@@ -1,6 +1,6 @@
 """Controller
 
-    Handles the processing of Albums of Song objects. Host to the recognition
+    Handles the processing of Albums of Track objects. Host to the recognition
     algorithms and querier of the Musicbrainz database
 """
 
@@ -9,7 +9,7 @@ import shutil
 #from queries import Musicbrainz
 
 from Album import Album
-from Song import Song
+from Track import Track
 
 
 def _set_album_path(album, path):
@@ -27,13 +27,13 @@ def _set_album_path(album, path):
 def build_albums(path, recursive=False):
     if recursive is False:
         files = [os.path.join(path, x) for x in os.listdir(path)]
-        album = Album([Song(x) for x in files if os.path.isfile(x)])
+        album = Album([Track(x) for x in files if os.path.isfile(x)])
         _set_album_path(album, path)
         yield album
     else:
         for root, _, files in os.walk(path):
             tracks = [os.path.join(path, x) for x in files]
-            album = Album([Song(x) for x in tracks if os.path.isfile(x)])
+            album = Album([Track(x) for x in tracks if os.path.isfile(x)])
             _set_album_path(album, root)
             yield album
 
@@ -81,10 +81,10 @@ def rename_tracks(target, pattern=None):
         shutil.move(track.path, destination)
         track.path = destination
 
-    if isinstance(target, Album):
+    try:
+        # Try to iterate through target, if you can, it's an Album
         for track in target:
             rename_track(track, pattern)
-    elif isinstance(target, Song):
+    except TypeError:
+        # If you can't iterate, it's a Track
         rename_track(target, pattern)
-    else:
-        assert False

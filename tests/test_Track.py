@@ -1,13 +1,13 @@
-"""Tests the Song object"""
+"""Tests the Track object"""
 
 import tempfile
 import shutil
 import os
-import Song
+import Track
 import pytest
 
 
-class TestWriteSong(object):
+class TestWriteTrack(object):
     """Provides a test suite for writing and reading fields
 
     artist == 'altArtist'
@@ -28,18 +28,16 @@ class TestWriteSong(object):
     class TestWriteBundle:
         # Setup 'song' funcarg and setup/teardown
         def setup_song(self):
-            """Setup: Setup copy of dummy song"""
-            TestWriteSong.dir = tempfile.mkdtemp()
+            TestWriteTrack.dir = tempfile.mkdtemp()
 
-            orig_path = os.path.join('test_songs', TestWriteSong.filename)
-            dest_path = os.path.join(TestWriteSong.dir, TestWriteSong.filename)
+            orig_path = os.path.join('test_songs', TestWriteTrack.filename)
+            dest_path = os.path.join(TestWriteTrack.dir, TestWriteTrack.filename)
 
             shutil.copyfile(orig_path, dest_path)
-            TestWriteSong.song = dest_path
-            return Song.Song(dest_path)
+            TestWriteTrack.song = dest_path
+            return Track.Track(dest_path)
 
         def pytest_funcarg__song(self, request):
-            """Dependency Injection: Song"""
             return request.cached_setup(self.setup_song,
                     scope='class')
 
@@ -85,14 +83,14 @@ class TestWriteSong(object):
         # Setup 'song' funcarg and setup/teardown
         def setup_song(self):
             """Setup: Open edited dummy song"""
-            return Song.Song(TestWriteSong.song)
+            return Track.Track(TestWriteTrack.song)
 
         def teardown_song(self, song):
             """Teardown: Delete directory containing dummy file"""
-            shutil.rmtree(TestWriteSong.dir)
+            shutil.rmtree(TestWriteTrack.dir)
 
         def pytest_funcarg__song(self, request):
-            """Dependency Injection: Song"""
+            """Dependency Injection: Track"""
             return request.cached_setup(self.setup_song,
                     self.teardown_song,
                     scope='class')
@@ -142,7 +140,6 @@ class TestAcoustid(object):
     filename = 'PublicDomainSong.mp3'
 
     def setup_song(self):
-        """Setup: Setup copy of dummy song"""
         TestAcoustid.dir = tempfile.mkdtemp()
 
         orig_path = os.path.join('test_songs', TestAcoustid.filename)
@@ -150,14 +147,12 @@ class TestAcoustid(object):
 
         shutil.copyfile(orig_path, dest_path)
         TestAcoustid.song = dest_path
-        return Song.Song(dest_path)
+        return Track.Track(dest_path)
 
     def teardown_song(self, song):
-        """Teardown: Delete directory containing dummy file"""
         shutil.rmtree(TestAcoustid.dir)
 
     def pytest_funcarg__song(self, request):
-        """Dependency Injection: Song"""
         return request.cached_setup(self.setup_song,
                 scope='class')
 
@@ -181,7 +176,6 @@ class TestFailures(object):
     filename = 'PublicDomainSong.mp3'
 
     def setup_song(self):
-        """Setup: Setup copy of dummy song"""
         TestAcoustid.dir = tempfile.mkdtemp()
 
         orig_path = os.path.join('test_songs', TestAcoustid.filename)
@@ -189,21 +183,20 @@ class TestFailures(object):
 
         shutil.copyfile(orig_path, dest_path)
         TestAcoustid.song = dest_path
-        return Song.Song(dest_path)
+        return Track.Track(dest_path)
 
     def teardown_song(self, song):
         """Teardown: Delete directory containing dummy file"""
         shutil.rmtree(TestAcoustid.dir)
 
     def pytest_funcarg__song(self, request):
-        """Dependency Injection: Song"""
         return request.cached_setup(self.setup_song,
                 scope='class')
 
     def test_unsupported_file(self):
         path = os.path.join('test_songs', 'Unsupported.file')
         with pytest.raises(NotImplementedError):
-            Song.Song(path)
+            Track.Track(path)
 
     def test_missing_attrib(self, song):
         with pytest.raises(AttributeError):

@@ -4,7 +4,7 @@ import shutil
 import os
 import tempfile
 
-from Song import Song
+from Track import Track
 from Album import Album
 
 
@@ -26,7 +26,7 @@ class TestReadAlbum(object):
 
         pattern = 'test_songs/album/{:0>2}.ogg'
 
-        tracks = [Song(pattern.format(x)) for x in range(1, 6)]
+        tracks = [Track(pattern.format(x)) for x in range(1, 6)]
 
         return Album(tracks)
 
@@ -143,7 +143,7 @@ class TestAlbumMatching(object):
 
         pattern = 'test_songs/album/{:0>2}.ogg'
 
-        tracks = [Song(pattern.format(x)) for x in range(1, 6)]
+        tracks = [Track(pattern.format(x)) for x in range(1, 6)]
 
         return Album(tracks)
 
