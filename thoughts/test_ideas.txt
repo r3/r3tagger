@@ -9,3 +9,6 @@ Simulate errors (503 & 404) for each low level query.
 
 Curry tests to allow tests to run on actual musicbrainz2
 library by changing ENV VAR.
+
+Fingerprinting in Track isn't tested. That shouldn't be hard.
+Same with Track.supported_{fields,filetypes}

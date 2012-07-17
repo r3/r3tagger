@@ -5,7 +5,7 @@ Provides models:
     Represents a music file on disc at a given path
 """
 
-import os.path
+import os
 
 import acoustid
 
@@ -59,11 +59,11 @@ class Track(object):
         if attr in self.supported_fields():
             return self._song_file.get(attr, '')[0]
         else:
-            result = self.__dict__.get(attr, None)
-            if result is None:
-                raise AttributeError
-            else:
+            result = self.__dict__.get(attr)
+            if result is not None:
                 return result
+            else:
+                raise AttributeError
 
     def __str__(self):
         return str(self.title)
@@ -96,7 +96,7 @@ class Track(object):
 
     @property
     def bitrate(self):
-        """Bitrate of song (160000)"""
+        """Bitrate of song (eg. 160000)"""
         return self._song_file.info.bitrate
 
     @property
