@@ -119,6 +119,11 @@ class TestReadMusicbrainz(object):
         assert self.same_mb_object(response,
                 Musicbrainz.get_album(ALBUM).next())
 
+    def test_get_album_with_artist(self, responses):
+        response = responses['get_album:Nevermind']
+        assert self.same_mb_object(response,
+                Musicbrainz.get_album(ALBUM, ARTIST).next())
+
     def test_get_artist(self, responses):
         response = responses['get_artist:Nirvana']
         assert self.same_mb_object(response,

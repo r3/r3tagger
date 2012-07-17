@@ -43,7 +43,7 @@ def _find_artist(artist):
             logging.debug('Error 503: Too many requests')
             return _find_artist(artist)
         else:
-            logging.error('Error: {}'.format(e))
+            logging.error('Other Error: {}'.format(e))
 
     return [x.getArtist().getId() for x in results]
 
@@ -65,7 +65,7 @@ def _find_release_group(title, artist=None):
             logging.debug('Error 503: Too many requests')
             return _find_release_group(title)
         else:
-            logging.error('Error: {}'.format(e))
+            logging.error('Other Error: {}'.format(e))
 
     return [x.getReleaseGroup().getId() for x in results]
 
@@ -81,14 +81,13 @@ def _find_track(track):
     try:
         query = ws.Query()
         filt = ws.TrackFilter(track)
-
         results = query.getTracks(filt)
     except ws.WebServiceError, e:
         if '503' in e:
             logging.debug('Error 503: Too many requests')
             return _find_track_releases(track)
         else:
-            logging.error('Error: {}'.format(e))
+            logging.error('Other Error: {}'.format(e))
 
     return [x.getTrack() for x in results]
 
@@ -119,7 +118,7 @@ def _lookup_release_group_id(ident):
             logging.debug('Error 503: Too many requests')
             return _lookup_release_group_id(ident)
         else:
-            logging.error('Error: {}'.format(e))
+            logging.error('Other Error: {}'.format(e))
 
 
 @Backoff(DELAY)
@@ -137,7 +136,7 @@ def _lookup_artist_id(ident):
             logging.debug('Error 503: Too many requests')
             return _lookup_artist_id(ident)
         else:
-            logging.error('Error: {}'.format(e))
+            logging.error('Other Error: {}'.format(e))
 
 
 @Backoff(DELAY)
@@ -154,7 +153,7 @@ def _lookup_release_id(ident):
             logging.debug('Error 503: Too many requests')
             return _lookup_release_id(ident)
         else:
-            logging.error('Error: {}'.format(e))
+            logging.error('Other Error: {}'.format(e))
 
 
 # === High level query interfaces ===

@@ -33,7 +33,7 @@ Create an agent string for the queries.
 
     Untested Functions
 My Musicbrainz library has functions that are not under test:
-_find_title{,_{artists,releases}}. Also, the Lucene version
+_find_title_{artists,releases}. Also, the Lucene version
 of searching in _find_release_group and get_albums
 
 New ones to test: Track.supported_filetypes
