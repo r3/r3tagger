@@ -10,7 +10,7 @@ ARTIST = 'Nirvana'
 ALBUM = 'Nevermind'
 
 
-class TestReadAlbum(object):
+class TestReadMusicbrainz(object):
     """Tests the Album object"""
 
     # Setup/teardown methods as well as dependency injection
@@ -28,6 +28,17 @@ class TestReadAlbum(object):
         mock_MusicbrainzQueries.disconnect()
 
         responses.close()
+
+    def setup_shelf(self):
+        shelf = shelve.open('./SomeAlbumInstance.shelve')
+        return shelf
+
+    def teardown_shelf(self, shelf):
+        shelf.close()
+
+    def pytest_funcarg__shelf(self, request):
+        return request.cached_setup(self.setup_shelf,
+                self.teardown_shelf, scope='class')
 
     def pytest_funcarg__responses(self, request):
         """Dependency Injection: responses"""
@@ -68,26 +79,22 @@ class TestReadAlbum(object):
     def test__find_artist(self, responses):
         response = responses['_find_artist:Nirvana']
         assert response == Musicbrainz._find_artist(ARTIST)
-        #pass
 
     def test__find_release_group(self, responses):
         response = responses['_find_release_group:Nevermind']
         assert response == Musicbrainz._find_release_group(ALBUM)
-        #pass
 
-    def test__find_title(self, responses):
+    def test__find_track(self, responses):
         response = responses['_find_title:Smells Like Teen Spirit']
-        assert self.same_mb_object(response, Musicbrainz._find_title(SONG))
+        assert self.same_mb_object(response, Musicbrainz._find_track(SONG))
 
-    def test__find_title_artists(self, responses):
+    def test__find_track_artists(self, responses):
         response = responses['_find_title_artists:Smells Like Teen Spirit']
-        assert response == Musicbrainz._find_title_artists(SONG)
-        #pass
+        assert response == Musicbrainz._find_track_artists(SONG)
 
-    def test__find_title_releases(self, responses):
+    def test__find_track_releases(self, responses):
         response = responses['_find_title_releases:Smells Like Teen Spirit']
-        assert response == Musicbrainz._find_title_releases(SONG)
-        #pass
+        assert response == Musicbrainz._find_track_releases(SONG)
 
     def test__lookup_artist_id(self, responses):
         ident = ('http://musicbrainz.org/artist/'
@@ -154,4 +161,4 @@ class TestReadAlbum(object):
         artist = responses[ident]
 
         first = Musicbrainz.artist_releases(artist).next()
-        assert TestReadAlbum.same_mb_object(first, album)
+        assert TestReadMusicbrainz.same_mb_object(first, album)

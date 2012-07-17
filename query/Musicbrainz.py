@@ -72,38 +72,36 @@ def _find_release_group(title, artist=None):
 
 # TODO: Unused so far. Untested.
 @Backoff(DELAY)
-def _find_title(title):
+def _find_track(track):
     """Returns iterable of Artist Ids
     Really should be called from either:
-    _find_title_releases
-    _find_title_artists
+    _find_track_releases
+    _find_track_artists
     """
     try:
         query = ws.Query()
-        filt = ws.TrackFilter(title)
+        filt = ws.TrackFilter(track)
 
         results = query.getTracks(filt)
     except ws.WebServiceError, e:
         if '503' in e:
             logging.debug('Error 503: Too many requests')
-            return _find_title_releases(title)
+            return _find_track_releases(track)
         else:
             logging.error('Error: {}'.format(e))
 
     return [x.getTrack() for x in results]
 
 
-# TODO: See _find_title above
-def _find_title_releases(title):
-    """Function for interpreting title based searches as releases"""
-    results = _find_title(title)
+def _find_track_releases(track):
+    """Function for interpreting track based searches as releases"""
+    results = _find_track(track)
     return [x.getReleases()[0].getId() for x in results]
 
 
-# TODO: See _find_title above
-def _find_title_artists(title):
-    """Function for interpreting title based searches as artists"""
-    results = _find_title(title)
+def _find_track_artists(track):
+    """Function for interpreting track based searches as artists"""
+    results = _find_track(track)
     return [x.getArtist().getId() for x in results]
 
 
