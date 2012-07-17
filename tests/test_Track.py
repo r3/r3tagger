@@ -3,6 +3,10 @@ import shutil
 import os
 import pytest
 
+from mutagen.oggvorbis import OggVorbis
+from mutagen.flac import FLAC
+from mutagen.easyid3 import EasyID3
+
 from r3tagger.model import Track
 
 
@@ -116,12 +120,20 @@ class TestWriteTrack(object):
         def test_read_altered_genre(self, song):
             assert song.genre == u'altGenre'
 
-        def test_read_length(self, song):
-            def near(reference, test_num, bounds=0.05):
-                return (reference - bounds) < test_num < (reference + bounds)
+        def test_length(self, song):
+            assert round(song.length, 3) == 0.789
 
-            #0.7886621315192743 is the length given in manual tests
-            assert near(song.length, 0.788)
+        def test_bitrate(self, song):
+            assert song.bitrate == 160000
+
+        def test_supported_fields(self, song):
+            assert song.supported_fields() == ('artist', 'album', 'title',
+                                               'tracknumber', 'date', 'genre')
+
+        def test_supported_filetypes(self, song):
+            assert song.supported_filetypes() == {'flac': FLAC,
+                                                  'ogg': OggVorbis,
+                                                  'mp3': EasyID3}
 
 
 class TestAcoustid(object):
@@ -131,7 +143,7 @@ class TestAcoustid(object):
 
        Fingerpring: test_songs/PublicDomainFingerprint.txt
        Musicbrainz Page for song:
-        http://musicbrainz.org/recording/f037f7cf-7454-4b55-9dfe-06e8ea641e40
+       http://musicbrainz.org/recording/f037f7cf-7454-4b55-9dfe-06e8ea641e40
     """
 
     dir = None
@@ -167,7 +179,7 @@ class TestFailures(object):
 
        Fingerpring: test_songs/PublicDomainFingerprint.txt
        Musicbrainz Page for song:
-        http://musicbrainz.org/recording/f037f7cf-7454-4b55-9dfe-06e8ea641e40
+       http://musicbrainz.org/recording/f037f7cf-7454-4b55-9dfe-06e8ea641e40
     """
 
     dir = None
@@ -175,6 +187,7 @@ class TestFailures(object):
     filename = 'PublicDomainSong.mp3'
 
     def setup_song(self):
+        #See below!
         TestAcoustid.dir = tempfile.mkdtemp()
 
         orig_path = os.path.join('test_songs', TestAcoustid.filename)
@@ -186,6 +199,7 @@ class TestFailures(object):
 
     def teardown_song(self, song):
         """Teardown: Delete directory containing dummy file"""
+        #TODO: Ugly. Get the path from the song!
         shutil.rmtree(TestAcoustid.dir)
 
     def pytest_funcarg__song(self, request):
