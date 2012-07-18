@@ -19,8 +19,10 @@ Provided Functions:
 import os
 import shutil
 
+from r3tagger import FileExistsError
 from r3tagger.model.Album import Album
 from r3tagger.model.Track import Track
+from r3tagger.library import filename, parent, extension
 
 
 def _set_album_path(album, path):
@@ -28,12 +30,7 @@ def _set_album_path(album, path):
     album.path = path
 
     for track in album:
-        if '/' in track.path:
-            name = os.path.split(track.path)[-1]
-        else:
-            name = track.path
-
-        track.path = os.path.join(path, name)
+        track.path = os.path.join(path, filename(track.path))
 
 
 def build_albums(path, recursive=False):
@@ -84,16 +81,14 @@ def rename_album(album, pattern=None):
     fields = {field: getattr(album, field) for field in supported_fields}
     name = pattern.format(**fields)
 
-    if album.path.endswith(os.path.sep):
-        album_path = os.path.dirname(album.path)
-        root_path = os.path.dirname(album_path)
-    else:
-        root_path = os.path.dirname(album.path)
+    album_parent = parent(album.path)
 
-    destination = os.path.join(root_path, name)
+    destination = os.path.join(album_parent, name)
 
     if not os.path.exists(destination):
         shutil.move(album.path, destination)
+    else:
+        raise FileExistsError("File exists: {}".format(destination))
 
     _set_album_path(album, destination)
 
@@ -118,14 +113,11 @@ def rename_tracks(target, pattern=None):
         pattern = default_pattern
 
     def rename_track(track, pattern):
-        extension = os.path.splitext(track.path)[-1]
-        root = os.path.dirname(track.path)
-
         supported_fields = track.supported_fields()
         fields = {field: getattr(track, field) for field in supported_fields}
-        name = pattern.format(**fields) + extension
+        name = pattern.format(**fields) + extension(track.path)
 
-        destination = os.path.join(root, name)
+        destination = os.path.join(parent(track.path), name)
         shutil.move(track.path, destination)
         track.path = destination
 

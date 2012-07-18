@@ -5,7 +5,7 @@ ERROR = None
 def getArtists(*args, **kwargs):
     """Query: 'Nirvana'"""
     if ERROR:
-        raise kwargs['error']
+        raise(ERROR)
 
     return mb_responses['Nirvana Ids']
 
@@ -13,7 +13,7 @@ def getArtists(*args, **kwargs):
 def getReleaseGroups(*args, **kwargs):
     """Query: 'Nevermind'"""
     if ERROR:
-        raise kwargs['error']
+        raise(ERROR)
 
     return mb_responses['Nevermind Release Groups']
 
@@ -21,7 +21,7 @@ def getReleaseGroups(*args, **kwargs):
 def getTracks(*args, **kwargs):
     """Query: 'Smells Like Teen Spirit'"""
     if ERROR:
-        raise kwargs['error']
+        raise(ERROR)
 
     return mb_responses['Teen Spirit Tracks']
 
@@ -31,7 +31,7 @@ def getReleaseGroupById(*args, **kwargs):
     http://musicbrainz.org/release-group/1b022e01-4da6-387b-8658-8678046e4cef
     """
     if ERROR:
-        raise kwargs['error']
+        raise(ERROR)
 
     return mb_responses['Nevermind Id']
 
@@ -41,7 +41,7 @@ def getArtistById(*args, **kwargs):
     http://musicbrainz.org/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da
     """
     if ERROR:
-        raise kwargs['error']
+        raise(ERROR)
 
     return mb_responses['Nirvana Id']
 
@@ -51,7 +51,7 @@ def getReleaseById(*args, **kwargs):
     http://musicbrainz.org/release/b52a8f31-b5ab-34e9-92f4-f5b7110220f0
     """
     if ERROR:
-        raise kwargs['error']
+        raise(ERROR)
 
     return mb_responses['Nevermind Release Id']
 

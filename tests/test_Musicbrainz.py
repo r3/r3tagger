@@ -1,8 +1,11 @@
 import shelve
 
-from mocks import MusicbrainzQueries
+import pytest
 
-from r3tagger.query import Musicbrainz
+from musicbrainz2.webservice import WebServiceError
+
+from mocks import MusicbrainzQueries
+from r3tagger.query import Musicbrainz, QueryError
 
 RESPONSES = 'mocks/MusicbrainzResponses.shelve'
 SONG = 'Smells Like Teen Spirit'
@@ -163,3 +166,28 @@ class TestReadMusicbrainz(object):
 
         first = Musicbrainz.artist_releases(artist).next()
         assert TestReadMusicbrainz.same_mb_object(first, album)
+
+
+class TestMusicbrainzFails():
+    def setup_responses(self):
+        return shelve.open(RESPONSES)
+
+    def teardown_responses(self, responses):
+        responses.close()
+
+    def pytest_funcarg__responses(self, request):
+        """Dependency Injection: responses"""
+        return request.cached_setup(self.setup_responses,
+                self.teardown_responses, scope='class')
+
+    def test_setup_mock_hack(self, responses):
+        MusicbrainzQueries.raise_error(WebServiceError)
+
+    def test_all_methods_fail(self):
+        methods = ('_find_artist', '_find_release_group', '_find_track',
+                   '_lookup_artist_id', '_lookup_release_group_id',
+                   '_lookup_release_id')
+
+        for method in methods:
+            with pytest.raises(QueryError):
+                getattr(Musicbrainz, method)('dummy_arg')

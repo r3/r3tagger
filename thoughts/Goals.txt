@@ -1,21 +1,5 @@
 IMMEDIATE GOALS
 
-    Path Manipulation
-The algorithm for grabbing path stuff is done a lot.
-It would be useful to build a helper function to take
-care of this kind of thing.
-
-                Use :: desired path
-    ========================================
-    _set_album_path :: /path/to/album/ | song.ogg
-    rename_album    :: /path/to/ | album/song.ogg
-    rename_tracks   :: /path/to/album/song | .ogg  # in sub func
-
-Since this is common in many libraries, perhaps make a
-path manipulation library.
-
- __________________________________________________
-
     ConfigParser
 I need to get a configuration up sooner than later or
 I'll continue to have hardcoded defaults in my source. I'd
@@ -29,29 +13,6 @@ Queries can be amped up, particularly since testing now no
 longer requires querying the remote Musicbrainz API.
 Create an agent string for the queries.
 
- __________________________________________________
-
-    Untested Functions
-My Musicbrainz library has functions that are not under test:
-_find_title_{artists,releases}. Also, the Lucene version
-of searching in _find_release_group and get_albums
-
-New ones to test: Track.supported_filetypes
-                  Track.supported_fields
-                  Album.supported_fields
-
-        Fix it. In general, add more tests
- __________________________________________________
-
-    Refactor into Query
-Refactor the Musicbrainz library into an instance of a Query.
-The Query will be a superclass providing a set public interface.
-Subclassing Queries (like Musicbrainz) will follow this contract
-exactly. For now, just use what's public in Musicbrainz. From
-there, attach it as a generic "Query" that can be used by the
-controller. Now is a good time to do that since it isn't
-integrated yet. From there, we can create other Queries like
-an API for last.fm which can be used as an alternative.
  __________________________________________________
 
     Integrate Tagging
