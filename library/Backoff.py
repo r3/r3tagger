@@ -4,43 +4,23 @@
 https://github.com/r3
 
 Author: Ryan Roler (ryan.roler@gmail.com)
-Date: 07/13/2012
+Date: 07/17/2012
 License: LGPL
 Requires: Python 2 or 3
 
 Description:
     Creates a 'Backoff' class to be used as a decorator for functions that
     require a delay between the resolutions of those functions. The delay
-    can be blocking or nonblocking as designated by the decorator's second
-    parameter. Nonblocking functions do not currently allow for return
-    values.
-
-    # blocking example:
-
-        from backoff import Backoff
+    blocks until the function is invoked.
 
         @Backoff(seconds=5)
         def func_needing_delay():
             pass
-
-    # non-blocking example:
-
-        from backoff import Backoff
-
-        @Backoff(5, blocking=False)
-        def func_needing_delay():
-            pass
-
-    This decorator class was created for use in r3tagger
-    (https://github.com/r3/r3tagger) as a means of mitigating the
-    musicbrainz api requirement that queries may not exceed one
-    per five seconds (or something like that).
 """
 
 from __future__ import print_function
 import datetime
 
-from threading import Timer
 from time import sleep
 
 
@@ -60,12 +40,8 @@ class Backoff():
 
     delay = None
     next_call = datetime.datetime.now()
-    blocking = True
 
-    def __init__(self, seconds, blocking=None):
-        if blocking is not None:
-            self._set_blocking(blocking)
-
+    def __init__(self, seconds):
         self._set_delay(seconds)
 
     def __call__(self, func):
@@ -80,24 +56,16 @@ class Backoff():
 
     @classmethod
     def _schedule(cls, func, *args, **kwargs):
-        """Non-blocking scheduling of function to be resolved after delay"""
-
+        """Blocks until the next available call time and invokes function"""
         def days_to_seconds(days):
             return days * 24 * 60
 
         backoff = cls.next_call - datetime.datetime.now()
         seconds = days_to_seconds(backoff.days) + backoff.seconds
 
-        if cls.blocking:
-            sleep(seconds)
-            cls._update()
-            return func(*args, **kwargs)
-        else:
-            # TODO: Return a Queue containing the thread from which
-            #       a return value may be derived when it resolves
-            action = Timer(seconds, func, args, kwargs)
-            action.start()
-            cls._update()
+        sleep(seconds)
+        cls._update()
+        return func(*args, **kwargs)
 
     @classmethod
     def _update(cls):
@@ -110,11 +78,6 @@ class Backoff():
         cls.delay = datetime.timedelta(seconds=1) * seconds
 
     @classmethod
-    def _set_blocking(cls, blocking):
-        """Set synch/asynch scheduling"""
-        cls.blocking = blocking
-
-    @classmethod
     def free(cls):
         """Indicates that the delay is elapsed"""
         return datetime.datetime.now() >= cls.next_call
@@ -124,7 +87,6 @@ if __name__ == '__main__':
     invoked_time = {}
     last_resolution = datetime.datetime.now()
 
-    # Decorated function (Blocking):
     @Backoff(5)
     def simple_func(name):
         resolved = datetime.datetime.now()
