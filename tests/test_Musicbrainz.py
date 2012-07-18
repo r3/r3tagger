@@ -1,7 +1,7 @@
 import shelve
+import os
 
 import pytest
-
 from musicbrainz2.webservice import WebServiceError
 
 from mocks import MusicbrainzQueries
@@ -70,9 +70,13 @@ class TestReadMusicbrainz(object):
             return True
 
     def test_setup_mock_hack(self, responses):
-        MusicbrainzQueries.inject_mock(Musicbrainz)  # reticulating_splines()
-        MusicbrainzQueries.link_shelve(responses)  # Share!
-        Musicbrainz.Backoff._set_delay(0)  # No need for backoff in mocks
+        """If MUSICBRAINZ_MOCK is set, inject the mock"""
+        if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
+                                                             'false', 'no'):
+            # reticulating_splines()
+            MusicbrainzQueries.inject_mock(Musicbrainz)
+            MusicbrainzQueries.link_shelve(responses)
+            Musicbrainz.Backoff._set_delay(0)
 
     # Test Methods
     def test__find_artist(self, responses):
