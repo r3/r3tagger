@@ -1,6 +1,6 @@
 import shelve
 
-from mocks import mock_MusicbrainzQueries
+from mocks import MusicbrainzQueries
 
 from r3tagger.query import Musicbrainz
 
@@ -15,19 +15,15 @@ class TestReadMusicbrainz(object):
 
     # Setup/teardown methods as well as dependency injection
     def setup_responses(self):
-        # Inject mock musicbrainz
-        mock_MusicbrainzQueries.inject_mocks(Musicbrainz)
-
-        # Remove delay on functions
-        Musicbrainz.Backoff._set_delay(0)
-
         return shelve.open(RESPONSES)
 
     def teardown_responses(self, responses):
-        # Disconnect Mock
-        mock_MusicbrainzQueries.disconnect()
-
         responses.close()
+
+    def pytest_funcarg__responses(self, request):
+        """Dependency Injection: responses"""
+        return request.cached_setup(self.setup_responses,
+                self.teardown_responses, scope='class')
 
     def setup_shelf(self):
         shelf = shelve.open('./mocks/SomeAlbumInstance.shelve')
@@ -39,11 +35,6 @@ class TestReadMusicbrainz(object):
     def pytest_funcarg__shelf(self, request):
         return request.cached_setup(self.setup_shelf,
                 self.teardown_shelf, scope='class')
-
-    def pytest_funcarg__responses(self, request):
-        """Dependency Injection: responses"""
-        return request.cached_setup(self.setup_responses,
-                self.teardown_responses, scope='class')
 
     def pytest_funcarg__album(self, request):
         response = {'artist': u"Nirvana",
@@ -74,6 +65,11 @@ class TestReadMusicbrainz(object):
                     return False
 
             return True
+
+    def test_setup_mock_hack(self, responses):
+        MusicbrainzQueries.inject_mock(Musicbrainz)  # reticulating_splines()
+        MusicbrainzQueries.link_shelve(responses)  # Share!
+        Musicbrainz.Backoff._set_delay(0)  # No need for backoff in mocks
 
     # Test Methods
     def test__find_artist(self, responses):

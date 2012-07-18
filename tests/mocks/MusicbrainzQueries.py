@@ -1,6 +1,4 @@
-import shelve
-
-mb_responses = shelve.open('mocks/mock_MusicbrainzQueries.shelve')
+mb_responses = None
 ERROR = None
 
 
@@ -58,8 +56,8 @@ def getReleaseById(*args, **kwargs):
     return mb_responses['Nevermind Release Id']
 
 
-def inject_mocks(module):
-    """Injects mock functions into musicbrainz library"""
+def inject_mock(module):
+    """Call FIRST"""
     assert module.__name__ == 'r3tagger.query.Musicbrainz'
 
     funcs = {'getArtists': getArtists,
@@ -73,10 +71,13 @@ def inject_mocks(module):
         setattr(module.ws.Query, name, func)
 
 
+def link_shelve(shelve):
+    """Call SECOND"""
+    global mb_responses
+    mb_responses = shelve
+
+
 def raise_error(error):
+    """Want errors? Let me know what kind"""
     global ERROR
     ERROR = error
-
-
-def disconnect():
-    mb_responses.close()
