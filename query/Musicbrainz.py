@@ -19,9 +19,6 @@ Provided Functions:
     Provide an iterator of musicbrainz2  releases.  #TODO: Make these Albums!
 """
 
-import logging
-logging.basicConfig(filename='musicbrainz.log', level=logging.DEBUG)
-
 import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 
@@ -52,16 +49,9 @@ def _find_release_group(title, artist=None):
     else:
         pattern = title
 
-    try:
-        filt = ws.ReleaseGroupFilter(query=pattern)
-        query = ws.Query()
-        results = query.getReleaseGroups(filt)
-    except ws.WebServiceError, e:
-        if '503' in e:
-            logging.debug('Error 503: Too many requests')
-            return _find_release_group(title)
-        else:
-            logging.error('Other Error: {}'.format(e))
+    filt = ws.ReleaseGroupFilter(query=pattern)
+    query = ws.Query()
+    results = query.getReleaseGroups(filt)
 
     return [x.getReleaseGroup().getId() for x in results]
 
@@ -74,16 +64,9 @@ def _find_track(track):
     _find_track_releases
     _find_track_artists
     """
-    try:
-        query = ws.Query()
-        filt = ws.TrackFilter(track)
-        results = query.getTracks(filt)
-    except ws.WebServiceError, e:
-        if '503' in e:
-            logging.debug('Error 503: Too many requests')
-            return _find_track_releases(track)
-        else:
-            logging.error('Other Error: {}'.format(e))
+    query = ws.Query()
+    filt = ws.TrackFilter(track)
+    results = query.getTracks(filt)
 
     return [x.getTrack() for x in results]
 
@@ -105,54 +88,33 @@ def _find_track_artists(track):
 @Backoff(DELAY)
 def _lookup_release_group_id(ident):
     """Returns musicbrainz releaseGroup object"""
-    try:
-        query = ws.Query()
-        filt = ws.ReleaseGroupIncludes(artist=True, releases=True)
+    query = ws.Query()
+    filt = ws.ReleaseGroupIncludes(artist=True, releases=True)
 
-        return query.getReleaseGroupById(ident, filt)
-    except ws.WebServiceError, e:
-        if '503' in e:
-            logging.debug('Error 503: Too many requests')
-            return _lookup_release_group_id(ident)
-        else:
-            logging.error('Other Error: {}'.format(e))
+    return query.getReleaseGroupById(ident, filt)
 
 
 @Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _lookup_artist_id(ident):
     """Returns musicbrainz Artist object"""
-    try:
-        query = ws.Query()
-        filt = ws.ArtistIncludes(
-                releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM),
-                tags=True, releaseGroups=True)
+    query = ws.Query()
+    filt = ws.ArtistIncludes(
+            releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM),
+            tags=True, releaseGroups=True)
 
-        return query.getArtistById(ident, filt)
-    except ws.WebServiceError, e:
-        if '503' in e:
-            logging.debug('Error 503: Too many requests')
-            return _lookup_artist_id(ident)
-        else:
-            logging.error('Other Error: {}'.format(e))
+    return query.getArtistById(ident, filt)
 
 
 @Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _lookup_release_id(ident):
     """Returns musicbrainz Release object"""
-    try:
-        query = ws.Query()
-        filt = ws.ReleaseIncludes(artist=True, tracks=True,
-                releaseEvents=True)
+    query = ws.Query()
+    filt = ws.ReleaseIncludes(artist=True, tracks=True,
+            releaseEvents=True)
 
-        return query.getReleaseById(ident, filt)
-    except ws.WebServiceError, e:
-        if '503' in e:
-            logging.debug('Error 503: Too many requests')
-            return _lookup_release_id(ident)
-        else:
-            logging.error('Other Error: {}'.format(e))
+    return query.getReleaseById(ident, filt)
 
 
 # === High level query interfaces ===

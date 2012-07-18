@@ -1,10 +1,10 @@
 import shelve
 
-import mock_MusicbrainzQueries
+from mocks import mock_MusicbrainzQueries
 
 from r3tagger.query import Musicbrainz
 
-RESPONSES = 'MusicbrainzResponses.shelve'
+RESPONSES = 'mocks/MusicbrainzResponses.shelve'
 SONG = 'Smells Like Teen Spirit'
 ARTIST = 'Nirvana'
 ALBUM = 'Nevermind'
@@ -30,7 +30,7 @@ class TestReadMusicbrainz(object):
         responses.close()
 
     def setup_shelf(self):
-        shelf = shelve.open('./SomeAlbumInstance.shelve')
+        shelf = shelve.open('./mocks/SomeAlbumInstance.shelve')
         return shelf
 
     def teardown_shelf(self, shelf):

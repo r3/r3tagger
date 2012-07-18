@@ -1,19 +1,30 @@
 import shelve
-mb_responses = shelve.open('mock_MusicbrainzQueries.shelve')
+
+mb_responses = shelve.open('mocks/mock_MusicbrainzQueries.shelve')
+ERROR = None
 
 
 def getArtists(*args, **kwargs):
     """Query: 'Nirvana'"""
+    if ERROR:
+        raise kwargs['error']
+
     return mb_responses['Nirvana Ids']
 
 
 def getReleaseGroups(*args, **kwargs):
     """Query: 'Nevermind'"""
+    if ERROR:
+        raise kwargs['error']
+
     return mb_responses['Nevermind Release Groups']
 
 
 def getTracks(*args, **kwargs):
     """Query: 'Smells Like Teen Spirit'"""
+    if ERROR:
+        raise kwargs['error']
+
     return mb_responses['Teen Spirit Tracks']
 
 
@@ -21,6 +32,9 @@ def getReleaseGroupById(*args, **kwargs):
     """Lookup of ID for 'Nevermind' (release group)
     http://musicbrainz.org/release-group/1b022e01-4da6-387b-8658-8678046e4cef
     """
+    if ERROR:
+        raise kwargs['error']
+
     return mb_responses['Nevermind Id']
 
 
@@ -28,6 +42,9 @@ def getArtistById(*args, **kwargs):
     """Lookup of ID for 'Nirvana'
     http://musicbrainz.org/artist/5b11f4ce-a62d-471e-81fc-a69a8278c7da
     """
+    if ERROR:
+        raise kwargs['error']
+
     return mb_responses['Nirvana Id']
 
 
@@ -35,6 +52,9 @@ def getReleaseById(*args, **kwargs):
     """Lookup ID for 'Nevermind' (release)
     http://musicbrainz.org/release/b52a8f31-b5ab-34e9-92f4-f5b7110220f0
     """
+    if ERROR:
+        raise kwargs['error']
+
     return mb_responses['Nevermind Release Id']
 
 
@@ -51,6 +71,11 @@ def inject_mocks(module):
 
     for name, func in funcs.items():
         setattr(module.ws.Query, name, func)
+
+
+def raise_error(error):
+    global ERROR
+    ERROR = error
 
 
 def disconnect():

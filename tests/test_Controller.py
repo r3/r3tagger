@@ -50,8 +50,8 @@ class TestCreateAlbum(object):
         """
         tempdir = tempfile.mkdtemp()
 
-        orig_path = 'SomeAlbumInstance.shelve'
-        dest_path = os.path.join(tempdir, 'SomeAlbumInstance.shelve')
+        orig_path = 'mocks/SomeAlbumInstance.shelve'
+        dest_path = os.path.join(tempdir, os.path.dirname(orig_path))
 
         shutil.copyfile(orig_path, dest_path)
         TestCreateAlbum.persist_album = dest_path
