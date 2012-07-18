@@ -6,17 +6,17 @@ expected methods of a query:
 
 Provided Functions:
     get_album(title:str, artist=None:str)
-    Provides an iterator of musicbrainz2 releases #TODO: Make these Albums!
+    Provides an iterator of musicbrainz2 releases  #TODO: Make these Albums!
     Currently, the artist parameter is not functional.
 
     get_artist(artist:str)
-    Provides an iterator of musicbrainz2 artists #TODO: Make a model!
+    Provides an iterator of musicbrainz2 artists  #TODO: Make a model!
 
     album_tags(album:musicbrainz2.Release)
     Provides a dict of fields from a release.
 
     artist_releases(artist:musicbrainz2.Artist)
-    Provide an iterator of musicbrainz2  releases. #TODO: Make these Albums!
+    Provide an iterator of musicbrainz2  releases.  #TODO: Make these Albums!
 """
 
 import logging
@@ -25,29 +25,25 @@ logging.basicConfig(filename='musicbrainz.log', level=logging.DEBUG)
 import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 
+from r3tagger.query import Retry
 from r3tagger.library.Backoff import Backoff
 DELAY = 5  # Seconds between query to API
 
 
 # === ID Finding ===
+@Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _find_artist(artist):
     """Returns iterable of Artist Ids"""
-    try:
-        query = ws.Query()
-        filt = ws.ArtistFilter(name=artist)
+    query = ws.Query()
+    filt = ws.ArtistFilter(name=artist)
 
-        results = query.getArtists(filt)
-    except ws.WebServiceError, e:
-        if '503' in e:
-            logging.debug('Error 503: Too many requests')
-            return _find_artist(artist)
-        else:
-            logging.error('Other Error: {}'.format(e))
+    results = query.getArtists(filt)
 
     return [x.getArtist().getId() for x in results]
 
 
+@Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _find_release_group(title, artist=None):
     """Returns iterable of releaseGroups"""
@@ -70,7 +66,7 @@ def _find_release_group(title, artist=None):
     return [x.getReleaseGroup().getId() for x in results]
 
 
-# TODO: Unused so far. Untested.
+@Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _find_track(track):
     """Returns iterable of Artist Ids
@@ -105,6 +101,7 @@ def _find_track_artists(track):
 
 
 # === Look-ups of IDs ===
+@Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _lookup_release_group_id(ident):
     """Returns musicbrainz releaseGroup object"""
@@ -121,6 +118,7 @@ def _lookup_release_group_id(ident):
             logging.error('Other Error: {}'.format(e))
 
 
+@Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _lookup_artist_id(ident):
     """Returns musicbrainz Artist object"""
@@ -139,6 +137,7 @@ def _lookup_artist_id(ident):
             logging.error('Other Error: {}'.format(e))
 
 
+@Retry(ws.WebServiceError)
 @Backoff(DELAY)
 def _lookup_release_id(ident):
     """Returns musicbrainz Release object"""
