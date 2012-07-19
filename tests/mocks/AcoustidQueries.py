@@ -17,7 +17,7 @@ def urlopen(*args, **kwargs):
 
 
 def inject_mock(module):
-    setattr(module, 'urllib2.urlopen', urlopen)
+    module.urllib2.urlopen = urlopen
 
 
 def link_shelve(shelve):

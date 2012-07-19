@@ -71,6 +71,7 @@ def get_releases(track):
     """
     url = _build_query_url(track, 'releaseids')
     results = _build_results(url)
+    print results
     for match in results['results']:
         for release in match['releases']:
             print(release)

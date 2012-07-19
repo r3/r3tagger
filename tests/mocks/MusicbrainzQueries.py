@@ -1,5 +1,3 @@
-import logging
-logging.basicConfig(filename='example.log',level=logging.DEBUG)
 mb_responses = None
 ERROR = None
 
@@ -55,10 +53,9 @@ def getReleaseById(*args, **kwargs):
     if ERROR:
         raise(ERROR)
 
-    publicdomainsong_release_id = '415d09de-08ef-40fb-973c-6e4e0f193bda'
+    publicdomainsong_release_id = '80460fff-5cbb-430e-92d1-765e50a02317'
 
-    logging.info("args: {}".format(args))
-    if args[1] == publicdomainsong_release_id:
+    if publicdomainsong_release_id in args:
         return mb_responses['publicdomain_release_id']
     else:
         return mb_responses['Nevermind Release Id']
