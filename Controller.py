@@ -19,6 +19,8 @@ Provided Functions:
 import os
 import shutil
 
+from mutagen import File
+
 from r3tagger import FileExistsError
 from r3tagger.model.Album import Album
 from r3tagger.model.Track import Track
@@ -44,8 +46,9 @@ def build_albums(path, recursive=False):
     """
     def prep_album(files, path):
         """An attempt to keep code affecting the build of an Album"""
-        tracks = [os.path.join(path, x) for x in files]
-        album = Album([Track(x) for x in tracks if os.path.isfile(x)])
+        paths = [os.path.join(path, x) for x in files]
+        tracks = [x for x in paths if os.path.isfile(x)]
+        album = Album([Track(x) for x in tracks if File(x)])
         _set_album_path(album, path)
 
         for field, shared_value in find_shared_tags(album).items():

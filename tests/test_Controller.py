@@ -75,6 +75,10 @@ class TestCreateAlbum(object):
         for album in Controller.build_albums(path, True):
             assert persist.match(album) == 1.0
 
+    def test_build_from_unsupported(self):
+        generated = Controller.build_albums('.')
+        assert generated.next().tracks == []
+
 
 class TestAlbumManipulation():
     def setup_album(self):
