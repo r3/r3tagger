@@ -5,6 +5,8 @@ import shutil
 import os
 import tempfile
 
+import pytest
+
 from r3tagger import Controller
 
 
@@ -67,6 +69,19 @@ class TestCreateAlbum(object):
         return request.cached_setup(self.setup_persist, self.teardown_persist,
                 scope='class')
 
+    def test_build_track_supported(self):
+        track = Controller.build_track('test_songs/PublicDomainSong.mp3')
+        with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
+            assert ''.join(fingerprint) == track.fingerprint
+
+    def test_build_track_unsupported(self):
+        with pytest.raises(NotImplementedError):
+            Controller.build_track('test_Controller.py')
+
+    def test_build_track_missing(self):
+        with pytest.raises(Controller.NoFileFoundError):
+            Controller.build_track('.')
+
     def test_single_album(self, path, persist):
         test_album = Controller.build_albums(path).next()
         assert persist.match(test_album) == 1.0
@@ -75,9 +90,9 @@ class TestCreateAlbum(object):
         for album in Controller.build_albums(path, True):
             assert persist.match(album) == 1.0
 
-    def test_build_from_unsupported(self):
-        generated = Controller.build_albums('.')
-        assert generated.next().tracks == []
+    def test_missing_album(self):
+        with pytest.raises(Controller.NoFileFoundError):
+            Controller.build_albums('.').next()
 
 
 class TestAlbumManipulation():

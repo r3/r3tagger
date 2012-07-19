@@ -27,12 +27,24 @@ from r3tagger.model.Track import Track
 from r3tagger.library import filename, parent, extension
 
 
+class NoFileFoundError(Exception):
+    pass
+
+
 def _set_album_path(album, path):
     """Correct a path to an Album or add a new one"""
     album.path = path
 
     for track in album:
         track.path = os.path.join(path, filename(track.path))
+
+
+def build_track(path):
+    """Create a Track based on a path"""
+    if os.path.isfile(path):
+        return Track(path)
+    else:
+        raise NoFileFoundError("No file exists at {}".format(path))
 
 
 def build_albums(path, recursive=False):
@@ -47,8 +59,12 @@ def build_albums(path, recursive=False):
     def prep_album(files, path):
         """An attempt to keep code affecting the build of an Album"""
         paths = [os.path.join(path, x) for x in files]
-        tracks = [x for x in paths if os.path.isfile(x)]
-        album = Album([Track(x) for x in tracks if File(x)])
+        tracks = [Track(x) for x in paths if os.path.isfile(x) and File(x)]
+
+        if not tracks:
+            raise NoFileFoundError("No supported tracks at {}".format(path))
+
+        album = Album(tracks)
         _set_album_path(album, path)
 
         for field, shared_value in find_shared_tags(album).items():
