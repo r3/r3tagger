@@ -24,7 +24,7 @@ import musicbrainz2.model as m
 
 from r3tagger.query import Retry
 from r3tagger.library.Backoff import Backoff
-DELAY = 5  # Seconds between query to API
+DELAY = 1  # Seconds between query to API
 
 
 # === ID Finding ===
@@ -74,7 +74,13 @@ def _find_track(track):
 def _find_track_releases(track):
     """Function for interpreting track based searches as releases"""
     results = _find_track(track)
-    return [x.getReleases()[0].getId() for x in results]
+
+    releases = []
+    for result in results:
+        for release in result.getReleases():
+            releases.append(release.getId())
+
+    return releases
 
 
 def _find_track_artists(track):
