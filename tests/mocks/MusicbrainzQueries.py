@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(filename='example.log',level=logging.DEBUG)
 mb_responses = None
 ERROR = None
 
@@ -53,13 +55,17 @@ def getReleaseById(*args, **kwargs):
     if ERROR:
         raise(ERROR)
 
-    return mb_responses['Nevermind Release Id']
+    publicdomainsong_release_id = '415d09de-08ef-40fb-973c-6e4e0f193bda'
+
+    logging.info("args: {}".format(args))
+    if args[1] == publicdomainsong_release_id:
+        return mb_responses['publicdomain_release_id']
+    else:
+        return mb_responses['Nevermind Release Id']
 
 
 def inject_mock(module):
     """Call FIRST"""
-    assert module.__name__ == 'r3tagger.query.Musicbrainz'
-
     funcs = {'getArtists': getArtists,
              'getReleaseGroups': getReleaseGroups,
              'getTracks': getTracks,

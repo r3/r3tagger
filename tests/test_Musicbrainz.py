@@ -72,7 +72,7 @@ class TestReadMusicbrainz(object):
     def test_setup_mock_hack(self, responses):
         """If MUSICBRAINZ_MOCK is set, inject the mock"""
         if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
-                                                             'false', 'no'):
+                'false', 'no'):
             # reticulating_splines()
             MusicbrainzQueries.inject_mock(Musicbrainz)
             MusicbrainzQueries.link_shelve(responses)
