@@ -11,7 +11,7 @@ import acoustid
 
 from mutagen.oggvorbis import OggVorbis
 from mutagen.flac import FLAC
-from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import EasyMP3
 
 
 class Track(object):
@@ -20,7 +20,7 @@ class Track(object):
     _supported_fields = ('artist', 'album', 'title',
                          'tracknumber', 'date', 'genre')
 
-    _supported_filetypes = {'flac': FLAC, 'ogg': OggVorbis, 'mp3': EasyID3}
+    _supported_filetypes = {'flac': FLAC, 'ogg': OggVorbis, 'mp3': EasyMP3}
 
     def __init__(self, path, fields=None):
         """Instantiate Track object

@@ -5,7 +5,7 @@ import pytest
 
 from mutagen.oggvorbis import OggVorbis
 from mutagen.flac import FLAC
-from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import EasyMP3
 
 from r3tagger.model import Track
 
@@ -133,7 +133,7 @@ class TestWriteTrack(object):
         def test_supported_filetypes(self, song):
             assert song.supported_filetypes() == {'flac': FLAC,
                                                   'ogg': OggVorbis,
-                                                  'mp3': EasyID3}
+                                                  'mp3': EasyMP3}
 
 
 class TestAcoustid(object):
