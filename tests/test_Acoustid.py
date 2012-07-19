@@ -13,7 +13,7 @@ class TestAcoustid():
         return Track('test_songs/PublicDomainSong.mp3')
 
     def setup_expected(self):
-        expected_responses = shelve.open('mocks/Acoustid.shelve')
+        expected_responses = shelve.open('mocks/AcoustidResponses.shelve')
         return expected_responses
 
     def teardown_expected(self, expected):
@@ -34,15 +34,15 @@ class TestAcoustid():
         return request.cached_setup(self.setup_mb,
                 self.teardown_mb, scope='class')
 
-    def test_inject_mocks_hack(self, expected, mb):
-        if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
-                'false', 'no'):
-            MusicbrainzQueries.inject_mock(Acoustid.Musicbrainz)
-            MusicbrainzQueries.link_shelve(mb)
-        if os.getenv('ACOUSTID_MOCK', '').lower() not in (None,
-                'false', 'no'):
-            AcoustidQueries.inject_mock(Acoustid)
-            AcoustidQueries.link_shelve(expected)
+    #def test_inject_mocks_hack(self, expected, mb):
+        #if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
+                #'false', 'no'):
+            #MusicbrainzQueries.inject_mock(Acoustid.Musicbrainz)
+            #MusicbrainzQueries.link_shelve(mb)
+        #if os.getenv('ACOUSTID_MOCK', '').lower() not in (None,
+                #'false', 'no'):
+            #AcoustidQueries.inject_mock(Acoustid)
+            #AcoustidQueries.link_shelve(expected)
 
     def test__build_results(self, track, expected):
         url = Acoustid._build_query_url(track)
@@ -50,7 +50,8 @@ class TestAcoustid():
         assert results == expected['_build_results']
 
     def test_get_releases(self, track, expected):
-        album = Acoustid.get_releases(track).next()
+        result = Acoustid.get_releases(track)
+        album = result.next()
         print album.__dict__
         print expected['get_releases'].__dict__
         assert expected['get_releases'].match(album) == 1

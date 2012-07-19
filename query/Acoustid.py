@@ -73,7 +73,8 @@ def get_releases(track):
     results = _build_results(url)
     for match in results['results']:
         for release in match['releases']:
+            print(release)
             musicbrainz_album = Musicbrainz._lookup_release_id(release['id'])
             tags_dict = Musicbrainz.album_tags(musicbrainz_album)
 
-        yield(Album(tags_dict))
+            yield(Album(tags_dict))

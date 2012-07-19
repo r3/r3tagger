@@ -1,11 +1,19 @@
 acoustid_responses = None
 
 
+class ResponseObject():
+    def __init__(self, url):
+        self.url = url
+
+    def read(self):
+        if 'meta=releaseids' in self.url:
+            return acoustid_responses['meta=releaseids']
+        else:
+            return acoustid_responses['meta=']
+
+
 def urlopen(*args, **kwargs):
-    result = ('{"status": "ok", "results": [{"score": 0.928399, "id":'
-              '"625165b5-cbd1-4968-97fa-9e438eca4353"}, {"score": 0.472189,'
-              '"id": "64f210b8-ee5b-4d61-8fd1-da4df5b5286d"}]}')
-    return result
+    return ResponseObject(args[0])
 
 
 def inject_mock(module):

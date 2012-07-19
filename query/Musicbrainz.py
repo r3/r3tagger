@@ -136,8 +136,7 @@ def get_album(title, artist=None):
     for release_group_id in idents:
         release_group = _lookup_release_group_id(release_group_id)
         if not release_group:
-            logging.error("ID: '{}' returned no releaseGroup object".format(
-                release_group_id))
+            raise StopIteration()
         for release in release_group.getReleases():
             yield _lookup_release_id(release.getId())
 
