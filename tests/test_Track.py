@@ -130,11 +130,6 @@ class TestWriteTrack(object):
             assert song.supported_fields() == ('artist', 'album', 'title',
                                                'tracknumber', 'date', 'genre')
 
-        def test_supported_filetypes(self, song):
-            assert song.supported_filetypes() == {'flac': FLAC,
-                                                  'ogg': OggVorbis,
-                                                  'mp3': EasyMP3}
-
 
 class TestAcoustid(object):
     """Provides a test suite for ensuring that fingerprints are properly

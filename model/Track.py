@@ -5,13 +5,8 @@ Provides models:
     Represents a music file on disc at a given path
 """
 
-import os
-
 import acoustid
-
-from mutagen.oggvorbis import OggVorbis
-from mutagen.flac import FLAC
-from mutagen.mp3 import EasyMP3
+from mutagen import File
 
 
 class Track(object):
@@ -19,8 +14,6 @@ class Track(object):
 
     _supported_fields = ('artist', 'album', 'title',
                          'tracknumber', 'date', 'genre')
-
-    _supported_filetypes = {'flac': FLAC, 'ogg': OggVorbis, 'mp3': EasyMP3}
 
     def __init__(self, path, fields=None):
         """Instantiate Track object
@@ -37,8 +30,11 @@ class Track(object):
         """
 
         self.path = path
-        self._song_file = None
-        self._connect_to_file()
+        mutagen_song = File(path)
+        if mutagen_song:
+            self._song_file = mutagen_song
+        else:
+            raise NotImplementedError("File not compatible: {}".format(path))
 
         # Fill in tags if given a dict
         if fields is not None:
@@ -67,23 +63,6 @@ class Track(object):
 
     def __str__(self):
         return str(self.title)
-
-    def _connect_to_file(self):
-        """Opens a file and determines type. File will be opened
-        (if compatible) with codec and metadata will be read in.
-        """
-        def determine_type(path):
-            """Determine codec to use in opening file depending on extension"""
-            extension = os.path.splitext(path)[-1][1:]
-            result = self.supported_filetypes().get(extension)
-            if result is None:
-                error = "Extension '{}' is not supported"
-                raise NotImplementedError(error.format(extension))
-            else:
-                return result
-
-        song_type = determine_type(self.path)
-        self._song_file = song_type(self.path)
 
     def _update_file(self):
         """Saves updated metadata to file."""
