@@ -63,8 +63,16 @@ class TestReadMusicbrainz(object):
         try:
             return first.getId() == second.getId()
         except AttributeError:
-            for a, b in zip(first, second):
+            if hasattr(first, 'getArtist') and hasattr(second, 'getArtist'):
+                first_artists = [x.getArtist() for x in first]
+                second_artists = [x.getArtist() for x in second]
+                items = zip(first_artists, second_artists)
+            else:
+                items = zip(first, second)
+
+            for a, b in items:
                 if a.getId() != b.getId():
+                    print("{} <= A | B => {}".format(a.getId(), b.getId()))
                     return False
 
             return True
@@ -114,8 +122,8 @@ class TestReadMusicbrainz(object):
     def test__lookup_release_id(self, responses):
         ident = ('http://musicbrainz.org/release/'
                  'b52a8f31-b5ab-34e9-92f4-f5b7110220f0')
-        assert self.same_mb_object(responses[ident],
-            Musicbrainz._lookup_release_id(ident))
+        release = Musicbrainz._lookup_release_id(ident)
+        assert self.same_mb_object(responses[ident], release)
 
     def test_get_album(self, responses):
         response = responses['get_album:Nevermind']
@@ -160,7 +168,7 @@ class TestReadMusicbrainz(object):
     def test_artist_releases(self, album, responses):
         # Get an release object
         ident = ('http://musicbrainz.org/release/'
-                 'b52a8f31-b5ab-34e9-92f4-f5b7110220f0')
+                 '0c9e9d42-80c1-4d7b-bdb6-aeb70d3501c5')
         album = responses[ident]
 
         # Get an artist object
@@ -192,6 +200,8 @@ class TestMusicbrainzFails():
                    '_lookup_artist_id', '_lookup_release_group_id',
                    '_lookup_release_id')
 
-        for method in methods:
-            with pytest.raises(QueryError):
-                getattr(Musicbrainz, method)('dummy_arg')
+        if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
+                'false', 'no'):
+            for method in methods:
+                with pytest.raises(QueryError):
+                    getattr(Musicbrainz, method)('dummy_arg')
