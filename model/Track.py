@@ -30,7 +30,7 @@ class Track(object):
         """
 
         self.path = path
-        mutagen_song = File(path)
+        mutagen_song = File(path, easy=True)
         if mutagen_song:
             self._song_file = mutagen_song
         else:
