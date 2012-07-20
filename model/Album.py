@@ -35,7 +35,6 @@ class Album(object):
             self.artist = None
             self.date = None
             self.genre = None
-
             self.tracks = arg
 
     def __call__(self):

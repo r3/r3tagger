@@ -183,7 +183,7 @@ def retag_album(album, mapping):
 
     """
     for name, field in mapping.items():
-        if name in album.supported_fields():
+        if name in album.supported_fields() or name == 'tracks':
             setattr(album, name, field)
         else:
             raise NotImplementedError("Unsupported field: {}".format(field))
