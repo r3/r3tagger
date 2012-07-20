@@ -14,6 +14,12 @@ Provided Functions:
 
     rename_tracks(target:model)
     Renames Track or Tracks in an Album
+
+    retag_album(album:Album, mapping:dict)
+    Retag an Album and contents based on a mapping
+
+    retag_track(track:Track, mapping:dict)
+    Retag a Track based on a mapping
 """
 
 import os
@@ -164,3 +170,35 @@ def find_shared_tags(album):
             result[field] = getattr(album.tracks[0], field)
 
     return result
+
+
+def retag_album(album, mapping):
+    """Uses information from a mapping to update the tags of a given Album
+
+    Changes the tags of an Album and all contained tracks based on
+    a mapping (eg. dict). Mappings not found in the track's supported
+    fields will raise a NotImplementedError exception.
+
+    """
+    for name, field in mapping.items():
+        if name in album.supported_fields():
+            setattr(album, name, field)
+        else:
+            raise NotImplementedError("Unsupported field: {}".format(field))
+
+    for track in album:
+        retag_track(track, mapping)
+
+
+def retag_track(track, mapping):
+    """Uses information from a mapping to update the tags of a given Track
+
+    Changes the tags of a Track based on a mapping (eg. dict). Mappings
+    not found in the track's supported fields will raise a
+    NotImplementedError exception.
+    """
+    for name, field in mapping.items():
+        if name in track.supported_fields():
+            setattr(track, name, field)
+        else:
+            raise NotImplementedError("Unsupported field: {}".format(field))

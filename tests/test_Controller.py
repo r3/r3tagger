@@ -147,3 +147,25 @@ class TestAlbumManipulation():
         for path, track in zip(track_paths, album):
             assert track.path == path
             assert os.path.exists(track.path)
+
+    def test_retag_album(self, album):
+        tags = {'artist': 'NewArtist', 'album': 'NewAlbum',
+                'date': '2013', 'genre': 'NewGenre'}
+
+        Controller.retag_album(album, tags)
+
+        for name, tag in tags.items():
+            assert getattr(album, name) == tag
+
+            for track in album:
+                assert getattr(track, name) == tag
+
+    def test_retag_track(self, album):
+        tags = {'artist': 'AnotherArtist', 'album': 'AnotherAlbum',
+                'date': '2013', 'genre': 'AnotherGenre'}
+        track = album.tracks[0]
+
+        Controller.retag_track(track, tags)
+
+        for name, tag in tags.items():
+            assert getattr(track, name) == tag
