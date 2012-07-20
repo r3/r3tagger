@@ -27,6 +27,7 @@ Provided Functions:
 
 import os
 import shutil
+import ConfigParser
 
 from mutagen import File
 
@@ -35,11 +36,22 @@ from r3tagger.model.Album import Album
 from r3tagger.model.Track import Track
 from r3tagger.library import filename, parent, extension
 
+# Configuration loading
+config_file = os.path.join(os.path.dirname(__file__), 'r3tagger.cfg')
+config = ConfigParser.RawConfigParser()
+config.read(config_file)
 
+THRESHOLD = config.get('Main', 'match-threshold')
+TRACK_PATTERN = config.get('Main', 'track-pattern')
+ALBUM_PATTERN = config.get('Main', 'album-pattern')
+
+
+# Classes
 class NoFileFoundError(Exception):
     pass
 
 
+# Functions
 def _set_album_path(album, path):
     """Correct a path to an Album or add a new one"""
     album.path = path
@@ -96,14 +108,9 @@ def rename_album(album, pattern=None):
 
     The paths of any Tracks contained by the album will make the necessary
     changes to remain valid.
-
-    Note: Default pattern is currently hardcoded
     """
-    # TODO: Move into a config
-    default_pattern = "{date} - {album}"
-
     if pattern is None:
-        pattern = default_pattern
+        pattern = ALBUM_PATTERN
 
     supported_fields = album.supported_fields()
     fields = {field: getattr(album, field) for field in supported_fields}
@@ -128,17 +135,9 @@ def rename_tracks(target, pattern=None):
     configuration files to select one.
 
     Pattern Example: '{artist} - {tracknumber} - {title}'
-
-    Supported fields my be retreived with:
-    r3tagger.model.Track.supported_fields()
-
-    Note: Default pattern is currently hardcoded
-    Note: Supported Fields method doesn't yet exist, use _supported_fields
     """
-    default_pattern = "{artist} - {tracknumber} - {title}"
-
     if pattern is None:
-        pattern = default_pattern
+        pattern = TRACK_PATTERN
 
     def rename_track(track, pattern):
         supported_fields = track.supported_fields()

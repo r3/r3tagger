@@ -87,6 +87,9 @@ class TestCreateAlbum(object):
         return request.cached_setup(self.setup_album, self.teardown_album,
                 scope='function')
 
+    def test_fix_config_path_hack(self):
+        Controller.config_file = os.path.dirname(Controller.__file__)
+
     def test_build_track_supported(self):
         track = Controller.build_track('test_songs/PublicDomainSong.mp3')
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
