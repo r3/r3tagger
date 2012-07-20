@@ -22,8 +22,10 @@ Provided Functions:
 import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 
+from r3tagger.model.Album import Album
 from r3tagger.query import Retry
 from r3tagger.library.Backoff import Backoff
+
 DELAY = 1  # Seconds between query to API
 
 
@@ -144,7 +146,8 @@ def get_album(title, artist=None):
         if not release_group:
             raise StopIteration()
         for release in release_group.getReleases():
-            yield _lookup_release_id(release.getId())
+            musicbrainz_album = _lookup_release_id(release.getId())
+            yield Album(album_tags(musicbrainz_album))
 
 
 def get_artist(name):

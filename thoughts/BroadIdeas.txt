@@ -2,7 +2,7 @@
 
 File has 'artist' and 'album' tags:
     Query MusicBrainz for album with artist argument
-    Album track count and tags
+    Ensure match of albums
     Update local files
 
 Fingerprint exists

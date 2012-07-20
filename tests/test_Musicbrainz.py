@@ -129,13 +129,12 @@ class TestReadMusicbrainz(object):
 
     def test_get_album(self, responses):
         response = responses['get_album:Nevermind']
-        assert self.same_mb_object(response,
-                Musicbrainz.get_album(ALBUM).next())
+        assert response.match(Musicbrainz.get_album(ALBUM).next()) == 1
 
     def test_get_album_with_artist(self, responses):
         response = responses['get_album:Nevermind']
-        assert self.same_mb_object(response,
-                Musicbrainz.get_album(ALBUM, ARTIST).next())
+        mb_response = Musicbrainz.get_album(ALBUM, ARTIST).next()
+        assert response.match(mb_response) == 1
 
     def test_get_artist(self, responses):
         response = responses['get_artist:Nirvana']
