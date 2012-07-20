@@ -2,7 +2,8 @@ import shelve
 import os
 
 import pytest
-from musicbrainz2.webservice import WebServiceError
+import musicbrainz2.webservice as ws
+import musicbrainz2.model as m
 
 from mocks import MusicbrainzQueries
 from r3tagger.query import Musicbrainz, QueryError
@@ -87,29 +88,30 @@ class TestReadMusicbrainz(object):
             Musicbrainz.Backoff._set_delay(0)
 
     # Test Methods
-    def test__find_artist(self, responses):
-        response = responses['_find_artist:Nirvana']
-        assert response == Musicbrainz._find_artist(ARTIST)
+    def test__find_artist(self):
+        for ident in Musicbrainz._find_artist(ARTIST):
+            assert ident.startswith('http://musicbrainz.org/artist/')
 
-    def test__find_release_group(self, responses):
-        response = responses['_find_release_group:Nevermind']
-        assert response == Musicbrainz._find_release_group(ALBUM)
+    def test__find_release_group(self):
+        for ident in Musicbrainz._find_release_group(ALBUM):
+            assert ident.startswith('http://musicbrainz.org/release-group/')
 
-    def test__find_track(self, responses):
-        response = responses['_find_title:Smells Like Teen Spirit']
-        assert self.same_mb_object(response, Musicbrainz._find_track(SONG))
+    def test__find_track(self):
+        for ident in Musicbrainz._find_track(SONG):
+            assert isinstance(ident, m.Track)
 
-    def test__find_track_artists(self, responses):
-        response = responses['_find_title_artists:Smells Like Teen Spirit']
-        assert response == Musicbrainz._find_track_artists(SONG)
+    def test__find_track_artists(self):
+        for ident in Musicbrainz._find_track_artists(SONG):
+            assert ident.startswith('http://musicbrainz.org/artist/')
 
-    def test__find_track_releases(self, responses):
-        response = responses['_find_title_releases:Smells Like Teen Spirit']
-        assert response == Musicbrainz._find_track_releases(SONG)
+    def test__find_track_releases(self):
+        for ident in Musicbrainz._find_track_releases(SONG):
+            assert ident.startswith('http://musicbrainz.org/release/')
 
     def test__lookup_artist_id(self, responses):
         ident = ('http://musicbrainz.org/artist/'
                  '5b11f4ce-a62d-471e-81fc-a69a8278c7da')
+
         assert self.same_mb_object(responses[ident],
                 Musicbrainz._lookup_artist_id(ident))
 
@@ -166,18 +168,13 @@ class TestReadMusicbrainz(object):
         assert Musicbrainz.album_tags(album) == response
 
     def test_artist_releases(self, album, responses):
-        # Get an release object
-        ident = ('http://musicbrainz.org/release/'
-                 '0c9e9d42-80c1-4d7b-bdb6-aeb70d3501c5')
-        album = responses[ident]
-
         # Get an artist object
         ident = ('http://musicbrainz.org/artist/'
                  '5b11f4ce-a62d-471e-81fc-a69a8278c7da')
         artist = responses[ident]
 
-        first = Musicbrainz.artist_releases(artist).next()
-        assert TestReadMusicbrainz.same_mb_object(first, album)
+        release = Musicbrainz.artist_releases(artist).next().getId()
+        assert release.startswith('http://musicbrainz.org/release/')
 
 
 class TestMusicbrainzFails():
@@ -193,7 +190,7 @@ class TestMusicbrainzFails():
                 self.teardown_responses, scope='class')
 
     def test_setup_mock_hack(self, responses):
-        MusicbrainzQueries.raise_error(WebServiceError)
+        MusicbrainzQueries.raise_error(ws.WebServiceError)
 
     def test_all_methods_fail(self):
         methods = ('_find_artist', '_find_release_group', '_find_track',
