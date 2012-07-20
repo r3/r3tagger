@@ -69,6 +69,24 @@ class TestCreateAlbum(object):
         return request.cached_setup(self.setup_persist, self.teardown_persist,
                 scope='class')
 
+    def setup_album(self):
+        tempdir = tempfile.mkdtemp()
+
+        orig_path = 'test_songs/album'
+        dest_path = os.path.join(tempdir, 'album')
+
+        shutil.copytree(orig_path, dest_path)
+
+        return Controller.build_albums(dest_path, False).next()
+
+    def teardown_album(self, album):
+        root = os.path.dirname(album.path)
+        shutil.rmtree(root)
+
+    def pytest_funcarg__album(self, request):
+        return request.cached_setup(self.setup_album, self.teardown_album,
+                scope='function')
+
     def test_build_track_supported(self):
         track = Controller.build_track('test_songs/PublicDomainSong.mp3')
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
@@ -93,6 +111,16 @@ class TestCreateAlbum(object):
     def test_missing_album(self):
         with pytest.raises(Controller.NoFileFoundError):
             Controller.build_albums('.').next()
+
+    def test_missing_fields_album(self, album):
+        album.artist = None
+        assert Controller.missing_fields(album) == ['artist']
+
+    def test_missing_fields_track(self, album):
+        track = album.tracks[0]
+        track.album = track.title = None
+
+        assert sorted(Controller.missing_fields(track)) == ['album', 'title']
 
 
 class TestAlbumManipulation():

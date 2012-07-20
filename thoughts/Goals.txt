@@ -15,10 +15,7 @@ Create an agent string for the queries.
 
  __________________________________________________
 
-    Integrate Tagging
-Should the actual action of changing a file's tag be taken by
-individual Track objects, or in the Controller? I'm thinking
-that the Track will handle manipulation of the file it 
-represents, acting as a proxy object to that file. The
-Controller will instigate tagging changes. Unless I can think
-of a better design.
+    Create the algorithm
+I need to start recognizing music. Starting this process will
+show me where the holes in my APIs are so that I can build things
+out.

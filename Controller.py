@@ -20,6 +20,9 @@ Provided Functions:
 
     retag_track(track:Track, mapping:dict)
     Retag a Track based on a mapping
+
+    missing_fields(target:Album|Track)
+    Returns list of fields that have missing tags
 """
 
 import os
@@ -202,3 +205,8 @@ def retag_track(track, mapping):
             setattr(track, name, field)
         else:
             raise NotImplementedError("Unsupported field: {}".format(field))
+
+
+def missing_fields(target):
+    """Determines the missing fields in an Album or Track"""
+    return [x for x in target.supported_fields() if not getattr(target, x)]
