@@ -183,8 +183,11 @@ def retag_album(album, mapping):
 
     """
     for name, field in mapping.items():
-        if name in album.supported_fields() or name == 'tracks':
+        if name in album.supported_fields():
             setattr(album, name, field)
+        elif name == 'tracks':
+            for track in album:
+                retag_track(track, get_fields(mapping))
         else:
             raise NotImplementedError("Unsupported field: {}".format(field))
 
@@ -209,3 +212,34 @@ def retag_track(track, mapping):
 def missing_fields(target):
     """Determines the missing fields in an Album or Track"""
     return [x for x in target.supported_fields() if not getattr(target, x)]
+
+
+def update_album(target, source):
+    """Copy fields from source to target
+
+    Supports all of the target's supported fields, and tracks. Each of these
+    supported fields will be read from the source and written to the target.
+    """
+    # Grab supported fields
+    supported = source.supported_fields()
+    source_map = {field: getattr(source, field) for field in supported}
+
+    # Grab tags that exist
+    if hasattr(source, 'tracks') and source.tracks:
+        source_map['tracks'] = source.tracks
+
+    retag_album(target, source_map)
+
+
+def get_fields(target):
+    """Returns a mapping of the fields in the target Album or Track
+
+    Mapping will use the target's supported fields, if they exist.
+    If there is no supported_fields method, the target will be taken
+    as a title and returned as such.
+    """
+    if hasattr(target, 'supported_fields'):
+        supported = target.supported_fields()
+        return {field: getattr(target, field) for field in supported}
+    else:
+        return {'title': target}

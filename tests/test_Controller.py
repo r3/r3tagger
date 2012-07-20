@@ -8,6 +8,7 @@ import tempfile
 import pytest
 
 from r3tagger import Controller
+from r3tagger.model.Album import Album
 
 
 class TestCreateAlbum(object):
@@ -125,6 +126,20 @@ class TestCreateAlbum(object):
 
         assert sorted(Controller.missing_fields(track)) == ['album', 'title']
 
+    def test_get_fields_track(self, album):
+        expected = {'album': u'SomeAlbum', 'title': u'SomeTrack05',
+                    'artist': u'SomeArtist', 'date': u'2012',
+                    'genre': u'SomeGenre', 'tracknumber': u'05'}
+        track = album.tracks[0]
+        for name, field in Controller.get_fields(track).items():
+            assert expected[name] == field
+
+    def test_get_fields_album(self, album):
+        expected = {'album': u'SomeAlbum', 'date': u'2012',
+                    'genre': u'SomeGenre', 'artist': u'SomeArtist'}
+        for name, field in Controller.get_fields(album).items():
+            assert expected[name] == field
+
 
 class TestAlbumManipulation():
     def setup_album(self):
@@ -200,3 +215,14 @@ class TestAlbumManipulation():
 
         for name, tag in tags.items():
             assert getattr(track, name) == tag
+
+    def test_update_album(self, album):
+        source = {'album': 'UpdatedAlbum',
+                  'artist': 'UpdatedArtist',
+                  'date': 1,
+                  'genre': 'UpdatedGenre'}
+
+        Controller.update_album(album, Album(source))
+
+        for name, field in source.items():
+            assert getattr(album, name) == field
