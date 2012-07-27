@@ -1,0 +1,87 @@
+ =============================Concept Definitions=============================
+
+
+    album - Folder containing compatible music files
+
+    Album - Type as defined by r3tagger.model.Album
+
+    track - Compatible music file
+
+    Track - Type as defined by r3tagger.model.Track
+
+    tag   - A field from a Track or Album (ie. artist, track number, etc)
+
+ ===============================Major Objects=================================
+
+QFileSystemModel
+    Abstraction for local filesystem
+
+QTreeView "filesystem" (In left-only dock)
+    Front end for file system navigation and album selection
+    Only folders shall be visible
+    Multiple albums shall be selectable
+
+QListWidget "listing" (Left side of main HBoxLayout)
+    Lists Albums and Tracks
+    Populated by r3tagger.Controller.build_albums
+    Path determined by "filesystem" selection(s)
+    If populated by only one Album, displays only Album's Tracks
+    If populated by multiple Albums, displays Albums
+
+ =================================Structure===================================
+
+QMainWindow
+    QDock
+        QTreeView
+    QMenu
+        ...
+    QCentralWidget
+        QHBoxLayout
+            QListWidget
+            QVBoxLayout
+                QHBoxLayout
+                    QLabel
+                    QLineEdit
+                    ...
+                QHBoxLayout
+                    QPushButton
+                    ...
+
+ * Items marked with ellipsis described in more detail later
+
+ ==================================Details====================================
+
+Tag editing:
+    There shall be one QLabel / QLineEdit pair for each supported object
+    selected in "listing". Should an Album be selected in "listing", an
+    album's fields will be edited by this group (ie track number wouldn't
+    exist). Fields not populated but supported by the Track/Album shall have
+    red backgrounds. Fields shared amongst all Album/Track objects shall
+    have grey backgrounds. Fields where tags differ between Album/Track
+    objects shall have white backgrounds.
+
+Confirm/Cancel:
+    Below the tag editing group and spaced to the bottom of the window, flush
+    left with "listing", shall be a group of buttons:
+
+        Confirm   - Changes made to the tags in tag editing group will be
+                    applied to Tracks/Albums
+
+        Cancel    - Changes made to tag editing group will revert to existing
+                    values.
+
+        Recognize - Run recognition algorithm on selection
+
+Menus:
+    File:
+        Open - Select location in "filesystem", updating "listing".
+        Save - Save changes made in tag editing group. Same as Confirm button
+
+    Edit:
+        Recognize  - Run recognition algorithm on selection from "listing"
+        Reorganize - Open reorganization dialog
+        Settings   - Open settings changing dialog
+
+    Help:
+        Docs  - Link to documentation
+        About - Links and the like
