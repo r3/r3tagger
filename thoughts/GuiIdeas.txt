@@ -13,7 +13,8 @@
 
  ===============================Major Objects=================================
 
-QFileSystemModel
+QFileSystemModel "filesystemModel"
+    Filtered: QDir.NoDotAndDotDot | QDir.AllDirs
     Abstraction for local filesystem
 
 QTreeView "filesystem" (In left-only dock)
@@ -21,12 +22,12 @@ QTreeView "filesystem" (In left-only dock)
     Only folders shall be visible
     Multiple albums shall be selectable
 
-QListWidget "listing" (Left side of main HBoxLayout)
-    Lists Albums and Tracks
-    Populated by r3tagger.Controller.build_albums
-    Path determined by "filesystem" selection(s)
-    If populated by only one Album, displays only Album's Tracks
-    If populated by multiple Albums, displays Albums
+QFileSystemModel "listingModel"
+    
+
+QTreeView "listing" (Left side of main HBoxLayout)
+    Filtered: By name (ie *.mp3, *.flac, *.ogg, etc)
+    Root determined by "filesystem" selection
 
  =================================Structure===================================
 
@@ -37,7 +38,7 @@ QMainWindow
         ...
     QCentralWidget
         QHBoxLayout
-            QListWidget
+            QTreeView
             QVBoxLayout
                 QHBoxLayout
                     QLabel
