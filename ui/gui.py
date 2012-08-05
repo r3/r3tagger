@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
     def updateEditing(self):
 
         index = form.listModel.index(3, 0)
-        form.listing.setCurrentIndex(index)
+        self.listing.setCurrentIndex(index)
         #albums = self.selectedAlbums()
         # Get selection from model
         #print(albums)
