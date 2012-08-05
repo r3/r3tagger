@@ -53,7 +53,7 @@ class Track(object):
 
     def __getattr__(self, attr):
         if attr in self.supported_fields():
-            return self._song_file.get(attr, '')[0]
+            return self._song_file.get(attr, [''])[0]
         else:
             result = self.__dict__.get(attr)
             if result is not None:
