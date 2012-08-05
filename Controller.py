@@ -83,7 +83,7 @@ def build_albums(path, recursive=False):
         tracks = [Track(x) for x in paths if os.path.isfile(x) and File(x)]
 
         if not tracks:
-            raise NoFileFoundError("No supported tracks at {}".format(path))
+            return None
 
         album = Album(tracks)
         _set_album_path(album, path)
@@ -94,10 +94,21 @@ def build_albums(path, recursive=False):
         return album
 
     if recursive is False:
-        yield prep_album(os.listdir(path), path)
+        album = prep_album(os.listdir(path), path)
+
+        if not album:
+            raise NoFileFoundError("No supported tracks at {}".format(path))
+
+        yield album
+
     else:
         for root, _, files in os.walk(path):
-            yield prep_album(files, root)
+            album = prep_album(files, root)
+
+            if not album:
+                continue
+
+            yield album
 
 
 def rename_album(album, pattern=None):
@@ -130,6 +141,8 @@ def rename_album(album, pattern=None):
 
 def rename_tracks(target, pattern=None):
     """Correct the file name of a Track to reflect tags and a given pattern
+
+    Either Albums or Tracks are acceptable arguments to pass.
 
     A pattern may be passed as an argument, but rename_tracks will use the
     configuration files to select one.

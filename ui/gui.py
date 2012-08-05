@@ -1,11 +1,14 @@
 import sys
-import os
 
 from PySide.QtCore import Qt
 from PySide.QtGui import (QMainWindow, QFileSystemModel, QHBoxLayout, QAction,
                           QTreeView, QApplication, QWidget, QVBoxLayout,
                           QAbstractItemView, QDockWidget, QLabel, QLineEdit,
-                          QPushButton, QTableView, QKeySequence, QIcon)
+                          QPushButton, QTableView, QKeySequence, QIcon,
+                          QStandardItemModel, QStandardItem,
+                          QItemSelectionModel)
+
+from r3tagger import Controller
 
 
 class MainWindow(QMainWindow):
@@ -14,22 +17,22 @@ class MainWindow(QMainWindow):
 
         # Models
         self.fsModel = QFileSystemModel()
-        fsRoot = self.fsModel.setRootPath(os.path.curdir)
+        fsRoot = self.fsModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger')
 
-        self.listModel = QFileSystemModel()
-        lsRoot = self.listModel.setRootPath(os.path.curdir)
+        self.listModel = AlbumCollectionModel()
 
         # Views
         self.filesystem = QTreeView()
         self.filesystem.setModel(self.fsModel)
         self.filesystem.setRootIndex(fsRoot)
-        self.filesystem.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.filesystem.clicked.connect(self.updateListing)
+        self.filesystem.doubleClicked.connect(self.updateListing)
 
         self.listing = QTableView()
         self.listing.setModel(self.listModel)
-        self.listing.setRootIndex(lsRoot)
         self.listing.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.listing.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.listing.verticalHeader().hide()
+        self.listing.clicked.connect(self.updateEditing)
 
         # Statusbar
         status = self.statusBar()
@@ -48,7 +51,9 @@ class MainWindow(QMainWindow):
         for field in ("artist", "album", "date", "track", "number"):
             horizLayout = QHBoxLayout()
             horizLayout.addWidget(QLabel(field))
-            horizLayout.addWidget(QLineEdit())
+            line = QLineEdit()
+            horizLayout.addWidget(line)
+            setattr(self, field + 'Field', line)
             self.taggingGroup.addLayout(horizLayout)
 
         # Confirm / Cancel Button Group
@@ -111,8 +116,25 @@ class MainWindow(QMainWindow):
 
     def updateListing(self, index):
         path = self.fsModel.fileInfo(index).absoluteFilePath()
-        root = self.listModel.setRootPath(path)
-        self.listing.setRootIndex(root)
+
+        # Zero collection:
+        self.listModel.clearAlbums()
+
+        # Add new albums
+        for album in Controller.build_albums(path, recursive=True):
+            self.listModel.addAlbum(album)
+
+    def updateEditing(self):
+
+        index = form.listModel.index(3, 0)
+        form.listing.setCurrentIndex(index)
+        #albums = self.selectedAlbums()
+        # Get selection from model
+        #print(albums)
+
+    def selectedAlbums(self):
+        selected_rows = {x.row() for x in self.listing.selectedIndexes()}
+        return [self.listModel.albums[x] for x in selected_rows]
 
     def fileOpen(self):
         pass
@@ -160,6 +182,49 @@ class MainWindow(QMainWindow):
                 target.addSeparator()
             else:
                 target.addAction(action)
+
+
+class AlbumCollectionModel(QStandardItemModel):
+    def __init__(self, parent=None):
+        super(AlbumCollectionModel, self).__init__(parent)
+
+        self.albums = []
+        self.columns = ("title", "artist", "album", "track_number")
+
+    def addAlbum(self, album):
+        self.albums.append(album)
+
+        album_row = self._build_row(album)
+        album_row[0].isAlbum = True
+        self.appendRow(album_row)
+
+        for track in album:
+            track_row = self._build_row(track)
+            self.appendRow(track_row)
+
+    def _build_row(self, model):
+        row = []
+
+        for column in self.columns:
+            try:
+                field = getattr(model, column)
+                row.append(QStandardItem(field))
+
+            except AttributeError:
+                row.append(QStandardItem(''))
+
+        return row
+
+    def clearAlbums(self):
+        self.albums = []
+        self.clear()
+
+
+class QAlbum():
+    def __init__(self, album):
+        self.album = album
+
+        self.tracks = None
 
 
 if __name__ == '__main__':
