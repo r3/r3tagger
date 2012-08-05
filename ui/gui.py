@@ -1,4 +1,5 @@
 import sys
+from UserList import UserList
 
 from PySide.QtCore import Qt
 from PySide.QtGui import (QMainWindow, QFileSystemModel, QHBoxLayout, QAction,
@@ -124,17 +125,20 @@ class MainWindow(QMainWindow):
         for album in Controller.build_albums(path, recursive=True):
             self.listModel.addAlbum(album)
 
+    def correctListingSelection(self):
+        row_indices = {x.row() for x in self.listing.selectedIndexes()}
+
+        for row_index in row_indices:
+            parent = self.listModel.lookupRow(row_index).parent
+            siblings = parent.children
+
+            print siblings
+
     def updateEditing(self):
-
-        index = form.listModel.index(3, 0)
-        self.listing.setCurrentIndex(index)
-        #albums = self.selectedAlbums()
-        # Get selection from model
-        #print(albums)
-
-    def selectedAlbums(self):
-        selected_rows = {x.row() for x in self.listing.selectedIndexes()}
-        return [self.listModel.albums[x] for x in selected_rows]
+        # TODO: This code is for selecting things given an index
+        #index = form.listModel.index(3, 0)
+        #self.listing.setCurrentIndex(index)
+        self.correctListingSelection()
 
     def fileOpen(self):
         pass
@@ -184,23 +188,50 @@ class MainWindow(QMainWindow):
                 target.addAction(action)
 
 
+class TableRow(UserList):
+    def __init__(self, contents, wrapped=None, parent=None):
+        self.data = []
+        self.data.extend(contents)
+        self.wrapped = wrapped
+        self.parent = parent
+        self.children = []
+
+    def __str__(self):
+        return str(self.wrapped)
+
+    def addChild(self, child):
+        self.children.append(child)
+
+    @property
+    def index(self):
+        return self[0].index()
+
+    def isSelected(self):
+        pass
+
+
 class AlbumCollectionModel(QStandardItemModel):
     def __init__(self, parent=None):
         super(AlbumCollectionModel, self).__init__(parent)
 
-        self.albums = []
+        self._rows = 0
+        self.albums = {}
         self.columns = ("title", "artist", "album", "track_number")
 
     def addAlbum(self, album):
-        self.albums.append(album)
-
-        album_row = self._build_row(album)
-        album_row[0].isAlbum = True
+        album_row = TableRow(self._build_row(album), album)
+        self.albums[self._rows] = album_row
         self.appendRow(album_row)
 
         for track in album:
-            track_row = self._build_row(track)
+            track_row = TableRow(self._build_row(track), track, album_row)
+            album_row.addChild(track_row)
+            self.albums[self._rows] = track_row
             self.appendRow(track_row)
+
+    def appendRow(self, row):
+        super(AlbumCollectionModel, self).appendRow(row)
+        self._rows += 1
 
     def _build_row(self, model):
         row = []
@@ -211,20 +242,22 @@ class AlbumCollectionModel(QStandardItemModel):
                 row.append(QStandardItem(field))
 
             except AttributeError:
-                row.append(QStandardItem(''))
+                row.append(QStandardItem('_'))
 
         return row
 
     def clearAlbums(self):
-        self.albums = []
-        self.clear()
+        self.albums = {}
+        self._rows = 0
 
+    def lookupRow(self, index):
+        return self.albums[index]
 
-class QAlbum():
-    def __init__(self, album):
-        self.album = album
+    def lookupRowWrapped(self, index):
+        return self.albums[index].wrapped
 
-        self.tracks = None
+    def lookupRowIndex(self, index):
+        return self.albums[index].view[0].index()
 
 
 if __name__ == '__main__':
