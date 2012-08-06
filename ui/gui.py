@@ -125,20 +125,54 @@ class MainWindow(QMainWindow):
         for album in Controller.build_albums(path, recursive=True):
             self.listModel.addAlbum(album)
 
-    def correctListingSelection(self):
-        row_indices = {x.row() for x in self.listing.selectedIndexes()}
+    def correctListingSelection(self, index):
+        def isSelected(index):
+            return index in self.listing.selectedIndexes()
 
-        for row_index in row_indices:
-            parent = self.listModel.lookupRow(row_index).parent
-            siblings = parent.children
+        def siblingsSelected(row):
+            return all([isSelected(sibling.index) for sibling in row.siblings])
 
-            print siblings
+        def isAlbum(row):
+            return row.parent is None
 
-    def updateEditing(self):
-        # TODO: This code is for selecting things given an index
+        def childrenSelected(row):
+            return siblingsSelected(row.children[0])
+
+        def selectedRows():
+            return {x.row() for x in self.listing.selectedIndexes()}
+
+        clicked_row = index.row()
+        row = self.listModel.lookupRow(clicked_row)
+        model = self.listing.selectionModel()
+
+        if isAlbum(row):
+            if isSelected(index):
+                select_policy = QItemSelectionModel.Select
+            elif childrenSelected(row):
+                select_policy = QItemSelectionModel.Deselect
+            else:
+                select_policy = None
+
+            if select_policy:
+                for child in row.children:
+                    for item in child:
+                        model.setCurrentIndex(item.index(), select_policy)
+
+        elif isSelected(index):
+            if siblingsSelected(row) and not isSelected(row.parent):
+                for item in row.parent:
+                    model.setCurrentIndex(item.index(),
+                            QItemSelectionModel.Select)
+
+        else:
+            for item in row.parent:
+                model.setCurrentIndex(item.index(),
+                        QItemSelectionModel.Deselect)
+
+    def updateEditing(self, index):
+        self.correctListingSelection(index)
         #index = form.listModel.index(3, 0)
-        #self.listing.setCurrentIndex(index)
-        self.correctListingSelection()
+        #self.listing.selectionModel().setCurrentIndex(index, QItemSelectionModel.Toggle)
 
     def fileOpen(self):
         pass
@@ -206,8 +240,12 @@ class TableRow(UserList):
     def index(self):
         return self[0].index()
 
-    def isSelected(self):
-        pass
+    @property
+    def siblings(self):
+        if self.parent:
+            return self.parent.children
+        else:
+            return None
 
 
 class AlbumCollectionModel(QStandardItemModel):
@@ -257,7 +295,9 @@ class AlbumCollectionModel(QStandardItemModel):
         return self.albums[index].wrapped
 
     def lookupRowIndex(self, index):
-        return self.albums[index].view[0].index()
+        row = self.albums[index]
+        first_item_index = row[0].index()
+        return first_item_index
 
 
 if __name__ == '__main__':
