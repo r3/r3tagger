@@ -6,7 +6,7 @@ from PySide.QtGui import (QMainWindow, QFileSystemModel, QHBoxLayout, QAction,
                           QTreeView, QApplication, QWidget, QVBoxLayout,
                           QAbstractItemView, QDockWidget, QLabel, QLineEdit,
                           QPushButton, QTableView, QKeySequence, QIcon,
-                          QStandardItemModel, QStandardItem,
+                          QStandardItemModel, QStandardItem, QBrush, QColor,
                           QItemSelectionModel)
 
 from r3tagger import Controller
@@ -330,14 +330,20 @@ class AlbumCollectionModel(QStandardItemModel):
         self.setHorizontalHeaderItem(5, QStandardItem("Genre"))
 
     def addAlbum(self, album):
+        def colorRow(row, color):
+            for item in row:
+                item.setBackground(color)
+
         album_row = TableRow(self._build_row(album), album)
         self.albums[self._rows] = album_row
+        colorRow(album_row, QBrush(QColor(100, 100, 100), Qt.SolidPattern))
         self.appendRow(album_row)
 
         for track in album:
             track_row = TableRow(self._build_row(track), track, album_row)
             album_row.addChild(track_row)
             self.albums[self._rows] = track_row
+            colorRow(track_row, QBrush(QColor(70, 70, 70), Qt.SolidPattern))
             self.appendRow(track_row)
 
     def appendRow(self, row):
