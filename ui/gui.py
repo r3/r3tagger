@@ -10,6 +10,7 @@ from PySide.QtGui import (QMainWindow, QFileSystemModel, QHBoxLayout, QAction,
                           QItemSelectionModel)
 
 from r3tagger import Controller
+from r3tagger.model.Album import Album
 
 
 class MainWindow(QMainWindow):
@@ -48,14 +49,43 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, dockView)
 
         # Tag Editing Group
-        self.taggingGroup = QVBoxLayout()
-        for field in ("artist", "album", "date", "track", "number"):
-            horizLayout = QHBoxLayout()
-            horizLayout.addWidget(QLabel(field))
-            line = QLineEdit()
-            horizLayout.addWidget(line)
-            setattr(self, field + 'Field', line)
-            self.taggingGroup.addLayout(horizLayout)
+        self.mainLayout = QVBoxLayout()
+        self.taggingGroup = QHBoxLayout()
+        labels = QVBoxLayout()
+        edits = QVBoxLayout()
+
+        self.fieldArtist = QLabel("Artist:")
+        labels.addWidget(self.fieldArtist)
+        self.lineArtist = QLineEdit()
+        edits.addWidget(self.lineArtist)
+
+        self.fieldAlbum = QLabel("Album:")
+        labels.addWidget(self.fieldAlbum)
+        self.lineAlbum = QLineEdit()
+        edits.addWidget(self.lineAlbum)
+
+        self.fieldTitle = QLabel("Title:")
+        labels.addWidget(self.fieldTitle)
+        self.lineTitle = QLineEdit()
+        edits.addWidget(self.lineTitle)
+
+        self.fieldTrack = QLabel("Track:")
+        labels.addWidget(self.fieldTrack)
+        self.lineTrack = QLineEdit()
+        edits.addWidget(self.lineTrack)
+
+        self.fieldDate = QLabel("Date:")
+        labels.addWidget(self.fieldDate)
+        self.lineDate = QLineEdit()
+        edits.addWidget(self.lineDate)
+
+        self.fieldGenre = QLabel("Genre:")
+        labels.addWidget(self.fieldGenre)
+        self.lineGenre = QLineEdit()
+        edits.addWidget(self.lineGenre)
+
+        self.taggingGroup.addLayout(labels)
+        self.taggingGroup.addLayout(edits)
 
         # Confirm / Cancel Button Group
         self.buttonGroup = QHBoxLayout()
@@ -64,11 +94,12 @@ class MainWindow(QMainWindow):
         self.buttonGroup.addStretch()
 
         # Layout
-        self.taggingGroup.addStretch()
-        self.taggingGroup.addLayout(self.buttonGroup)
+        self.mainLayout.addLayout(self.taggingGroup)
+        self.mainLayout.addStretch()
+        self.mainLayout.addLayout(self.buttonGroup)
         layout = QHBoxLayout()
         layout.addWidget(self.listing)
-        layout.addLayout(self.taggingGroup)
+        layout.addLayout(self.mainLayout)
         central = QWidget()
         central.setLayout(layout)
         self.setCentralWidget(central)
@@ -138,9 +169,6 @@ class MainWindow(QMainWindow):
         def childrenSelected(row):
             return siblingsSelected(row.children[0])
 
-        def selectedRows():
-            return {x.row() for x in self.listing.selectedIndexes()}
-
         clicked_row = index.row()
         row = self.listModel.lookupRow(clicked_row)
         model = self.listing.selectionModel()
@@ -169,10 +197,45 @@ class MainWindow(QMainWindow):
                 model.setCurrentIndex(item.index(),
                         QItemSelectionModel.Deselect)
 
+    def selectedRows(self):
+        return {x.row() for x in self.listing.selectedIndexes()}
+
+    def selectedAlbums(self):
+        def isAlbum(row_number):
+            return self.listModel.lookupRow(row_number).parent is None
+
+        unwrap = self.listModel.lookupRowWrapped
+        return [unwrap(x) for x in self.selectedRows() if isAlbum(x)]
+
+    def selectedSingles(self):
+        def isTrack(row_number):
+            return self.listModel.lookupRow(row_number).parent is not None
+
+        def parentNotSelected(row_number):
+            parent_index = self.listModel.lookupRow(row_number).parent.index
+            return parent_index not in self.listing.selectedIndexes()
+
+        unwrap = self.listModel.lookupRowWrapped
+        res = [unwrap(x) for x in self.selectedRows() if isTrack(x)
+                and parentNotSelected(x)]
+        return res
+
     def updateEditing(self, index):
         self.correctListingSelection(index)
-        #index = form.listModel.index(3, 0)
-        #self.listing.selectionModel().setCurrentIndex(index, QItemSelectionModel.Toggle)
+
+        tags_to_attribs = {'artist': self.lineArtist,
+                           'album': self.lineAlbum,
+                           'title': self.lineTitle,
+                           'tracknumber': self.lineTrack,
+                           'date': self.lineDate,
+                           'genre': self.lineGenre}
+
+        singles = [Album({'tracks':[x]}) for x in self.selectedSingles()]
+        selected = self.selectedAlbums() + singles
+        tags = Controller.find_shared_tags(*selected) if selected else {}
+
+        for tag, edit in tags_to_attribs.items():
+            edit.setText(tags.get(tag, ''))
 
     def fileOpen(self):
         pass
