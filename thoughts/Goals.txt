@@ -1,13 +1,5 @@
 IMMEDIATE GOALS
 
-    ConfigParser
-I need to get a configuration up sooner than later or
-I'll continue to have hardcoded defaults in my source. I'd
-rather remove these to a config file where they can be
-changed and better tested.
-
- __________________________________________________
-
     Tune Queries and Agent Strings
 Queries can be amped up, particularly since testing now no
 longer requires querying the remote Musicbrainz API.
@@ -19,3 +11,9 @@ Create an agent string for the queries.
 I need to start recognizing music. Starting this process will
 show me where the holes in my APIs are so that I can build things
 out.
+ __________________________________________________
+
+    Build GUI
+Interacting with the tagger through the interpreter is not the best
+way of doing things. I'm in the process of building a GUI using Qt4
+and PySide.

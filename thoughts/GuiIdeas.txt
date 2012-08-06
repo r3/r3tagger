@@ -1,88 +1,37 @@
- =============================Concept Definitions=============================
+Ability to sort by column. If columns are sorted by anything but 'Album'
+(default), then the Album entries will disappear (they loose meaning). Those
+entries should reappear if the sorting is changed back to 'Album'.
 
+Connect the 'Confirm' action to Controller's retagging
 
-    album - Folder containing compatible music files
+Connect the 'Cancel' button to repopulate the editing fields to the default
+values
 
-    Album - Type as defined by r3tagger.model.Album
+Allow retagging by editing cells in the TableView
 
-    track - Compatible music file
+Connect 'Open' action to affect the StandardFileSystemModel and emit a
+doubleClicked signal so that the listing is updated. If single tracks are added
+to the selection, do not display their Album entry.
 
-    Track - Type as defined by r3tagger.model.Track
+Allow multiple directories to be opened into the AlbumCollectionModel
 
-    tag   - A field from a Track or Album (ie. artist, track number, etc)
+Connect the 'Exit' action to quitting!
 
- ===============================Major Objects=================================
+Build icons for actions and insert them
 
-QFileSystemModel "filesystemModel"
-    Filtered: QDir.NoDotAndDotDot | QDir.AllDirs
-    Abstraction for local filesystem
+Build dialog for rename
 
-QTreeView "filesystem" (In left-only dock)
-    Front end for file system navigation and album selection
-    Only folders shall be visible
-    Multiple albums shall be selectable
+Build dialog for recognize
 
-QFileSystemModel "listingModel"
-    
+Build dialog for editing settings
 
-QTreeView "listing" (Left side of main HBoxLayout)
-    Filtered: By name (ie *.mp3, *.flac, *.ogg, etc)
-    Root determined by "filesystem" selection
+Write end-user documentation and connect it to 'Documentation' action
 
- =================================Structure===================================
+TableView scrolls when selecting things. Make it quit.
 
-QMainWindow
-    QDock
-        QTreeView
-    QMenu
-        ...
-    QCentralWidget
-        QHBoxLayout
-            QTreeView
-            QVBoxLayout
-                QHBoxLayout
-                    QLabel
-                    QLineEdit
-                    ...
-                QHBoxLayout
-                    QPushButton
-                    ...
+Make the FileTree show drives
 
- * Items marked with ellipsis described in more detail later
-
- ==================================Details====================================
-
-Tag editing:
-    There shall be one QLabel / QLineEdit pair for each supported object
-    selected in "listing". Should an Album be selected in "listing", an
-    album's fields will be edited by this group (ie track number wouldn't
-    exist). Fields not populated but supported by the Track/Album shall have
-    red backgrounds. Fields shared amongst all Album/Track objects shall
-    have grey backgrounds. Fields where tags differ between Album/Track
-    objects shall have white backgrounds.
-
-Confirm/Cancel:
-    Below the tag editing group and spaced to the bottom of the window, flush
-    left with "listing", shall be a group of buttons:
-
-        Confirm   - Changes made to the tags in tag editing group will be
-                    applied to Tracks/Albums
-
-        Cancel    - Changes made to tag editing group will revert to existing
-                    values.
-
-        Recognize - Run recognition algorithm on selection
-
-Menus:
-    File:
-        Open - Select location in "filesystem", updating "listing".
-        Save - Save changes made in tag editing group. Same as Confirm button
-
-    Edit:
-        Recognize  - Run recognition algorithm on selection from "listing"
-        Reorganize - Open reorganization dialog
-        Settings   - Open settings changing dialog
-
-    Help:
-        Docs  - Link to documentation
-        About - Links and the like
+Allow drag and drop interface where folder or music file can be dropped onto the
+launcher and it will be recognized and renamed and filed into the folder as
+defined by the settings (Magic mode!). There should be a menu button for this
+that applies the same thing to albums selected in the TableView.

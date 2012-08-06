@@ -58,12 +58,3 @@ Allow Albums to be instantiated using musicbrainz results
     Factory class method that could be used to instantiate albums in results
 Use Musicbrainz Albums to match against local Albums, return 0.0 to 1.0
 Allow a matching threshold to be specified
-
-
-----------------------------------
-Localized Musicbrainz API
-==================================
-find_album(album=None, artist=None): List of Albums instantiated from results
-    get_album:
-        id = find_album_id -> lookup_album_id(id)
-find_artist(album=None, artist=None): 
