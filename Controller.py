@@ -170,18 +170,23 @@ def rename_tracks(target, pattern=None):
         rename_track(target, pattern)
 
 
-def find_shared_tags(album):
+def find_shared_tags(*albums):
     """Finds field shared by all tracks on a given album
     Returns a dictionary mapping of fields to shared values.
     """
-    def is_shared(field, album):
-        if len({getattr(x, field) for x in album.tracks}) == 1:
-            return field
+    def is_shared(field, albums):
+        print(field)
+        result = set()
+        for album in albums:
+            for track in album:
+                result.add(getattr(track, field))
 
+        return len(result) == 1
+
+    album = albums[0]
     result = {}
-
     for field in album.supported_fields():
-        if is_shared(field, album):
+        if is_shared(field, albums):
             result[field] = getattr(album.tracks[0], field)
 
     return result

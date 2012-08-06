@@ -134,11 +134,27 @@ class TestCreateAlbum(object):
         for name, field in Controller.get_fields(track).items():
             assert expected[name] == field
 
+    def test_find_shared_tags_none(self, album, persist):
+        album.tracks[0].artist = u'AnotherArtist'
+        album.tracks[0].album = u'AnotherAlbum'
+        album.tracks[0].genre = u'AnotherGenre'
+        album.tracks[0].date = u'0'
+
+        assert Controller.find_shared_tags(album, persist) == {}
+
     def test_get_fields_album(self, album):
         expected = {'album': u'SomeAlbum', 'date': u'2012',
                     'genre': u'SomeGenre', 'artist': u'SomeArtist'}
         for name, field in Controller.get_fields(album).items():
             assert expected[name] == field
+
+    def test_find_shared_tags_partial(self, album, persist):
+        expected = {'album': u'SomeAlbum', 'date': u'2012',
+                    'genre': u'SomeGenre'}
+
+        album.tracks[0].artist = u'AnotherArtist'
+
+        assert Controller.find_shared_tags(album, persist) == expected
 
 
 class TestAlbumManipulation():
