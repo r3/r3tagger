@@ -317,7 +317,17 @@ class AlbumCollectionModel(QStandardItemModel):
 
         self._rows = 0
         self.albums = {}
-        self.columns = ("title", "artist", "album", "track_number")
+        self.columns = ("artist", "album", "title", "tracknumber",
+                        "date", "genre")
+        self.setHeader()
+
+    def setHeader(self):
+        self.setHorizontalHeaderItem(0, QStandardItem("Artist"))
+        self.setHorizontalHeaderItem(1, QStandardItem("Album"))
+        self.setHorizontalHeaderItem(2, QStandardItem("Title"))
+        self.setHorizontalHeaderItem(3, QStandardItem("Track Number"))
+        self.setHorizontalHeaderItem(4, QStandardItem("Date"))
+        self.setHorizontalHeaderItem(5, QStandardItem("Genre"))
 
     def addAlbum(self, album):
         album_row = TableRow(self._build_row(album), album)
@@ -350,6 +360,8 @@ class AlbumCollectionModel(QStandardItemModel):
     def clearAlbums(self):
         self.albums = {}
         self._rows = 0
+        self.clear()
+        self.setHeader()
 
     def lookupRow(self, index):
         return self.albums[index]
