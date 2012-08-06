@@ -175,7 +175,6 @@ def find_shared_tags(*albums):
     Returns a dictionary mapping of fields to shared values.
     """
     def is_shared(field, albums):
-        print(field)
         result = set()
         for album in albums:
             for track in album:
