@@ -35,6 +35,9 @@ class MainWindow(QMainWindow):
         self.listing.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.listing.verticalHeader().hide()
         self.listing.clicked.connect(self.updateEditing)
+        self.listing.setSortingEnabled(True)
+        headerView = self.listing.horizontalHeader()
+        headerView.sortIndicatorChanged.connect(self.hideAlbumEntries)
 
         # Statusbar
         status = self.statusBar()
@@ -115,7 +118,8 @@ class MainWindow(QMainWindow):
                 self.editRecognize, QKeySequence(Qt.CTRL + Qt.Key_R),
                 'editrecognize', "Recognize music")
         editReorganizeAction = self.createAction("Reorganize",
-                self.editReorganize, QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_R),
+                self.editReorganize,
+                QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_R),
                 'editreorganize', "Reorganize music")
         editSettingsAction = self.createAction("Settings", self.editSettings,
                 QKeySequence.Preferences, 'editsettings', "Edit settings")
@@ -127,11 +131,12 @@ class MainWindow(QMainWindow):
 
         # Menus
         fileMenu = self.menuBar().addMenu("&File")
-        self.addActions(fileMenu, (fileOpenAction, fileSaveAction, fileQuitAction))
+        self.addActions(fileMenu, (fileOpenAction, fileSaveAction, \
+                                   fileQuitAction))
 
         editMenu = self.menuBar().addMenu("&Edit")
-        self.addActions(editMenu, (editReorganizeAction, editRecognizeAction, \
-                                   editSettingsAction))
+        self.addActions(editMenu, (editReorganizeAction, \
+                                   editRecognizeAction, editSettingsAction))
 
         helpMenu = self.menuBar().addMenu("&Help")
         self.addActions(helpMenu, (helpDocsAction, helpAboutAction))
@@ -145,6 +150,12 @@ class MainWindow(QMainWindow):
         editToolbar.setObjectName("editToolbar")
         self.addActions(editToolbar, (editRecognizeAction,
                                       editReorganizeAction))
+
+    def hideAlbumEntries(self):
+        # Issue is that... shit. Big stuff. Need to fix the model
+        for row_index, row_contents in self.listModel.albums.items():
+            if row_contents.parent is None:
+                self.listing.setRowHidden(row_index, True)
 
     def updateListing(self, index):
         path = self.fsModel.fileInfo(index).absoluteFilePath()
