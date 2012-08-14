@@ -30,11 +30,11 @@ class Album(object):
             for attrib in ('album', 'artist', 'date', 'genre', 'tracks'):
                 setattr(self, attrib, arg.get(attrib, None))
         else:
-            self.path = None
-            self.album = None
-            self.artist = None
-            self.date = None
-            self.genre = None
+            self.path = ''
+            self.album = ''
+            self.artist = ''
+            self.date = ''
+            self.genre = ''
             self.tracks = arg
 
     def __call__(self):

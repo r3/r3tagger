@@ -1,44 +1,13 @@
 import sys
-from collections import OrderedDict
 
 from PySide.QtCore import Qt
-from PySide.QtGui import (QStandardItemModel, QStandardItem, QTreeView,
-                          QMainWindow, QFileSystemModel, QDockWidget, QLabel,
-                          QAbstractItemView, QHBoxLayout, QVBoxLayout,
-                          QWidget, QLineEdit, QPushButton, QApplication)
+from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
+                          QDockWidget, QLabel, QAbstractItemView, QHBoxLayout,
+                          QVBoxLayout, QWidget, QLineEdit, QPushButton,
+                          QApplication)
 
 from r3tagger import Controller
-
-
-columns = OrderedDict({"Artist": 'artist', "Album": 'album', "Title": 'title',
-    "Track Number": 'tracknumber', "Date": 'date', "Genre": 'genre'})
-
-
-class StandardItem(QStandardItem):
-    def data(self, column):
-        columnName = columns.keys()[column]
-        # TODO: Supposes that column order never changes
-        field = columns[columnName]
-        wrapped = self.data(Qt.UserRole)
-        return getattr(wrapped, field)
-
-
-class AlbumCollectionModel(QStandardItemModel):
-    def __init__(self):
-        super(AlbumCollectionModel, self).__init__()
-
-        self.albums = []
-
-    def addAlbum(self, album):
-        parent = StandardItem()
-        parent.setData(album, Qt.UserRole)
-
-        for track in album:
-            item = StandardItem()
-            item.setData(track, Qt.UserRole)
-            parent.appendRow(item)
-
-        self.appendRow(parent)
+import ui
 
 
 class MainWindow(QMainWindow):
@@ -51,7 +20,7 @@ class MainWindow(QMainWindow):
         # TODO: Set this to CWD and add drives/root
         fileSystemRoot = self.fileSystemModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger')
         #  - Album Model
-        self.albumModel = AlbumCollectionModel()
+        self.albumModel = ui.MusicCollectionModel()
 
         # Views
         #  - Filesystem View
@@ -140,9 +109,10 @@ class MainWindow(QMainWindow):
         centralWidget.setLayout(centralLayout)
         self.setCentralWidget(centralWidget)
 
-    def updateAlbumModel(self):
-        path = 'get path!'
-        for album in Controller.build_albums(path):
+    def updateAlbumModel(self, index):
+        path = self.fileSystemModel.fileInfo(index).absoluteFilePath()
+        print(path)
+        for album in Controller.build_albums(path, recursive=True):
             self.albumModel.addAlbum(album)
 
     def updateEditing(self):
