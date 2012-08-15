@@ -260,3 +260,7 @@ def get_fields(target):
         return {field: getattr(target, field) for field in supported}
     else:
         return {'title': target}
+
+
+def album_from_tracks(tracks):
+    return Album({'tracks': tracks})

@@ -27,8 +27,9 @@ class Album(object):
 
     def __init__(self, arg):
         if isinstance(arg, dict):
-            for attrib in ('album', 'artist', 'date', 'genre', 'tracks'):
-                setattr(self, attrib, arg.get(attrib, None))
+            for attrib in self.supported_fields():
+                setattr(self, attrib, arg.get(attrib, ''))
+            self.tracks = arg.get('tracks', [])
         else:
             self.path = ''
             self.album = ''
@@ -53,13 +54,17 @@ class Album(object):
         only the supported fields (Album._supported_fields) are used.
         """
 
-        fields = self.supported_fields()
         albums = []
 
         for album in (self, other):
-            info = {getattr(album, field) for field in fields}
+            info = set()
+            for field in self.supported_fields():
+                attrib = getattr(album, field)
+                if attrib:
+                    info.add(attrib)
+
             if self.tracks and other.tracks:
-                info.update([str(x) for x in album.tracks])
+                info.update([str(x) for x in album.tracks if x])
             albums.append(info)
 
         first, second = albums
