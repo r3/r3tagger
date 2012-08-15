@@ -1,5 +1,6 @@
 import bisect
 from collections import OrderedDict
+from functools import total_ordering
 
 from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PySide.QtGui import QTreeView, QItemSelectionModel, QItemSelection
@@ -12,7 +13,16 @@ COLUMNS = OrderedDict({"Artist": 'artist',
                        "Genre": 'genre'})
 
 
-class AlbumNode(object):
+@total_ordering
+class Node(object):
+    def __lt__(self, other):
+        return str(self) < str(other)
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+
+class AlbumNode(Node):
     def __init__(self, wrapped, parent=None):
         self.wrapped = wrapped
         self.parent = parent
@@ -24,10 +34,6 @@ class AlbumNode(object):
     def __len__(self):
         return len(self.tracks)
 
-    def orderKey(self):
-        name = self.wrapped.album
-        return name.lower() if name else ''
-
     def childAtRow(self, row):
         return self.tracks[row]
 
@@ -38,30 +44,15 @@ class AlbumNode(object):
         child.parent = self
         bisect.insort(self.tracks, child)
 
-    def hasTracks(self):
-        if not self.tracks:
-            return False
-        return isinstance(self.tracks[0], TrackNode)
 
-
-class TrackNode(object):
+class TrackNode(Node):
     def __init__(self, wrapped, parent=None):
         self.parent = parent
         self.wrapped = wrapped
 
     def __str__(self, separator="\t"):
-        return separator.join(self.fields)
-
-    @property
-    def fields(self):
-        return [getattr(self.wrapped, x) for x in COLUMNS.values()]
-
-    def orderKey(self):
-        return "\t".join(self.fields).lower()
-
-    def field(self, column):
-        assert 0 <= column <= len(self.fields)
-        return COLUMNS[column]
+        fields = [getattr(self.wrapped, x) for x in COLUMNS.values()]
+        return separator.join(fields)
 
 
 class MusicCollectionModel(QAbstractItemModel):
@@ -169,15 +160,16 @@ class MusicCollectionView(QTreeView):
 
     def _selectParent(self, index, selectionPolicy):
         selectionModel = self.selectionModel()
+        model = self.model()
         parentIndex = index.parent()
-        parentParentIndex = parentIndex.parent()
-        node = self.model().nodeFromIndex(index)
-        assert isinstance(node, TrackNode)
+        ancestorIndex = parentIndex.parent()
 
-        for column, _ in enumerate(COLUMNS.keys()):
-            indexToModify = self.model().index(parentIndex.row(), column,
-                                               parentParentIndex)
-            selectionModel.select(indexToModify, selectionPolicy)
+        left = model.index(parentIndex.row(), 0, ancestorIndex)
+        right = model.index(parentIndex.row(),
+                            len(COLUMNS) - 1, ancestorIndex)
+
+        selection = QItemSelection(left, right)
+        selectionModel.select(selection, selectionPolicy)
 
     def selectedTracks(self):
         result = []
