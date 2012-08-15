@@ -2,7 +2,7 @@ import bisect
 from collections import namedtuple, OrderedDict
 
 from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
-from PySide.QtGui import QTreeView
+from PySide.QtGui import QTreeView, QItemSelectionModel
 
 Record = namedtuple('Record', ('key', 'node'))
 
@@ -163,12 +163,39 @@ class MusicCollectionView(QTreeView):
 
     def _selectedNodes(self):
         # TODO: Cache this maybe? Invalidate cache when new selection made
-        return [self.model().nodeFromIndex(x) for x in self.selectedIndexes()]
+        return {self.model().nodeFromIndex(x) for x in self.selectedIndexes()}
 
     def _siblingsSelected(self, node):
         selected = self._selectedNodes()
         siblings = node.parent.tracks if node.parent else []
-        return all([x in selected for x in siblings])
+        return all([x.node in selected for x in siblings])
+
+    def _childrenSelected(self, node):
+        assert isinstance(node, AlbumNode)
+        selected = self._selectedNodes()
+        return all([x.node in selected for x in node.tracks])
+
+    def _selectChildren(self, index, selectionPolicy):
+        selectionModel = self.selectionModel()
+        node = self.model().nodeFromIndex(index)
+        assert isinstance(node, AlbumNode)
+
+        for row, _ in enumerate(node.tracks):
+            for column, _ in enumerate(COLUMNS.keys()):
+                childIndex = self.model().index(row, column, index)
+                selectionModel.select(childIndex, selectionPolicy)
+
+    def _selectParent(self, index, selectionPolicy):
+        selectionModel = self.selectionModel()
+        parentIndex = index.parent()
+        parentParentIndex = parentIndex.parent()
+        node = self.model().nodeFromIndex(index)
+        assert isinstance(node, TrackNode)
+
+        for column, _ in enumerate(COLUMNS.keys()):
+            indexToModify = self.model().index(parentIndex.row(), column,
+                                               parentParentIndex)
+            selectionModel.select(indexToModify, selectionPolicy)
 
     def selectedTracks(self):
         result = []
@@ -184,3 +211,23 @@ class MusicCollectionView(QTreeView):
             if isinstance(node, AlbumNode):
                 result.append(node.wrapped)
         return result
+
+    def correctListingSelection(self, index):
+        node = self.model().nodeFromIndex(index)
+        selectedNodes = self._selectedNodes()
+
+        if isinstance(node, AlbumNode):
+            if node in selectedNodes:
+                self._selectChildren(index, QItemSelectionModel.Select)
+                return None
+            elif self._childrenSelected(node):
+                self._selectChildren(index, QItemSelectionModel.Deselect)
+                return None
+
+        elif node in selectedNodes:
+            parentNode = self.model().nodeFromIndex(index.parent())
+            if self._siblingsSelected(node) and not parentNode in selectedNodes:
+                self._selectParent(index, QItemSelectionModel.Select)
+
+        else:
+            self._selectParent(index, QItemSelectionModel.Deselect)

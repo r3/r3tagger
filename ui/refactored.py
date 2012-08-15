@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
             self.albumView.model().addAlbum(album)
 
     def updateEditing(self, index):
-        #self.correctListingSelection(index)
+        self.albumView.correctListingSelection(index)
 
         tags_to_attribs = {'artist': self.lineArtist,
                            'album': self.lineAlbum,
@@ -129,6 +129,11 @@ class MainWindow(QMainWindow):
 
         for tag, edit in tags_to_attribs.items():
             edit.setText(tags.get(tag, ''))
+
+        if len(selectedTracks) == 1:
+            track = selectedTracks[0]
+            self.lineTitle.setText(track.title)
+            self.lineTrack.setText(track.tracknumber)
 
 
 if __name__ == '__main__':
