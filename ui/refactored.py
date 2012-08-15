@@ -26,6 +26,8 @@ class MainWindow(QMainWindow):
         self.fileSystemView.setModel(self.fileSystemModel)
         self.fileSystemView.setRootIndex(fileSystemRoot)
         self.fileSystemView.doubleClicked.connect(self.updateAlbumModel)
+        self.fileSystemView.expanded.connect(self.fixFileSystemColumns)
+        self.fileSystemView.collapsed.connect(self.fixFileSystemColumns)
         #  - Album View
         self.albumView = ui.MusicCollectionView()
         self.albumView.setSelectionMode(QAbstractItemView.MultiSelection)
@@ -82,6 +84,11 @@ class MainWindow(QMainWindow):
         centralLayout.addLayout(self.buttonGroup)
         centralWidget.setLayout(centralLayout)
         self.setCentralWidget(centralWidget)
+
+    def fixFileSystemColumns(self, index):
+        columns = self.fileSystemModel.columnCount(index)
+        for column in range(columns):
+            self.fileSystemView.resizeColumnToContents(column)
 
     def updateAlbumModel(self, index):
         path = self.fileSystemModel.fileInfo(index).absoluteFilePath()
