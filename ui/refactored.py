@@ -19,8 +19,6 @@ class MainWindow(QMainWindow):
         self.fileSystemModel = QFileSystemModel()
         # TODO: Set this to CWD and add drives/root
         fileSystemRoot = self.fileSystemModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger')
-        #  - Album Model
-        self.albumModel = ui.MusicCollectionModel()
 
         # Views
         #  - Filesystem View
@@ -29,8 +27,7 @@ class MainWindow(QMainWindow):
         self.fileSystemView.setRootIndex(fileSystemRoot)
         self.fileSystemView.doubleClicked.connect(self.updateAlbumModel)
         #  - Album View
-        self.albumView = QTreeView()
-        self.albumView.setModel(self.albumModel)
+        self.albumView = ui.MusicCollectionView()
         self.albumView.setSelectionMode(QAbstractItemView.MultiSelection)
         self.albumView.clicked.connect(self.updateEditing)
 
@@ -111,12 +108,28 @@ class MainWindow(QMainWindow):
 
     def updateAlbumModel(self, index):
         path = self.fileSystemModel.fileInfo(index).absoluteFilePath()
-        print(path)
         for album in Controller.build_albums(path, recursive=True):
-            self.albumModel.addAlbum(album)
+            self.albumView.model().addAlbum(album)
 
-    def updateEditing(self):
-        pass
+    def updateEditing(self, index):
+        #self.correctListingSelection(index)
+
+        tags_to_attribs = {'artist': self.lineArtist,
+                           'album': self.lineAlbum,
+                           'title': self.lineTitle,
+                           'tracknumber': self.lineTrack,
+                           'date': self.lineDate,
+                           'genre': self.lineGenre}
+
+        selectedTracks = self.albumView.selectedTracks()
+        albumOfSingles = Controller.album_from_tracks(selectedTracks)
+        selected = self.albumView.selectedAlbums()
+        selected.append(albumOfSingles)
+        tags = Controller.find_shared_tags(*selected) if selected else {}
+
+        for tag, edit in tags_to_attribs.items():
+            edit.setText(tags.get(tag, ''))
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

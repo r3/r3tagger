@@ -1,6 +1,8 @@
 import bisect
 from collections import namedtuple, OrderedDict
-from PySide.QtCore import (QAbstractItemModel, QModelIndex, Qt)
+
+from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
+from PySide.QtGui import QTreeView
 
 Record = namedtuple('Record', ('key', 'node'))
 
@@ -120,8 +122,8 @@ class MusicCollectionModel(QAbstractItemModel):
         assert node is not None
         if isinstance(node, AlbumNode):
             return str(node) if index.column() == 0 else ""
-        column_number = index.column()
-        field = COLUMNS.values()[column_number]
+        columnNumber = index.column()
+        field = COLUMNS.values()[columnNumber]
         return getattr(node.wrapped, field)
 
     def headerData(self, section, orientation, role):
@@ -152,3 +154,33 @@ class MusicCollectionModel(QAbstractItemModel):
 
     def nodeFromIndex(self, index):
         return index.internalPointer() if index.isValid() else self.root
+
+
+class MusicCollectionView(QTreeView):
+    def __init__(self, parent=None):
+        super(MusicCollectionView, self).__init__(parent)
+        self.setModel(MusicCollectionModel())
+
+    def _selectedNodes(self):
+        # TODO: Cache this maybe? Invalidate cache when new selection made
+        return [self.model().nodeFromIndex(x) for x in self.selectedIndexes()]
+
+    def _siblingsSelected(self, node):
+        selected = self._selectedNodes()
+        siblings = node.parent.tracks if node.parent else []
+        return all([x in selected for x in siblings])
+
+    def selectedTracks(self):
+        result = []
+        for node in self._selectedNodes():
+            if (isinstance(node, TrackNode) and
+                    not self._siblingsSelected(node)):
+                result.append(node.wrapped)
+        return result
+
+    def selectedAlbums(self):
+        result = []
+        for node in self._selectedNodes():
+            if isinstance(node, AlbumNode):
+                result.append(node.wrapped)
+        return result
