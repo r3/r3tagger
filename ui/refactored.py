@@ -2,9 +2,9 @@ import sys
 
 from PySide.QtCore import Qt
 from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
-                          QDockWidget, QLabel, QAbstractItemView, QHBoxLayout,
+                          QDockWidget, QAbstractItemView, QHBoxLayout,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
-                          QApplication)
+                          QApplication, QFormLayout)
 
 from r3tagger import Controller
 import ui
@@ -37,42 +37,19 @@ class MainWindow(QMainWindow):
         #status.showMessage("Ready", 5000)
 
         # Editing Group
-        self.editingGroup = QHBoxLayout()
-        labels = QVBoxLayout()
-        edits = QVBoxLayout()
-
-        self.fieldArtist = QLabel("Artist:")
-        labels.addWidget(self.fieldArtist)
+        self.editingGroup = QFormLayout()
         self.lineArtist = QLineEdit()
-        edits.addWidget(self.lineArtist)
-
-        self.fieldAlbum = QLabel("Album:")
-        labels.addWidget(self.fieldAlbum)
         self.lineAlbum = QLineEdit()
-        edits.addWidget(self.lineAlbum)
-
-        self.fieldTitle = QLabel("Title:")
-        labels.addWidget(self.fieldTitle)
         self.lineTitle = QLineEdit()
-        edits.addWidget(self.lineTitle)
-
-        self.fieldTrack = QLabel("Track:")
-        labels.addWidget(self.fieldTrack)
         self.lineTrack = QLineEdit()
-        edits.addWidget(self.lineTrack)
-
-        self.fieldDate = QLabel("Date:")
-        labels.addWidget(self.fieldDate)
         self.lineDate = QLineEdit()
-        edits.addWidget(self.lineDate)
-
-        self.fieldGenre = QLabel("Genre:")
-        labels.addWidget(self.fieldGenre)
         self.lineGenre = QLineEdit()
-        edits.addWidget(self.lineGenre)
-
-        self.editingGroup.addLayout(labels)
-        self.editingGroup.addLayout(edits)
+        self.editingGroup.addRow("Artist:", self.lineArtist)
+        self.editingGroup.addRow("Album:", self.lineAlbum)
+        self.editingGroup.addRow("Title:", self.lineTitle)
+        self.editingGroup.addRow("Track:", self.lineTrack)
+        self.editingGroup.addRow("Date:", self.lineDate)
+        self.editingGroup.addRow("Genre:", self.lineGenre)
 
         # Docks
         dockAllowed = (Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
