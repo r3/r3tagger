@@ -38,7 +38,14 @@ class AlbumNode(Node):
         return self.tracks[row]
 
     def rowOfChild(self, child):
-        return bisect.bisect_left(self.tracks, child)
+        index = 0
+        while self.tracks[index] is not child:
+            index = bisect.bisect_left(self.tracks, child, index + 1)
+
+            if index == len(self.tracks) or index == -1:
+                return -1
+
+        return index
 
     def insertChild(self, child):
         child.parent = self
