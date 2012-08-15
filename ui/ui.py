@@ -1,10 +1,8 @@
 import bisect
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
-from PySide.QtGui import QTreeView, QItemSelectionModel
-
-Record = namedtuple('Record', ('key', 'node'))
+from PySide.QtGui import QTreeView, QItemSelectionModel, QItemSelection
 
 COLUMNS = OrderedDict({"Artist": 'artist',
                        "Album": 'album',
@@ -31,30 +29,14 @@ class AlbumNode(object):
         return name.lower() if name else ''
 
     def childAtRow(self, row):
-        return self.tracks[row].node
+        return self.tracks[row]
 
     def rowOfChild(self, child):
-        for i, item in enumerate(self.tracks):
-            if item.node == child:
-                return i
-        return -1
-
-    def childWithKey(self, key):
-        """Find node child with given key"""
-        if not self.tracks:
-            return None
-        # Causes a -3 deprecation warning. Solution will be to
-        # reimplement bisect_left and provide a key function.
-        i = bisect.bisect_left(self.tracks, (key, None))
-        if i < 0 or i >= len(self.tracks):
-            return None
-        if self.tracks[i].key == key:
-            return self.tracks[i].node
-        return None
+        return bisect.bisect_left(self.tracks, child)
 
     def insertChild(self, child):
         child.parent = self
-        bisect.insort(self.tracks, Record(child.orderKey(), child))
+        bisect.insort(self.tracks, child)
 
     def hasTracks(self):
         if not self.tracks:
@@ -69,9 +51,6 @@ class TrackNode(object):
 
     def __str__(self, separator="\t"):
         return separator.join(self.fields)
-
-    def __len__(self):
-        return len(self.fields)
 
     @property
     def fields(self):
@@ -140,16 +119,16 @@ class MusicCollectionModel(QAbstractItemModel):
 
     def parent(self, child):
         node = self.nodeFromIndex(child)
-        if node is None:
-            return QModelIndex()
         parent = node.parent
+
         if parent is None:
             return QModelIndex()
+
         grandparent = parent.parent
         if grandparent is None:
             return QModelIndex()
+
         row = grandparent.rowOfChild(parent)
-        assert row != -1
         return self.createIndex(row, 0, parent)
 
     def nodeFromIndex(self, index):
@@ -160,6 +139,7 @@ class MusicCollectionView(QTreeView):
     def __init__(self, parent=None):
         super(MusicCollectionView, self).__init__(parent)
         self.setModel(MusicCollectionModel())
+        self.setUniformRowHeights(True)
 
     def _selectedNodes(self):
         # TODO: Cache this maybe? Invalidate cache when new selection made
@@ -168,22 +148,24 @@ class MusicCollectionView(QTreeView):
     def _siblingsSelected(self, node):
         selected = self._selectedNodes()
         siblings = node.parent.tracks if node.parent else []
-        return all([x.node in selected for x in siblings])
+        return all([x in selected for x in siblings])
 
     def _childrenSelected(self, node):
         assert isinstance(node, AlbumNode)
         selected = self._selectedNodes()
-        return all([x.node in selected for x in node.tracks])
+        return all([x in selected for x in node.tracks])
 
     def _selectChildren(self, index, selectionPolicy):
         selectionModel = self.selectionModel()
-        node = self.model().nodeFromIndex(index)
+        model = self.model()
+        node = model.nodeFromIndex(index)
         assert isinstance(node, AlbumNode)
 
-        for row, _ in enumerate(node.tracks):
-            for column, _ in enumerate(COLUMNS.keys()):
-                childIndex = self.model().index(row, column, index)
-                selectionModel.select(childIndex, selectionPolicy)
+        topLeft = model.index(0, 0, index)
+        bottomRight = model.index(len(node.tracks) - 1,
+                                  len(COLUMNS) - 1, index)
+        selection = QItemSelection(topLeft, bottomRight)
+        selectionModel.select(selection, selectionPolicy)
 
     def _selectParent(self, index, selectionPolicy):
         selectionModel = self.selectionModel()
@@ -219,10 +201,8 @@ class MusicCollectionView(QTreeView):
         if isinstance(node, AlbumNode):
             if node in selectedNodes:
                 self._selectChildren(index, QItemSelectionModel.Select)
-                return None
             elif self._childrenSelected(node):
                 self._selectChildren(index, QItemSelectionModel.Deselect)
-                return None
 
         elif node in selectedNodes:
             parentNode = self.model().nodeFromIndex(index.parent())
