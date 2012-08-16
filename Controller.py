@@ -262,5 +262,16 @@ def get_fields(target):
         return {'title': target}
 
 
-def album_from_tracks(tracks):
-    return Album({'tracks': tracks})
+def album_from_tracks(tracks, name=None):
+    """Creates a container album for the given tracks
+
+    Accepts an optional name argument which will be used as the container
+    album's album title (album.name). All fields aside from tracks (and name,
+    if given) will be empty strings.
+    """
+    args = {'tracks': tracks}
+
+    if name is not None:
+        args['album'] = name
+
+    return Album(args)

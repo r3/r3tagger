@@ -37,7 +37,7 @@ class TestCreateAlbum(object):
     def pytest_funcarg__path(self, request):
         """Dependency Injection: Album"""
         return request.cached_setup(self.setup_path, self.teardown_path,
-                scope='class')
+                                    scope='class')
 
     def setup_controller(self):
         """Setup: Creates a test album with 5 dummy songs on it"""
@@ -68,7 +68,7 @@ class TestCreateAlbum(object):
     def pytest_funcarg__persist(self, request):
         """Dependency Injection: Album"""
         return request.cached_setup(self.setup_persist, self.teardown_persist,
-                scope='class')
+                                    scope='class')
 
     def setup_album(self):
         tempdir = tempfile.mkdtemp()
@@ -86,7 +86,7 @@ class TestCreateAlbum(object):
 
     def pytest_funcarg__album(self, request):
         return request.cached_setup(self.setup_album, self.teardown_album,
-                scope='function')
+                                    scope='function')
 
     def test_fix_config_path_hack(self):
         Controller.config_file = os.path.dirname(Controller.__file__)
@@ -156,6 +156,18 @@ class TestCreateAlbum(object):
 
         assert Controller.find_shared_tags(album, persist) == expected
 
+    def test_album_from_tracks(self, album, persist):
+        tracks = album.tracks
+        new_album = Controller.album_from_tracks(tracks)
+
+        assert new_album.match(persist) == 1
+
+    def test_album_from_tracks_with_name(self, album, persist):
+        tracks = album.tracks
+        new_album = Controller.album_from_tracks(tracks, name="AnotherAlbum")
+
+        assert 0.7 < new_album.match(persist) < 0.72
+
 
 class TestAlbumManipulation():
     def setup_album(self):
@@ -174,7 +186,7 @@ class TestAlbumManipulation():
 
     def pytest_funcarg__album(self, request):
         return request.cached_setup(self.setup_album, self.teardown_album,
-                scope='function')
+                                    scope='function')
 
     def test_album(self, album):
         """Simply ensure that the test album is what I expect"""
@@ -203,7 +215,7 @@ class TestAlbumManipulation():
 
         path = os.path.dirname(album.tracks[0].path)
         pattern = os.path.join(path,
-                'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
+                               'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
         track_paths = [pattern.format(x, x) for x in range(5, 0, -1)]
 
         for path, track in zip(track_paths, album):
