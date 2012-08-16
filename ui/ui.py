@@ -143,9 +143,16 @@ class MusicCollectionView(QTreeView):
         # TODO: Cache this maybe? Invalidate cache when new selection made
         return {self.model().nodeFromIndex(x) for x in self.selectedIndexes()}
 
+    def _nodeSiblings(self, node):
+        return node.parent.tracks if node.parent else []
+
     def _siblingsSelected(self, node):
         selected = self._selectedNodes()
-        siblings = node.parent.tracks if node.parent else []
+        siblings = self._nodeSiblings(node)
+
+        if len(siblings) == 1:
+            return True
+
         return all([x in selected for x in siblings])
 
     def _childrenSelected(self, node):
@@ -181,9 +188,13 @@ class MusicCollectionView(QTreeView):
     def selectedTracks(self):
         result = []
         for node in self._selectedNodes():
-            if (isinstance(node, TrackNode) and
-                    not self._siblingsSelected(node)):
+
+            if not isinstance(node, TrackNode):
+                continue
+
+            if not self._siblingsSelected(node) or len(self._nodeSiblings(node)) == 1:
                 result.append(node.wrapped)
+
         return result
 
     def selectedAlbums(self):

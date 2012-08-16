@@ -7,8 +7,8 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
                           QApplication, QFormLayout)
 
-from r3tagger import Controller
 import ui
+from r3tagger import Controller
 
 
 class MainWindow(QMainWindow):
@@ -96,11 +96,12 @@ class MainWindow(QMainWindow):
 
         if os.path.isfile(path):
             track = Controller.build_track(path)
-            containerAlbum = Controller.album_from_tracks(track, 'Singles')
+            containerAlbum = Controller.album_from_tracks([track], 'Single')
             self.albumView.model().addAlbum(containerAlbum)
 
-        for album in Controller.build_albums(path, recursive=True):
-            self.albumView.model().addAlbum(album)
+        else:
+            for album in Controller.build_albums(path, recursive=True):
+                self.albumView.model().addAlbum(album)
 
     def updateEditing(self, index):
         self.albumView.correctListingSelection(index)
