@@ -69,7 +69,7 @@ class MusicCollectionModel(QAbstractItemModel):
         self.root = AlbumNode("")
         self.headers = COLUMNS.keys()
 
-    def addAlbum(self, album):
+    def addAlbum(self, album, callReset=True):
         root = self.root
         albumNode = AlbumNode(album)
         root.insertChild(albumNode)
@@ -77,6 +77,9 @@ class MusicCollectionModel(QAbstractItemModel):
         for track in album:
             trackNode = TrackNode(track, albumNode)
             albumNode.insertChild(trackNode)
+
+        if callReset:
+            self.reset()
 
     def rowCount(self, parent):
         node = self.nodeFromIndex(parent)
