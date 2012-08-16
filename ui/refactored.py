@@ -1,4 +1,5 @@
 import sys
+import os
 
 from PySide.QtCore import Qt
 from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
@@ -92,6 +93,12 @@ class MainWindow(QMainWindow):
 
     def updateAlbumModel(self, index):
         path = self.fileSystemModel.fileInfo(index).absoluteFilePath()
+
+        if os.path.isfile(path):
+            track = Controller.build_track(path)
+            containerAlbum = Controller.album_from_tracks(track, 'Singles')
+            self.albumView.model().addAlbum(containerAlbum)
+
         for album in Controller.build_albums(path, recursive=True):
             self.albumView.model().addAlbum(album)
 
