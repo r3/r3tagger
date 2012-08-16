@@ -56,22 +56,25 @@ class Album(object):
 
         albums = []
 
-        for album in (self, other):
-            info = set()
-            for field in self.supported_fields():
-                attrib = getattr(album, field)
-                if attrib:
-                    info.add(attrib)
+        info = set()
+        other_info = set()
+
+        for field in self.supported_fields():
+            attrib = getattr(self, field)
+            other_attrib = getattr(other, field)
+            if attrib and other_attrib:
+                info.add(attrib)
+                other_info.add(other_attrib)
 
             if self.tracks and other.tracks:
-                info.update([str(x) for x in album.tracks if x])
-            albums.append(info)
+                info.update([str(x) for x in self.tracks if x])
+                other_info.update([str(x) for x in other.tracks if x])
 
-        first, second = albums
+        print(albums)
 
-        nc = len(first.intersection(second))
-        na = len(first)
-        nb = len(second)
+        nc = len(info.intersection(other_info))
+        na = len(info)
+        nb = len(other_info)
 
         return float(nc) / (na + nb - nc)
 
