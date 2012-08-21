@@ -21,7 +21,7 @@ class QueryError(ws.WebServiceError):
     pass
 
 
-class Retry():
+class Retry(object):
     def __init__(self, error, attempts=3):
         self.error = error
         self.attempts = attempts

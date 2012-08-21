@@ -24,7 +24,7 @@ import datetime
 from time import sleep
 
 
-class Backoff():
+class Backoff(object):
     """Delays execution of a decorated function
         Backoff maintains information about the next free time to call the
         decorated function. The delay is set as the first parameter to the

@@ -1,18 +1,9 @@
-Ability to sort by column. If columns are sorted by anything but 'Album'
-(default), then the Album entries will disappear (they loose meaning). Those
-entries should reappear if the sorting is changed back to 'Album'.
-
-    In addition, you can enable interactive sorting (i.e. allowing the
-    users to sort the data by clicking the view's headers), by
-    connecting the QHeaderView::sortIndicatorChanged() signal to the
-    QTableView::sortByColumn() slot
-
 Connect the 'Confirm' action to Controller's retagging
 
 Connect the 'Cancel' button to repopulate the editing fields to the default
 values
 
-Allow retagging by editing cells in the TableView
+Allow retagging by editing cells in the TreeView
 
 Connect 'Open' action to affect the StandardFileSystemModel and emit a
 doubleClicked signal so that the listing is updated. If single tracks are added
