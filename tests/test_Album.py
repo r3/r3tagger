@@ -61,6 +61,10 @@ class TestReadAlbum(object):
     def test_save_tracks(self, album):
         assert album() == None
 
+    def test_getitem(self, album):
+        first_track = list(album)[0]
+        assert album[0] == first_track
+
 
 class TestBuildFromDict(object):
     """Tests the Album object's ability to instantiate on a dict"""
