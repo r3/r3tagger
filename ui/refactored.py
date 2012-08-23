@@ -12,6 +12,7 @@ from r3tagger import Controller
 
 
 class MainWindow(QMainWindow):
+
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
@@ -54,6 +55,13 @@ class MainWindow(QMainWindow):
         self.editingGroup.addRow("Date:", self.lineDate)
         self.editingGroup.addRow("Genre:", self.lineGenre)
 
+        self.tagsToAttribs = {'artist': self.lineArtist,
+                              'album': self.lineAlbum,
+                              'title': self.lineTitle,
+                              'tracknumber': self.lineTrack,
+                              'date': self.lineDate,
+                              'genre': self.lineGenre}
+
         # Docks
         dockAllowed = (Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         #  - Filesystem Dock
@@ -74,8 +82,11 @@ class MainWindow(QMainWindow):
         # Confirm / Cancel Group
         self.buttonGroup = QHBoxLayout()
         self.buttonGroup.addStretch()
-        self.buttonGroup.addWidget(QPushButton("Confirm"))
-        self.buttonGroup.addWidget(QPushButton("Cancel"))
+        confirm = QPushButton("Confirm")
+        confirm.clicked.connect(self.retagSelected)
+        self.buttonGroup.addWidget(confirm)
+        cancel = QPushButton("Cancel")
+        self.buttonGroup.addWidget(cancel)
         self.buttonGroup.addStretch()
 
         # Final Layout
@@ -106,26 +117,36 @@ class MainWindow(QMainWindow):
     def updateEditing(self, index):
         self.albumView.correctListingSelection(index)
 
-        tags_to_attribs = {'artist': self.lineArtist,
-                           'album': self.lineAlbum,
-                           'title': self.lineTitle,
-                           'tracknumber': self.lineTrack,
-                           'date': self.lineDate,
-                           'genre': self.lineGenre}
-
         selectedTracks = self.albumView.selectedTracks()
         albumOfSingles = Controller.album_from_tracks(selectedTracks)
         selected = self.albumView.selectedAlbums()
         selected.append(albumOfSingles)
         tags = Controller.find_shared_tags(*selected) if selected else {}
 
-        for tag, edit in tags_to_attribs.items():
+        for tag, edit in self.tagsToAttribs.items():
             edit.setText(tags.get(tag, ''))
 
         if len(selectedTracks) == 1:
             track = selectedTracks[0]
             self.lineTitle.setText(track.title)
             self.lineTrack.setText(track.tracknumber)
+
+    def retagSelected(self):
+        tags = {}
+        for field, lineEdit in self.tagsToAttribs.items():
+            tag = lineEdit.text()
+            if tag:
+                tags[field] = tag
+
+        view = self.albumView
+
+        import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+
+        for album in view.selectedAlbums():
+            Controller.retag_album(album, tags)
+
+        for track in view.selectedTracks():
+            Controller.retag_track(track, tags)
 
 
 if __name__ == '__main__':

@@ -205,8 +205,6 @@ def retag_album(album, mapping):
         elif name == 'tracks':
             for track in album:
                 retag_track(track, get_fields(mapping))
-        else:
-            raise NotImplementedError("Unsupported field: {}".format(field))
 
     for track in album:
         retag_track(track, mapping)
