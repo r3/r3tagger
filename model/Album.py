@@ -46,6 +46,9 @@ class Album(object):
     def __iter__(self):
         return iter(self.tracks)
 
+    def __getitem__(self, index):
+        return self.tracks[index]
+
     def match(self, other):
         """Compares albums based on supported fields
 
