@@ -174,6 +174,11 @@ def find_shared_tags(*albums):
     """Finds field shared by all tracks on a given album
     Returns a dictionary mapping of fields to shared values.
     """
+    try:
+        sample_track = albums[0][0]
+    except IndexError:
+        return None
+
     def is_shared(field, albums):
         result = set()
         for album in albums:
@@ -184,7 +189,7 @@ def find_shared_tags(*albums):
 
     album = albums[0]
     result = {}
-    for field in album.supported_fields():
+    for field in sample_track.supported_fields():
         if is_shared(field, albums):
             result[field] = getattr(album.tracks[0], field)
 

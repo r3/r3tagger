@@ -247,7 +247,7 @@ class TestAlbumManipulation():
     def test_update_album(self, album):
         source = {'album': 'UpdatedAlbum',
                   'artist': 'UpdatedArtist',
-                  'date': 1,
+                  'date': '1',
                   'genre': 'UpdatedGenre'}
 
         Controller.update_album(album, Album(source))
