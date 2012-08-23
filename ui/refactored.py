@@ -126,11 +126,6 @@ class MainWindow(QMainWindow):
         for tag, edit in self.tagsToAttribs.items():
             edit.setText(tags.get(tag, ''))
 
-        if len(selectedTracks) == 1:
-            track = selectedTracks[0]
-            self.lineTitle.setText(track.title)
-            self.lineTrack.setText(track.tracknumber)
-
     def retagSelected(self):
         tags = {}
         for field, lineEdit in self.tagsToAttribs.items():
