@@ -223,6 +223,8 @@ def retag_track(track, mapping):
         else:
             raise NotImplementedError("Unsupported field: {}".format(field))
 
+    track()  # Saves updates to disk
+
 
 def missing_fields(target):
     """Determines the missing fields in an Album or Track"""
