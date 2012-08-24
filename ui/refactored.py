@@ -134,7 +134,11 @@ class MainWindow(QMainWindow):
         tags = Controller.find_shared_tags(*selected) if selected else {}
 
         for tag, edit in self.tagsToAttribs.items():
+            if not tags:
+                self.clearEditing()
+                break
             edit.setText(tags.get(tag, ''))
+            edit.setCursorPosition(0)
 
     def retagSelected(self):
         tags = {}
