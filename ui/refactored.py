@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
         editingDock.setWidget(editingWidget)
         self.addDockWidget(Qt.RightDockWidgetArea, editingDock)
 
-        # Confirm / Cancel Group
+        # Confirm / Cancel / Clear Group
         self.buttonGroup = QHBoxLayout()
         self.buttonGroup.addStretch()
         confirm = QPushButton("Confirm")
@@ -87,6 +87,9 @@ class MainWindow(QMainWindow):
         self.buttonGroup.addWidget(confirm)
         cancel = QPushButton("Cancel")
         self.buttonGroup.addWidget(cancel)
+        clear = QPushButton("Clear")
+        clear.clicked.connect(self.clearAlbumView)
+        self.buttonGroup.addWidget(clear)
         self.buttonGroup.addStretch()
 
         # Final Layout
@@ -135,13 +138,16 @@ class MainWindow(QMainWindow):
 
         view = self.albumView
 
-        import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
-
         for album in view.selectedAlbums():
             Controller.retag_album(album, tags)
 
         for track in view.selectedTracks():
             Controller.retag_track(track, tags)
+
+    def clearAlbumView(self):
+        model = self.albumView.model()
+        model.clear()
+        model.setHeaders()
 
 
 if __name__ == '__main__':
