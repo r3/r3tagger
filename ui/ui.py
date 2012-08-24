@@ -214,7 +214,6 @@ class MusicCollectionView(QTreeView):
         return result
 
     def correctListingSelection(self, index):
-        print("Selected Tracks: {}\nSelected Albums: {}\n\n".format(self.selectedTracks(), self.selectedAlbums()))
         node = self.model().nodeFromIndex(index)
         selectedNodes = self._selectedNodes()
 
