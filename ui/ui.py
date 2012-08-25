@@ -64,9 +64,6 @@ class TrackNode(Node):
         fields = [getattr(self.wrapped, x) for x in COLUMNS.values()]
         return separator.join(fields)
 
-    def __iter__(self):
-        return iter(self.tracks)
-
     def reset(self):
         self.wrapped.reset_tags()
 
