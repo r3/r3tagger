@@ -3,10 +3,6 @@ import shutil
 import os
 import pytest
 
-from mutagen.oggvorbis import OggVorbis
-from mutagen.flac import FLAC
-from mutagen.mp3 import EasyMP3
-
 from r3tagger.model import Track
 
 
@@ -42,7 +38,7 @@ class TestWriteTrack(object):
 
         def pytest_funcarg__song(self, request):
             return request.cached_setup(self.setup_song,
-                    scope='class')
+                                        scope='class')
 
         # Ensure file exists
         def test_song_has_path(self, song):
@@ -82,6 +78,12 @@ class TestWriteTrack(object):
             assert song.genre == u'altGenre'
             song()
 
+        def test_reset_tags(self, song):
+            song.album = 'AnotherAlbum'
+            assert song.album == 'AnotherAlbum'
+            song.reset_tags()
+            assert song.album == u'altAlbum'
+
     class TestReadBundle:
         # Setup 'song' funcarg and setup/teardown
         def setup_song(self):
@@ -95,8 +97,8 @@ class TestWriteTrack(object):
         def pytest_funcarg__song(self, request):
             """Dependency Injection: Track"""
             return request.cached_setup(self.setup_song,
-                    self.teardown_song,
-                    scope='class')
+                                        self.teardown_song,
+                                        scope='class')
 
         # Read tests
         def test_to_string(self, song):
@@ -160,7 +162,7 @@ class TestAcoustid(object):
 
     def pytest_funcarg__song(self, request):
         return request.cached_setup(self.setup_song,
-                scope='class')
+                                    scope='class')
 
     def test_acoustid(self, song):
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
@@ -199,7 +201,7 @@ class TestFailures(object):
 
     def pytest_funcarg__song(self, request):
         return request.cached_setup(self.setup_song,
-                scope='class')
+                                    scope='class')
 
     def test_unsupported_file(self):
         path = os.path.join('test_songs', 'Unsupported.file')

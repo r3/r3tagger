@@ -68,6 +68,9 @@ class Track(object):
         """Saves updated metadata to file."""
         self._song_file.save()
 
+    def reset_tags(self):
+        self._song_file.load(self.path)
+
     @property
     def length(self):
         """Track length in seconds"""
