@@ -34,6 +34,9 @@ class AlbumNode(Node):
     def __len__(self):
         return len(self.tracks)
 
+    def __iter__(self):
+        return iter(self.tracks)
+
     def childAtRow(self, row):
         return self.tracks[row]
 
@@ -42,7 +45,7 @@ class AlbumNode(Node):
         while self.tracks[index] is not child:
             index = bisect.bisect_left(self.tracks, child, index + 1)
 
-            if index == len(self.tracks) or index == -1:
+            if index == len(self) or index == -1:
                 return -1
 
         return index
@@ -60,6 +63,12 @@ class TrackNode(Node):
     def __str__(self, separator="\t"):
         fields = [getattr(self.wrapped, x) for x in COLUMNS.values()]
         return separator.join(fields)
+
+    def __iter__(self):
+        return iter(self.tracks)
+
+    def reset(self):
+        self.wrapped.reset_tags()
 
 
 class MusicCollectionModel(QAbstractItemModel):
@@ -167,7 +176,7 @@ class MusicCollectionView(QTreeView):
     def _childrenSelected(self, node):
         assert isinstance(node, AlbumNode)
         selected = self._selectedNodes()
-        return all([x in selected for x in node.tracks])
+        return all([x in selected for x in node])
 
     def _selectChildren(self, index, selectionPolicy):
         selectionModel = self.selectionModel()
@@ -176,7 +185,7 @@ class MusicCollectionView(QTreeView):
         assert isinstance(node, AlbumNode)
 
         topLeft = model.index(0, 0, index)
-        bottomRight = model.index(len(node.tracks) - 1,
+        bottomRight = model.index(len(node) - 1,
                                   len(COLUMNS) - 1, index)
         selection = QItemSelection(topLeft, bottomRight)
         selectionModel.select(selection, selectionPolicy)

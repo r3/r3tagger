@@ -16,8 +16,6 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self._activePaths = set()
-
         # Models
         #  - Filesystem Model
         self.fileSystemModel = QFileSystemModel()
@@ -113,8 +111,6 @@ class MainWindow(QMainWindow):
         self.addPath(path)
 
     def addPath(self, path):
-        self._activePaths.add(path)
-
         if os.path.isfile(path):
             track = Controller.build_track(path)
             containerAlbum = Controller.album_from_tracks([track], 'Single')
@@ -157,7 +153,6 @@ class MainWindow(QMainWindow):
 
     def clearAlbumView(self):
         model = self.albumView.model()
-        self._activePaths = set()
         model.clear()
         model.setHeaders()
 
@@ -166,12 +161,10 @@ class MainWindow(QMainWindow):
             lineEdit.setText('')
 
     def cancelChanges(self):
-        paths = self._activePaths
-        self.clearAlbumView()
-        self.clearEditing()
-
-        for path in paths:
-            self.addPath(path)
+        model = self.albumView.model()
+        for child in model.root:
+            for track in child:
+                track.reset()
 
 
 if __name__ == '__main__':
