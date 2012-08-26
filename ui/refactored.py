@@ -37,6 +37,9 @@ class MainWindow(QMainWindow):
         self.albumView.expanded.connect(self.fixAlbumViewColumns)
         self.albumView.collapsed.connect(self.fixAlbumViewColumns)
 
+        model = self.albumView.model()
+        model.dataChanged.connect(self.updateEditing)
+
         # Statusbar
         #status = self.statusBar()
         #status.setSizeGripEnabled(False)

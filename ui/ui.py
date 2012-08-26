@@ -79,12 +79,9 @@ class TrackNode(Node):
         setattr(self.wrapped, tagToEdit, value)
         self.dirty = True
 
-        print("Album tag is now {}".format(self.wrapped.album))
         return True
 
     def saveChanges(self):
-        print("Changes to {} saved".format(self))
-        print("Album tag is now {}".format(self.wrapped.album))
         self.wrapped()
         self.dirty = False
 
