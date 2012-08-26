@@ -34,6 +34,8 @@ class MainWindow(QMainWindow):
         self.albumView = ui.MusicCollectionView()
         self.albumView.setSelectionMode(QAbstractItemView.MultiSelection)
         self.albumView.clicked.connect(self.updateEditing)
+        self.albumView.expanded.connect(self.fixAlbumViewColumns)
+        self.albumView.collapsed.connect(self.fixAlbumViewColumns)
 
         # Statusbar
         #status = self.statusBar()
@@ -101,10 +103,16 @@ class MainWindow(QMainWindow):
         centralWidget.setLayout(centralLayout)
         self.setCentralWidget(centralWidget)
 
+    def _fixColumns(self, index, view, model):
+        for column in range(model.columnCount(index)):
+            view.resizeColumnToContents(column)
+
     def fixFileSystemColumns(self, index):
-        columns = self.fileSystemModel.columnCount(index)
-        for column in range(columns):
-            self.fileSystemView.resizeColumnToContents(column)
+        self._fixColumns(index, self.fileSystemView, self.fileSystemModel)
+
+    def fixAlbumViewColumns(self, index):
+        model = self.albumView.model()
+        self._fixColumns(index, self.albumView, model)
 
     def updateAlbumModel(self, index):
         path = self.fileSystemModel.fileInfo(index).absoluteFilePath()
@@ -151,6 +159,10 @@ class MainWindow(QMainWindow):
         for track in view.selectedTracks():
             Controller.retag_track(track, tags)
 
+        for track in self.albumView.model():
+            if track.dirty:
+                track.saveChanges()
+
     def clearAlbumView(self):
         model = self.albumView.model()
         model.clear()
@@ -161,8 +173,12 @@ class MainWindow(QMainWindow):
             lineEdit.setText('')
 
     def cancelChanges(self):
-        for track in self.albumView.model():
+        model = self.albumView.model()
+        for track in model:
             track.reset()
+
+        model.beginResetModel()
+        model.endResetModel()
 
 
 if __name__ == '__main__':

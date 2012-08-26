@@ -81,6 +81,11 @@ class TrackNode(Node):
 
         return True
 
+    def saveChanges(self):
+        self.wrapped()
+        self.dirty = False
+        print("Changes to {} saved".format(self.wrapped))
+
 
 class MusicCollectionModel(QAbstractItemModel):
     def __init__(self, parent=None):
