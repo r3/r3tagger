@@ -54,6 +54,9 @@ class AlbumNode(Node):
         child.parent = self
         bisect.insort(self.tracks, child)
 
+    def setData(self, column, value):
+        return False
+
 
 class TrackNode(Node):
     def __init__(self, wrapped, parent=None):
@@ -66,6 +69,15 @@ class TrackNode(Node):
 
     def reset(self):
         self.wrapped.reset_tags()
+
+    def setData(self, column, value):
+        if column < 0 or column >= len(COLUMNS):
+            return False
+
+        tagToEdit = COLUMNS.values()[column]
+        setattr(self.wrapped, tagToEdit, value)
+
+        return True
 
 
 class MusicCollectionModel(QAbstractItemModel):
@@ -82,6 +94,12 @@ class MusicCollectionModel(QAbstractItemModel):
 
     def setHeaders(self):
         self.headers = COLUMNS.keys()
+
+    def flags(self, index):
+        if not index.isValid():
+            return 0
+
+        return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def addAlbum(self, album, callReset=True):
         root = self.root
@@ -117,6 +135,18 @@ class MusicCollectionModel(QAbstractItemModel):
         columnNumber = index.column()
         field = COLUMNS.values()[columnNumber]
         return getattr(node.wrapped, field)
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if role != Qt.EditRole:
+            return False
+
+        item = self.nodeFromIndex(index)
+        result = item.setData(index.column(), value)
+
+        if result:
+            self.dataChanged.emit(index, index)
+
+        return result
 
     def headerData(self, section, orientation, role):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
