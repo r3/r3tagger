@@ -62,6 +62,7 @@ class TrackNode(Node):
     def __init__(self, wrapped, parent=None):
         self.parent = parent
         self.wrapped = wrapped
+        self.dirty = False
 
     def __str__(self, separator="\t"):
         fields = [getattr(self.wrapped, x) for x in COLUMNS.values()]
@@ -76,6 +77,7 @@ class TrackNode(Node):
 
         tagToEdit = COLUMNS.values()[column]
         setattr(self.wrapped, tagToEdit, value)
+        self.dirty = True
 
         return True
 
@@ -86,6 +88,11 @@ class MusicCollectionModel(QAbstractItemModel):
         self.columns = len(COLUMNS)
         self.clear()
         self.setHeaders()
+
+    def __iter__(self):
+        for album in self.root:
+            for track in album:
+                yield track
 
     def clear(self):
         self.beginResetModel()

@@ -161,10 +161,8 @@ class MainWindow(QMainWindow):
             lineEdit.setText('')
 
     def cancelChanges(self):
-        model = self.albumView.model()
-        for child in model.root:
-            for track in child:
-                track.reset()
+        for track in self.albumView.model():
+            track.reset()
 
 
 if __name__ == '__main__':
