@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         #  - Filesystem Model
         self.fileSystemModel = QFileSystemModel()
         # TODO: Set this to CWD and add drives/root
-        fileSystemRoot = self.fileSystemModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger')
+        fileSystemRoot = self.fileSystemModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger/tests')
 
         # Views
         #  - Filesystem View
@@ -161,6 +161,8 @@ class MainWindow(QMainWindow):
 
         for track in self.albumView.model():
             if track.dirty:
+                import ipdb
+                ipdb.set_trace()  # XXX BREAKPOINT
                 track.saveChanges()
 
     def clearAlbumView(self):

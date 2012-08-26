@@ -79,12 +79,14 @@ class TrackNode(Node):
         setattr(self.wrapped, tagToEdit, value)
         self.dirty = True
 
+        print("Album tag is now {}".format(self.wrapped.album))
         return True
 
     def saveChanges(self):
+        print("Changes to {} saved".format(self))
+        print("Album tag is now {}".format(self.wrapped.album))
         self.wrapped()
         self.dirty = False
-        print("Changes to {} saved".format(self.wrapped))
 
 
 class MusicCollectionModel(QAbstractItemModel):
@@ -111,7 +113,11 @@ class MusicCollectionModel(QAbstractItemModel):
         if not index.isValid():
             return 0
 
-        return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        item = self.nodeFromIndex(index)
+        if isinstance(item, TrackNode):
+            return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
+
+        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def addAlbum(self, album, callReset=True):
         root = self.root
