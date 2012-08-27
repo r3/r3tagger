@@ -2,13 +2,12 @@ import sys
 import os
 
 from PySide.QtCore import Qt, QModelIndex
-from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
-                          QDockWidget, QAbstractItemView, QHBoxLayout,
+from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
+                          QDockWidget, QAbstractItemView, QHBoxLayout, QIcon,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
-                          QApplication, QFormLayout)
-                          # , QDesktopServices)
+                          QApplication, QFormLayout, QKeySequence)
 
-import ui
+import AlbumCollection
 from r3tagger import Controller
 
 
@@ -23,7 +22,8 @@ class MainWindow(QMainWindow):
         #rootPath = QDesktopServices.storageLocation(
             #QDesktopServices.HomeLocation)
         #fileSystemRoot = self.fileSystemModel.setRootPath(rootPath)
-        fileSystemRoot = self.fileSystemModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger/tests')
+        fileSystemRoot = self.fileSystemModel.setRootPath(
+            '/home/ryan/Programming/Python/projects/r3tagger/r3tagger/tests')
 
         # Views
         #  - Filesystem View
@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.fileSystemView.expanded.connect(self.fixFileSystemColumns)
         self.fileSystemView.collapsed.connect(self.fixFileSystemColumns)
         #  - Album View
-        self.albumView = ui.MusicCollectionView()
+        self.albumView = AlbumCollection.MusicCollectionView()
         self.albumView.setSelectionMode(QAbstractItemView.MultiSelection)
         self.albumView.clicked.connect(self.updateEditing)
         self.albumView.expanded.connect(self.fixAlbumViewColumns)
@@ -48,6 +48,63 @@ class MainWindow(QMainWindow):
         #status.setSizeGripEnabled(False)
         #status.showMessage("Ready", 5000)
 
+        # Actions
+        fileOpenAction = self._createAction(
+            "&Open", self.fileOpen, QKeySequence.Open,
+            'fileopen', "Open location")
+
+        fileSaveAction = self._createAction(
+            "&Confirm", self.fileSave, QKeySequence.Save, 'filesave',
+            "Confirm changes")
+
+        fileQuitAction = self._createAction(
+            "&Quit", self.fileQuit, QKeySequence.Quit, 'filequit',
+            "Quit program")
+
+        editRecognizeAction = self._createAction(
+            "&Recognize", self.editRecognize,
+            QKeySequence(Qt.CTRL + Qt.Key_R), 'editrecognize',
+            "Recognize music")
+
+        editReorganizeAction = self._createAction(
+            "Reorganize", self.editReorganize,
+            QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_R),
+            'editreorganize', "Reorganize music")
+
+        editSettingsAction = self._createAction(
+            "Settings", self.editSettings, QKeySequence.Preferences,
+            'editsettings', "Edit settings")
+
+        helpDocsAction = self._createAction(
+            "Documentation", self.helpDocs, QKeySequence.HelpContents,
+            'helpdocs', "Documentation")
+
+        helpAboutAction = self._createAction(
+            "About", self.helpAbout,
+            QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_F1),
+            'helpabout', "About")
+
+        # Menus
+        fileMenu = self.menuBar().addMenu("&File")
+        self._addActions(fileMenu, (fileOpenAction, fileSaveAction,
+                                    fileQuitAction))
+
+        editMenu = self.menuBar().addMenu("&Edit")
+        self._addActions(editMenu, (editReorganizeAction,
+                                    editRecognizeAction, editSettingsAction))
+
+        helpMenu = self.menuBar().addMenu("&Help")
+        self._addActions(helpMenu, (helpDocsAction, helpAboutAction))
+
+        # Toolbars
+        fileToolbar = self.addToolBar("FileToolbar")
+        fileToolbar.setObjectName("fileToolbar")
+        self._addActions(fileToolbar, (fileOpenAction, fileSaveAction))
+
+        editToolbar = self.addToolBar("EditToolbar")
+        editToolbar.setObjectName("editToolbar")
+        self._addActions(editToolbar, (editRecognizeAction,
+                                       editReorganizeAction))
         # Editing Group
         self.editingGroup = QFormLayout()
         self.lineArtist = QLineEdit()
@@ -108,6 +165,29 @@ class MainWindow(QMainWindow):
         centralLayout.addLayout(self.buttonGroup)
         centralWidget.setLayout(centralLayout)
         self.setCentralWidget(centralWidget)
+
+    def _createAction(self, text, slot=None, shortcut=None, icon=None,
+                      tip=None, checkable=False, signal="triggered"):
+        action = QAction(text, self)
+        if icon is not None:
+            action.setIcon(QIcon(":/{0}.png".format(icon)))
+        if shortcut is not None:
+            action.setShortcut(shortcut)
+        if tip is not None:
+            action.setToolTip(tip)
+            action.setStatusTip(tip)
+        if slot is not None:
+            getattr(action, signal).connect(slot)
+        if checkable:
+            action.setCheckable(True)
+        return action
+
+    def _addActions(self, target, actions):
+        for action in actions:
+            if action is None:
+                target.addSeparator()
+            else:
+                target.addAction(action)
 
     def _fixColumns(self, index, view, model):
         for column in range(model.columnCount(index)):
@@ -203,6 +283,30 @@ class MainWindow(QMainWindow):
 
         for expandedIndex in expanded:
             self.albumView.setExpanded(expandedIndex, True)
+
+    def fileOpen(self):
+        pass
+
+    def fileSave(self):
+        pass
+
+    def fileQuit(self):
+        pass
+
+    def editRecognize(self):
+        pass
+
+    def editReorganize(self):
+        pass
+
+    def editSettings(self):
+        pass
+
+    def helpDocs(self):
+        pass
+
+    def helpAbout(self):
+        pass
 
 
 if __name__ == '__main__':
