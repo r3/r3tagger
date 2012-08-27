@@ -6,6 +6,7 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
                           QDockWidget, QAbstractItemView, QHBoxLayout,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
                           QApplication, QFormLayout)
+                          # , QDesktopServices)
 
 import ui
 from r3tagger import Controller
@@ -19,7 +20,9 @@ class MainWindow(QMainWindow):
         # Models
         #  - Filesystem Model
         self.fileSystemModel = QFileSystemModel()
-        # TODO: Set this to CWD and add drives/root
+        #rootPath = QDesktopServices.storageLocation(
+            #QDesktopServices.HomeLocation)
+        #fileSystemRoot = self.fileSystemModel.setRootPath(rootPath)
         fileSystemRoot = self.fileSystemModel.setRootPath('/home/ryan/Programming/Python/projects/r3tagger/r3tagger/tests')
 
         # Views
@@ -120,11 +123,12 @@ class MainWindow(QMainWindow):
     def updateAlbumModel(self, index):
         path = self.fileSystemModel.fileInfo(index).absoluteFilePath()
         self.addPath(path)
+        self.fixAlbumViewColumns(index)
 
     def addPath(self, path):
         if os.path.isfile(path):
             track = Controller.build_track(path)
-            containerAlbum = Controller.album_from_tracks([track], 'Single')
+            containerAlbum = Controller.album_from_tracks([track], u'Singles')
             self.albumView.model().addAlbum(containerAlbum)
 
         else:

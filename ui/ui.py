@@ -94,6 +94,7 @@ class MusicCollectionModel(QAbstractItemModel):
         self.columns = len(COLUMNS)
         self.clear()
         self.setHeaders()
+        self.singlesRoot = None
 
     def __iter__(self):
         for album in self.root:
@@ -119,6 +120,23 @@ class MusicCollectionModel(QAbstractItemModel):
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def addAlbum(self, album, callReset=True):
+        if album.album == u'Singles':
+            self.addSingle(album, callReset)
+        else:
+            self.buildNode(album, callReset)
+
+    def addSingle(self, album, callReset=True):
+        if self.singlesRoot:
+            for track in album:
+                self.singlesRoot.insertChild(TrackNode(track))
+        else:
+            self.singlesRoot = self.buildNode(album, callReset=False)
+
+        if callReset:
+            self.beginResetModel()
+            self.endResetModel()
+
+    def buildNode(self, album, callReset):
         root = self.root
         albumNode = AlbumNode(album)
         root.insertChild(albumNode)
@@ -130,6 +148,8 @@ class MusicCollectionModel(QAbstractItemModel):
         if callReset:
             self.beginResetModel()
             self.endResetModel()
+
+        return albumNode
 
     def rowCount(self, parent):
         node = self.nodeFromIndex(parent)
@@ -145,12 +165,17 @@ class MusicCollectionModel(QAbstractItemModel):
             return int(Qt.AlignTop | Qt.AlignLeft)
         if role != Qt.DisplayRole:
             return None
+
+        columnNumber = index.column()
+        field = COLUMNS.values()[columnNumber]
+
         node = self.nodeFromIndex(index)
         assert node is not None
         if isinstance(node, AlbumNode):
+            if field == 'album' and not str(node):
+                return '[Various]'
             return str(node) if index.column() == 0 else ""
-        columnNumber = index.column()
-        field = COLUMNS.values()[columnNumber]
+
         return getattr(node.wrapped, field)
 
     def setData(self, index, value, role=Qt.EditRole):
