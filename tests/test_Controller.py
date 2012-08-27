@@ -254,3 +254,36 @@ class TestAlbumManipulation():
 
         for name, field in source.items():
             assert getattr(album, name) == field
+
+    def test_flush_changes_track(self, album):
+        track = album[0]
+        path = track.path
+        artist = u'Foo'
+        track.artist = artist
+        Controller.flush_changes(track)
+
+        changed_track = Controller.build_track(path)
+        assert changed_track.artist == artist
+
+    def test_flush_changes_album(self, album):
+        path = album.path
+        artist = u'Foo'
+        Controller.retag_album(album, {'artist': artist})
+        Controller.flush_changes(album)
+
+        changed_album = Controller.build_albums(path).next()
+        assert changed_album.artist == artist
+
+    def test_flush_changes_tracks(self, album):
+        artist = u'Foo'
+        tracks = []
+
+        for track in album[0:3]:
+            track.artist = artist
+
+        paths = [track.path for track in tracks]
+        Controller.flush_changes(*tracks)
+
+        for path in paths:
+            changed_track = Controller.build_track(path)
+            assert changed_track.artist == artist

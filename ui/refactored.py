@@ -164,8 +164,6 @@ class MainWindow(QMainWindow):
 
         for track in self.albumView.model():
             if track.dirty:
-                import ipdb
-                ipdb.set_trace()  # XXX BREAKPOINT
                 track.saveChanges()
 
     def clearAlbumView(self):

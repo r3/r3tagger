@@ -280,3 +280,17 @@ def album_from_tracks(tracks, name=None):
         args['album'] = name
 
     return Album(args)
+
+
+def flush_changes(*tracks_and_albums):
+    """Flushes the changes made to given tracks and/or albums to disk
+
+    Accepts any number of Track and/or Album objects
+    """
+    for item in tracks_and_albums:
+        if isinstance(item, Album):
+            for track in item:
+                track()
+
+        else:
+            item()
