@@ -5,6 +5,8 @@ from functools import total_ordering
 from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PySide.QtGui import QTreeView, QItemSelectionModel, QItemSelection
 
+from r3tagger import Controller
+
 COLUMNS = OrderedDict({"Artist": 'artist',
                        "Album": 'album',
                        "Title": 'title',
@@ -82,7 +84,7 @@ class TrackNode(Node):
         return True
 
     def saveChanges(self):
-        self.wrapped()
+        Controller.flush_changes(self.wrapped)
         self.dirty = False
 
 
