@@ -1,7 +1,7 @@
 import sys
 import os
 
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QModelIndex
 from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel,
                           QDockWidget, QAbstractItemView, QHBoxLayout,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
@@ -170,6 +170,8 @@ class MainWindow(QMainWindow):
             if track.dirty:
                 track.saveChanges()
 
+        self.resetModel()
+
     def clearAlbumView(self):
         model = self.albumView.model()
         model.clear()
@@ -180,12 +182,27 @@ class MainWindow(QMainWindow):
             lineEdit.setText('')
 
     def cancelChanges(self):
-        model = self.albumView.model()
-        for track in model:
+        for track in self.albumView.model():
             track.reset()
 
+        self.resetModel()
+
+    def resetModel(self):
+        model = self.albumView.model()
         model.beginResetModel()
+        self.clearEditing()
+
+        expanded = []
+        rowCount = model.rowCount(QModelIndex())
+        for row in range(rowCount):
+            index = model.index(row, 0, QModelIndex())
+            if self.albumView.isExpanded(index):
+                expanded.append(index)
+
         model.endResetModel()
+
+        for expandedIndex in expanded:
+            self.albumView.setExpanded(expandedIndex, True)
 
 
 if __name__ == '__main__':
