@@ -66,8 +66,8 @@ class Album(object):
             attrib = getattr(self, field)
             other_attrib = getattr(other, field)
             if attrib and other_attrib:
-                info.add(attrib)
-                other_info.add(other_attrib)
+                info.add(attrib.lower())
+                other_info.add(other_attrib.lower())
 
             if self.tracks and other.tracks:
                 info.update([str(x) for x in self.tracks if x])
