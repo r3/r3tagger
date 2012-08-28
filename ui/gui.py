@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
         editToolbar.setObjectName("editToolbar")
         self._addActions(editToolbar, (editRecognizeAction,
                                        editReorganizeAction))
+
         # Editing Group
         self.editingGroup = QFormLayout()
         self.lineArtist = QLineEdit()

@@ -1,6 +1,6 @@
 """r3tagger.Controller
 
-Handles the processing and construction of Albums of Tracks
+Handles the processing and construction of Albums and Tracks
 
 Provided Functions:
     build_albums(album:Album, path:str)
@@ -12,7 +12,7 @@ Provided Functions:
     rename_album(album:Album)
     Renames an Album
 
-    rename_tracks(target:model)
+    rename_tracks(target:Album|Track)
     Renames Track or Tracks in an Album
 
     retag_album(album:Album, mapping:dict)
@@ -23,6 +23,18 @@ Provided Functions:
 
     missing_fields(target:Album|Track)
     Returns list of fields that have missing tags
+
+    update_album(target:Album, source:Album)
+    Updates tags on target with those in source
+
+    get_fields(target:Album|Track)
+    Returns dictionary of the tags in target
+
+    album_from_tracks(tracks:Tracks, name=None)
+    Creates a container album with the given tracks and optional album name
+
+    flush_changes(target:Albums|Tracks)
+    Saves changes to any number of tracks and/or albums
 """
 
 import os
