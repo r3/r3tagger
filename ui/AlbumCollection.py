@@ -3,7 +3,8 @@ from collections import OrderedDict
 from functools import total_ordering
 
 from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
-from PySide.QtGui import QTreeView, QItemSelectionModel, QItemSelection
+from PySide.QtGui import (QTreeView, QItemSelectionModel, QItemSelection,
+                          QStyledItemDelegate, QLineEdit)
 
 from r3tagger import Controller
 
@@ -17,17 +18,24 @@ COLUMNS = OrderedDict({"Artist": 'artist',
 
 @total_ordering
 class Node(object):
+    def __init__(self, parent=None, wrapped=None):
+        self.parent = parent
+        self.wrapped = wrapped
+
     def __lt__(self, other):
         return str(self) < str(other)
 
     def __eq__(self, other):
         return str(self) == str(other)
 
+    def get(self, attrib):
+        return getattr(self.wrapped, attrib)
+
 
 class AlbumNode(Node):
     def __init__(self, wrapped, parent=None):
-        self.wrapped = wrapped
         self.parent = parent
+        self.wrapped = wrapped
         self.tracks = []
 
     def __str__(self):
@@ -176,7 +184,7 @@ class MusicCollectionModel(QAbstractItemModel):
                 return '[Various]'
             return str(node) if index.column() == 0 else ""
 
-        return getattr(node.wrapped, field)
+        return node.get(field)
 
     def setData(self, index, value, role=Qt.EditRole):
         if role != Qt.EditRole:
@@ -225,6 +233,7 @@ class MusicCollectionView(QTreeView):
         super(MusicCollectionView, self).__init__(parent)
         self.setModel(MusicCollectionModel())
         self.setUniformRowHeights(True)
+        self.setItemDelegate(MusicCollectionDelegate(self))
 
     def _selectedNodes(self):
         # TODO: Cache this maybe? Invalidate cache when new selection made
@@ -279,7 +288,8 @@ class MusicCollectionView(QTreeView):
             if not isinstance(node, TrackNode):
                 continue
 
-            if not self._siblingsSelected(node) or len(self._nodeSiblings(node)) == 1:
+            if (not self._siblingsSelected(node) or
+                    len(self._nodeSiblings(node)) == 1):
                 result.append(node.wrapped)
 
         return result
@@ -308,3 +318,23 @@ class MusicCollectionView(QTreeView):
 
         else:
             self._selectParent(index, QItemSelectionModel.Deselect)
+
+
+class MusicCollectionDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = QLineEdit(parent)
+        editor.returnPressed.connect(self.commitAndCloseEditor)
+        return editor
+
+    def setEditorData(self, editor, index):
+        column = COLUMNS.values()[index.column()]
+        model = self.parent().model()
+
+        node = model.nodeFromIndex(index)
+        previousNodeText = node.get(column)
+        editor.setText(previousNodeText)
+
+    def commitAndCloseEditor(self):
+        editor = self.sender()
+        self.commitData.emit(editor)
+        self.closeEditor.emit(editor, self.NoHint)
