@@ -44,46 +44,124 @@ class MainWindow(QMainWindow):
         model = self.albumView.model()
         model.dataChanged.connect(self.updateEditing)
 
+        # Editing Group
+        self.editingGroup = QFormLayout()
+        self.lineArtist = QLineEdit()
+        self.lineAlbum = QLineEdit()
+        self.lineTitle = QLineEdit()
+        self.lineTrack = QLineEdit()
+        self.lineDate = QLineEdit()
+        self.lineGenre = QLineEdit()
+        self.editingGroup.addRow("Artist:", self.lineArtist)
+        self.editingGroup.addRow("Album:", self.lineAlbum)
+        self.editingGroup.addRow("Title:", self.lineTitle)
+        self.editingGroup.addRow("Track:", self.lineTrack)
+        self.editingGroup.addRow("Date:", self.lineDate)
+        self.editingGroup.addRow("Genre:", self.lineGenre)
+
+        self.tagsToAttribs = {'artist': self.lineArtist,
+                              'album': self.lineAlbum,
+                              'title': self.lineTitle,
+                              'tracknumber': self.lineTrack,
+                              'date': self.lineDate,
+                              'genre': self.lineGenre}
+
+        # Confirm / Cancel / Clear Group
+        self.buttonGroup = QHBoxLayout()
+        self.buttonGroup.addStretch()
+        confirm = QPushButton("Confirm")
+        confirm.clicked.connect(self.retagSelected)
+        self.buttonGroup.addWidget(confirm)
+        cancel = QPushButton("Cancel")
+        cancel.clicked.connect(self.cancelChanges)
+        self.buttonGroup.addWidget(cancel)
+        clear = QPushButton("Clear")
+        clear.clicked.connect(self.clearAlbumView)
+        self.buttonGroup.addWidget(clear)
+        self.buttonGroup.addStretch()
+
         # Statusbar
         #status = self.statusBar()
         #status.setSizeGripEnabled(False)
         #status.showMessage("Ready", 5000)
 
+        # Docks
+        dockAllowed = (Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        #  - Filesystem Dock
+        fileSystemDock = QDockWidget("Navigate", self)
+        fileSystemDock.setObjectName("fileSystemDock")
+        fileSystemDock.setAllowedAreas(dockAllowed)
+        fileSystemDock.setWidget(self.fileSystemView)
+        self.addDockWidget(Qt.LeftDockWidgetArea, fileSystemDock)
+        #  - Editing Dock
+        editingWidget = QWidget()
+        editingWidget.setLayout(self.editingGroup)
+        editingDock = QDockWidget("Editing", self)
+        editingDock.setObjectName("editingDock")
+        editingDock.setAllowedAreas(dockAllowed)
+        editingDock.setWidget(editingWidget)
+        self.addDockWidget(Qt.RightDockWidgetArea, editingDock)
+
         # Actions
         fileOpenAction = self._createAction(
-            "&Open", self.fileOpen, QKeySequence.Open,
-            'fileopen', "Open location")
+            text="&Open",
+            slot=self.fileOpen,
+            shortcut=QKeySequence.Open,
+            icon='fileopen',
+            tip="Open location")
 
         fileSaveAction = self._createAction(
-            "&Confirm", self.fileSave, QKeySequence.Save, 'filesave',
-            "Confirm changes")
+            text="&Confirm",
+            slot=self.fileSave,
+            shortcut=QKeySequence.Save,
+            icon='filesave',
+            tip="Confirm changes")
 
         fileQuitAction = self._createAction(
-            "&Quit", self.fileQuit, QKeySequence.Quit, 'filequit',
-            "Quit program")
+            text="&Quit",
+            slot=self.fileQuit,
+            shortcut=QKeySequence.Quit,
+            icon='filequit',
+            tip="Quit program")
 
         editRecognizeAction = self._createAction(
-            "&Recognize", self.editRecognize,
-            QKeySequence(Qt.CTRL + Qt.Key_R), 'editrecognize',
-            "Recognize music")
+            text="&Recognize",
+            slot=self.editRecognize,
+            shortcut=QKeySequence(Qt.CTRL + Qt.Key_R),
+            icon='editrecognize',
+            tip="Recognize music")
 
         editReorganizeAction = self._createAction(
-            "Reorganize", self.editReorganize,
-            QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_R),
-            'editreorganize', "Reorganize music")
+            text="Reorganize",
+            slot=self.editReorganize,
+            shortcut=QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_R),
+            icon='editreorganize',
+            tip="Reorganize music")
 
         editSettingsAction = self._createAction(
-            "Settings", self.editSettings, QKeySequence.Preferences,
-            'editsettings', "Edit settings")
+            text="Settings",
+            slot=self.editSettings,
+            shortcut=QKeySequence.Preferences,
+            icon='editsettings',
+            tip="Edit settings")
 
         helpDocsAction = self._createAction(
-            "Documentation", self.helpDocs, QKeySequence.HelpContents,
-            'helpdocs', "Documentation")
+            text="Documentation",
+            slot=self.helpDocs,
+            shortcut=QKeySequence.HelpContents,
+            icon='helpdocs',
+            tip="Documentation")
 
         helpAboutAction = self._createAction(
-            "About", self.helpAbout,
-            QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_F1),
-            'helpabout', "About")
+            text="About",
+            slot=self.helpAbout,
+            shortcut=QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_F1),
+            icon='helpabout',
+            tip="About")
+
+        toggleEditing = editingDock.toggleViewAction()
+
+        toggleFileNav = fileSystemDock.toggleViewAction()
 
         # Menus
         fileMenu = self.menuBar().addMenu("&File")
@@ -107,58 +185,9 @@ class MainWindow(QMainWindow):
         self._addActions(editToolbar, (editRecognizeAction,
                                        editReorganizeAction))
 
-        # Editing Group
-        self.editingGroup = QFormLayout()
-        self.lineArtist = QLineEdit()
-        self.lineAlbum = QLineEdit()
-        self.lineTitle = QLineEdit()
-        self.lineTrack = QLineEdit()
-        self.lineDate = QLineEdit()
-        self.lineGenre = QLineEdit()
-        self.editingGroup.addRow("Artist:", self.lineArtist)
-        self.editingGroup.addRow("Album:", self.lineAlbum)
-        self.editingGroup.addRow("Title:", self.lineTitle)
-        self.editingGroup.addRow("Track:", self.lineTrack)
-        self.editingGroup.addRow("Date:", self.lineDate)
-        self.editingGroup.addRow("Genre:", self.lineGenre)
-
-        self.tagsToAttribs = {'artist': self.lineArtist,
-                              'album': self.lineAlbum,
-                              'title': self.lineTitle,
-                              'tracknumber': self.lineTrack,
-                              'date': self.lineDate,
-                              'genre': self.lineGenre}
-
-        # Docks
-        dockAllowed = (Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        #  - Filesystem Dock
-        fileSystemDock = QDockWidget("Navigate", self)
-        fileSystemDock.setObjectName("fileSystemDock")
-        fileSystemDock.setAllowedAreas(dockAllowed)
-        fileSystemDock.setWidget(self.fileSystemView)
-        self.addDockWidget(Qt.LeftDockWidgetArea, fileSystemDock)
-        #  - Editing Dock
-        editingWidget = QWidget()
-        editingWidget.setLayout(self.editingGroup)
-        editingDock = QDockWidget("Editing", self)
-        editingDock.setObjectName("editingDock")
-        editingDock.setAllowedAreas(dockAllowed)
-        editingDock.setWidget(editingWidget)
-        self.addDockWidget(Qt.RightDockWidgetArea, editingDock)
-
-        # Confirm / Cancel / Clear Group
-        self.buttonGroup = QHBoxLayout()
-        self.buttonGroup.addStretch()
-        confirm = QPushButton("Confirm")
-        confirm.clicked.connect(self.retagSelected)
-        self.buttonGroup.addWidget(confirm)
-        cancel = QPushButton("Cancel")
-        cancel.clicked.connect(self.cancelChanges)
-        self.buttonGroup.addWidget(cancel)
-        clear = QPushButton("Clear")
-        clear.clicked.connect(self.clearAlbumView)
-        self.buttonGroup.addWidget(clear)
-        self.buttonGroup.addStretch()
+        toggleToolbar = self.addToolBar("ToggleToolbar")
+        toggleToolbar.setObjectName("toggleToolbar")
+        self._addActions(toggleToolbar, (toggleEditing, toggleFileNav))
 
         # Final Layout
         centralWidget = QWidget()
