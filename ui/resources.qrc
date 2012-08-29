@@ -2,8 +2,13 @@
 <qresource>
 <file alias="fileOpen.png">icons/fileOpen.png</file>
 <file alias="fileSave.png">icons/fileSave.png</file>
+<file alias="fileQuit.png">icons/fileQuit.png</file>
 <file alias="editRecognize.png">icons/editRecognize.png</file>
+<file alias="editReorganize.png">icons/editReorganize.png</file>
+<file alias="editSettings.png">icons/editSettings.png</file>
 <file alias="toggleEditing.png">icons/toggleEditing.png</file>
 <file alias="toggleFileNav.png">icons/toggleFileNav.png</file>
+<file alias="helpDocs.png">icons/helpDocs.png</file>
+<file alias="helpAbout.png">icons/helpAbout.png</file>
 </qresource>
 </RCC>

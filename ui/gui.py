@@ -9,6 +9,7 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
 
 import AlbumCollection
 from r3tagger import Controller
+import qrc_resources
 
 
 class MainWindow(QMainWindow):
@@ -107,61 +108,63 @@ class MainWindow(QMainWindow):
             text="&Open",
             slot=self.fileOpen,
             shortcut=QKeySequence.Open,
-            icon='fileopen',
+            icon='fileOpen',
             tip="Open location")
 
         fileSaveAction = self._createAction(
-            text="&Confirm",
+            text="&Save",
             slot=self.fileSave,
             shortcut=QKeySequence.Save,
-            icon='filesave',
-            tip="Confirm changes")
+            icon='fileSave',
+            tip="Save changes")
 
         fileQuitAction = self._createAction(
             text="&Quit",
             slot=self.fileQuit,
             shortcut=QKeySequence.Quit,
-            icon='filequit',
+            icon='fileQuit',
             tip="Quit program")
 
         editRecognizeAction = self._createAction(
             text="&Recognize",
             slot=self.editRecognize,
             shortcut=QKeySequence(Qt.CTRL + Qt.Key_R),
-            icon='editrecognize',
+            icon='editRecognize',
             tip="Recognize music")
 
         editReorganizeAction = self._createAction(
             text="Reorganize",
             slot=self.editReorganize,
             shortcut=QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_R),
-            icon='editreorganize',
+            icon='editReorganize',
             tip="Reorganize music")
 
         editSettingsAction = self._createAction(
             text="Settings",
             slot=self.editSettings,
             shortcut=QKeySequence.Preferences,
-            icon='editsettings',
+            icon='editSettings',
             tip="Edit settings")
 
         helpDocsAction = self._createAction(
             text="Documentation",
             slot=self.helpDocs,
             shortcut=QKeySequence.HelpContents,
-            icon='helpdocs',
+            icon='helpDocs',
             tip="Documentation")
 
         helpAboutAction = self._createAction(
             text="About",
             slot=self.helpAbout,
             shortcut=QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_F1),
-            icon='helpabout',
+            icon='helpAbout',
             tip="About")
 
         toggleEditing = editingDock.toggleViewAction()
+        toggleEditing.setIcon(QIcon(":/toggleEditing.png"))
 
         toggleFileNav = fileSystemDock.toggleViewAction()
+        toggleFileNav.setIcon(QIcon(":/toggleFileNav.png"))
 
         # Menus
         fileMenu = self.menuBar().addMenu("&File")
