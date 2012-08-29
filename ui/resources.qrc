@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+<file alias="fileOpen.png">icons/fileOpen.png</file>
+<file alias="fileSave.png">icons/fileSave.png</file>
+<file alias="editRecognize.png">icons/editRecognize.png</file>
+<file alias="toggleEditing.png">icons/toggleEditing.png</file>
+<file alias="toggleFileNav.png">icons/toggleFileNav.png</file>
+</qresource>
+</RCC>
