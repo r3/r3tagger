@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.buttonGroup = QHBoxLayout()
         self.buttonGroup.addStretch()
         confirm = QPushButton("Confirm")
-        confirm.clicked.connect(self.retagSelected)
+        confirm.clicked.connect(self.confirmChanges)
         self.buttonGroup.addWidget(confirm)
         cancel = QPushButton("Cancel")
         cancel.clicked.connect(self.cancelChanges)
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
 
         fileSaveAction = self._createAction(
             text="&Save",
-            slot=self.retagSelected,
+            slot=self.confirmChanges,
             shortcut=QKeySequence.Save,
             icon='fileSave',
             tip="Save changes")
@@ -255,7 +255,7 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return None
             elif reply == QMessageBox.Yes:
-                self.retagSelected()
+                self.confirmChanges()
 
         settings = QSettings()
         settings.setValue("MainWindow/Geometry", self.saveGeometry())
@@ -299,7 +299,7 @@ class MainWindow(QMainWindow):
             edit.setText(tags.get(tag, ''))
             edit.setCursorPosition(0)
 
-    def retagSelected(self):
+    def confirmChanges(self):
         tags = {}
         for field, lineEdit in self.tagsToAttribs.items():
             tag = lineEdit.text()
