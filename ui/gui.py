@@ -1,7 +1,7 @@
 import sys
 import os
 
-from PySide.QtCore import Qt, QModelIndex
+from PySide.QtCore import Qt, QModelIndex, QSettings
 from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
                           QDockWidget, QAbstractItemView, QHBoxLayout, QIcon,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
@@ -116,14 +116,14 @@ class MainWindow(QMainWindow):
 
         fileSaveAction = self._createAction(
             text="&Save",
-            slot=self.fileSave,
+            slot=self.retagSelected,
             shortcut=QKeySequence.Save,
             icon='fileSave',
             tip="Save changes")
 
         fileQuitAction = self._createAction(
             text="&Quit",
-            slot=self.fileQuit,
+            slot=self.close,
             shortcut=QKeySequence.Quit,
             icon='fileQuit',
             tip="Quit program")
@@ -193,7 +193,17 @@ class MainWindow(QMainWindow):
 
         toggleToolbar = self.addToolBar("ToggleToolbar")
         toggleToolbar.setObjectName("toggleToolbar")
-        self._addActions(toggleToolbar, (toggleEditing, toggleFileNav))
+        self._addActions(toggleToolbar, (toggleFileNav, toggleEditing))
+
+        # Settings
+        settings = QSettings()
+        if settings.contains("MainWindow/Geometry"):
+            self.restoreGeometry(settings.value("MainWindow/Geometry"))
+
+        if settings.contains("MainWindow/State"):
+            self.restoreState(settings.value("MainWindow/State"))
+
+        self.setWindowTitle("r3tagger")
 
         # Final Layout
         centralWidget = QWidget()
@@ -232,6 +242,24 @@ class MainWindow(QMainWindow):
     def _fixColumns(self, index, view, model):
         for column in range(model.columnCount(index)):
             view.resizeColumnToContents(column)
+
+    def closeEvent(self, event):
+        if self.dirty:
+            reply = QMessageBox.question(
+                self,
+                "r3tagger - Unsaved Changes",
+                "Save unsaved changes?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+
+            if reply == QMessageBox.Cancel:
+                event.ignore()
+                return None
+            elif reply == QMessageBox.Yes:
+                self.retagSelected()
+
+        settings = QSettings()
+        settings.setValue("MainWindow/Geometry", self.saveGeometry())
+        settings.setValue("MainWindow/State", self.saveState())
 
     def fixFileSystemColumns(self, index):
         self._fixColumns(index, self.fileSystemView, self.fileSystemModel)
@@ -330,24 +358,6 @@ class MainWindow(QMainWindow):
 
     def fileOpen(self):
         pass
-
-    def fileSave(self):
-        pass
-
-    def fileQuit(self):
-        if self.dirty:
-            reply = QMessageBox.question(
-                self, "r3tagger - Unsaved Changes",
-                "Save unsaved changes?",
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-
-            if reply:
-                self.saveChanges()
-                self.close()
-            else:
-                return None
-
-        self.close()
 
     def editRecognize(self):
         pass
