@@ -5,7 +5,8 @@ from PySide.QtCore import Qt, QModelIndex
 from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
                           QDockWidget, QAbstractItemView, QHBoxLayout, QIcon,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
-                          QApplication, QFormLayout, QKeySequence)
+                          QApplication, QFormLayout, QKeySequence,
+                          QMessageBox)
 
 import AlbumCollection
 from r3tagger import Controller
@@ -16,6 +17,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.dirty = False
 
         # Models
         #  - Filesystem Model
@@ -41,6 +43,7 @@ class MainWindow(QMainWindow):
         self.albumView.expanded.connect(self.fixAlbumViewColumns)
         self.albumView.collapsed.connect(self.fixAlbumViewColumns)
         self.albumView.model().dataChanged.connect(self.fixAlbumViewColumns)
+        self.albumView.model().dataChanged.connect(self._setDirty)
 
         model = self.albumView.model()
         model.dataChanged.connect(self.updateEditing)
@@ -223,6 +226,9 @@ class MainWindow(QMainWindow):
             else:
                 target.addAction(action)
 
+    def _setDirty(self):
+        self.dirty = True
+
     def _fixColumns(self, index, view, model):
         for column in range(model.columnCount(index)):
             view.resizeColumnToContents(column)
@@ -280,11 +286,7 @@ class MainWindow(QMainWindow):
         for track in view.selectedTracks():
             Controller.retag_track(track, tags)
 
-        for track in self.albumView.model():
-            if track.dirty:
-                track.saveChanges()
-
-        self.resetModel()
+        self.saveChanges()
 
     def clearAlbumView(self):
         model = self.albumView.model()
@@ -294,6 +296,14 @@ class MainWindow(QMainWindow):
     def clearEditing(self):
         for lineEdit in self.tagsToAttribs.values():
             lineEdit.setText('')
+
+    def saveChanges(self):
+        for track in self.albumView.model():
+            if track.dirty:
+                track.saveChanges()
+
+        self.dirty = False
+        self.resetModel()
 
     def cancelChanges(self):
         for track in self.albumView.model():
@@ -325,7 +335,19 @@ class MainWindow(QMainWindow):
         pass
 
     def fileQuit(self):
-        pass
+        if self.dirty:
+            reply = QMessageBox.question(
+                self, "r3tagger - Unsaved Changes",
+                "Save unsaved changes?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+
+            if reply:
+                self.saveChanges()
+                self.close()
+            else:
+                return None
+
+        self.close()
 
     def editRecognize(self):
         pass
