@@ -6,7 +6,7 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
                           QDockWidget, QAbstractItemView, QHBoxLayout, QIcon,
                           QVBoxLayout, QWidget, QLineEdit, QPushButton,
                           QApplication, QFormLayout, QKeySequence,
-                          QMessageBox)
+                          QMessageBox, QFileDialog)
 
 import AlbumCollection
 from r3tagger import Controller
@@ -108,11 +108,11 @@ class MainWindow(QMainWindow):
 
         # Actions
         fileAddSongAction = self._createAction(
-            text="Add &Song",
+            text="Add &Songs",
             slot=self.fileAddSong,
             shortcut=QKeySequence.Open,
             icon='fileOpen',
-            tip="Add file (song)")
+            tip="Add files (songs)")
 
         fileAddAlbumAction = self._createAction(
             text="Add &Album",
@@ -360,10 +360,19 @@ class MainWindow(QMainWindow):
             self.albumView.setExpanded(expandedIndex, True)
 
     def fileAddSong(self):
-        pass
+        selectedFiles, selectedFilter = QFileDialog.getOpenFileNames(
+            parent=self,
+            caption="Add Songs")
+
+        for song in selectedFiles:
+            self.addPath(song)
 
     def fileAddAlbum(self):
-        pass
+        selectedDir = QFileDialog.getExistingDirectory(
+            parent=self,
+            caption="Add Album")
+
+        self.addPath(selectedDir)
 
     def editRecognize(self):
         pass
