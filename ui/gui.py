@@ -107,26 +107,33 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, editingDock)
 
         # Actions
-        fileOpenAction = self._createAction(
-            text="&Open",
-            slot=self.fileOpen,
+        fileAddSongAction = self._createAction(
+            text="Add &Song",
+            slot=self.fileAddSong,
             shortcut=QKeySequence.Open,
             icon='fileOpen',
-            tip="Open location")
+            tip="Add file (song)")
+
+        fileAddAlbumAction = self._createAction(
+            text="Add &Album",
+            slot=self.fileAddAlbum,
+            shortcut=QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_O),
+            icon='fileOpen',
+            tip="Add directory (album)")
 
         fileSaveAction = self._createAction(
-            text="&Save",
+            text="&Save Changes",
             slot=self.confirmChanges,
             shortcut=QKeySequence.Save,
             icon='fileSave',
-            tip="Save changes")
+            tip="Save Changes")
 
         fileQuitAction = self._createAction(
             text="&Quit",
             slot=self.close,
             shortcut=QKeySequence.Quit,
             icon='fileQuit',
-            tip="Quit program")
+            tip="Quit Program")
 
         editRecognizeAction = self._createAction(
             text="&Recognize",
@@ -171,8 +178,8 @@ class MainWindow(QMainWindow):
 
         # Menus
         fileMenu = self.menuBar().addMenu("&File")
-        self._addActions(fileMenu, (fileOpenAction, fileSaveAction,
-                                    fileQuitAction))
+        self._addActions(fileMenu, (fileAddSongAction, fileAddAlbumAction,
+                                    fileSaveAction, fileQuitAction))
 
         editMenu = self.menuBar().addMenu("&Edit")
         self._addActions(editMenu, (editReorganizeAction,
@@ -182,10 +189,6 @@ class MainWindow(QMainWindow):
         self._addActions(helpMenu, (helpDocsAction, helpAboutAction))
 
         # Toolbars
-        fileToolbar = self.addToolBar("FileToolbar")
-        fileToolbar.setObjectName("fileToolbar")
-        self._addActions(fileToolbar, (fileOpenAction, fileSaveAction))
-
         editToolbar = self.addToolBar("EditToolbar")
         editToolbar.setObjectName("editToolbar")
         self._addActions(editToolbar, (editRecognizeAction,
@@ -356,7 +359,10 @@ class MainWindow(QMainWindow):
         for expandedIndex in expanded:
             self.albumView.setExpanded(expandedIndex, True)
 
-    def fileOpen(self):
+    def fileAddSong(self):
+        pass
+
+    def fileAddAlbum(self):
         pass
 
     def editRecognize(self):
