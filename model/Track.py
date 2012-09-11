@@ -41,6 +41,9 @@ class Track(object):
             for field in self.supported_fields():
                 self._song_file[field] = fields.get(field, None)
 
+        # Populated in fingerprint method
+        self._fingerprint = None
+
     def __call__(self):
         """Shortcut to _update_file: Saves updated metadata to file."""
         self._update_file()
@@ -84,8 +87,11 @@ class Track(object):
     @property
     def fingerprint(self):
         """Returns the Acoustid fingerprint"""
-        _, fingerprint = acoustid.fingerprint_file(self.path)
-        return fingerprint
+        if self._fingerprint:
+            return self._fingerprint
+
+        _, self._fingerprint = acoustid.fingerprint_file(self.path)
+        return self._fingerprint
 
     @classmethod
     def supported_fields(cls):
