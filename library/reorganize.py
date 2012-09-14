@@ -2,9 +2,10 @@ import os
 import shutil
 import ConfigParser
 
-from r3tagger.library import parent, extension
-from r3tagger import FileExistsError
 from r3tagger import controller
+from r3tagger import FileExistsError
+from r3tagger.model.track import Track
+from r3tagger.library import parent, extension
 
 # Config loading
 parent_dir = parent(os.path.dirname(__file__))
@@ -40,13 +41,11 @@ def rename_tracks(target, pattern=None):
         shutil.move(track.path, destination)
         track.path = destination
 
-    try:
-        # Try to iterate through target, if you can, it's an Album
+    if isinstance(target, Track):
+        rename_track(target, pattern)
+    else:
         for track in target:
             rename_track(track, pattern)
-    except TypeError:
-        # If you can't iterate, it's a Track
-        rename_track(target, pattern)
 
 
 def rename_album(album, pattern=None):
@@ -77,12 +76,21 @@ def rename_album(album, pattern=None):
     controller.set_album_path(album, destination)
 
 
-def reorganize_and_rename_collection(collection_root=None, pattern=None):
-    if not pattern:
-        pattern = ORGANIZATION_PATTERN
+def reorganize_and_rename_collection(collection_root=None,
+                                     organization_pattern=None,
+                                     album_pattern=None,
+                                     track_pattern=None):
+    if not organization_pattern:
+        organization_pattern = ORGANIZATION_PATTERN
 
     if not collection_root:
         collection_root = COLLECTION_ROOT
+
+    if not album_pattern:
+        album_pattern = ALBUM_PATTERN
+
+    if not track_pattern:
+        track_pattern = TRACK_PATTERN
 
     for album in controller.build_albums(collection_root, recursive=True):
         folder = os.path.basename(album.path)
@@ -90,4 +98,5 @@ def reorganize_and_rename_collection(collection_root=None, pattern=None):
         shutil.move(album.path, destination)
         controller.set_album_path(album, destination)
 
-        rename_album(album)
+        rename_album(album, album_pattern)
+        rename_tracks(album, track_pattern)

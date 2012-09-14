@@ -83,13 +83,14 @@ class TestReorganize():
 
         for album, title in zip(collection, ('SomeAlbum', 'AnotherAlbum')):
             album_name = '{} - {}'.format(album.date, album.album)
-            album_from_root = path.join(title, album_name)
-            complete_path = path.join(collection_root, album_from_root)
+            complete_path = path.join(collection_root, album_name)
 
             assert path.isdir(complete_path)
 
-            for track_number in range(6):
-                track_name = '{0} - SomeTrack{0:0>2}.ogg'.format(track_number)
+            for track_number in range(1, 6):
+                track_name = '{0} - {1:0>2} - SomeTrack{1:0>2}.ogg'.format(
+                    album.artist,
+                    track_number)
                 track_path = path.join(complete_path, track_name)
 
                 assert path.isfile(track_path)
