@@ -6,7 +6,7 @@ from PySide.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PySide.QtGui import (QTreeView, QItemSelectionModel, QItemSelection,
                           QStyledItemDelegate, QLineEdit)
 
-from r3tagger import Controller
+from r3tagger import controller
 
 COLUMNS = OrderedDict({"Artist": 'artist',
                        "Album": 'album',

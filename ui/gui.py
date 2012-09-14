@@ -9,7 +9,7 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
                           QMessageBox, QFileDialog)
 
 import AlbumCollection
-from r3tagger import Controller
+from r3tagger import controller
 import qrc_resources
 
 
