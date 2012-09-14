@@ -196,32 +196,6 @@ class TestAlbumManipulation():
         assert album.genre == 'SomeGenre'
         assert len(album.tracks) == 5
 
-    def test_rename_album_default_pattern(self, album):
-        root = os.path.dirname(album.path)
-
-        controller.rename_album(album)
-
-        newpath = "{} - {}".format(album.date, album.album)
-        album_path = os.path.join(root, newpath)
-
-        assert album_path == album.path
-        assert os.path.exists(album_path)
-
-        for track in album:
-            assert os.path.dirname(track.path) == album_path
-
-    def test_rename_tracks_default_pattern(self, album):
-        controller.rename_tracks(album)
-
-        path = os.path.dirname(album.tracks[0].path)
-        pattern = os.path.join(path,
-                               'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
-        track_paths = [pattern.format(x, x) for x in range(5, 0, -1)]
-
-        for path, track in zip(track_paths, album):
-            assert track.path == path
-            assert os.path.exists(track.path)
-
     def test_retag_album(self, album):
         tags = {'artist': 'NewArtist', 'album': 'NewAlbum',
                 'date': '2013', 'genre': 'NewGenre'}
