@@ -1,52 +1,95 @@
 import shutil
 import tempfile
-import os
+from os import path
 
 from r3tagger import controller
 from r3tagger.library import reorganize
 
 
-class TestAlbumManipulation():
+class TestReorganize():
+    collection_root = None
+
     def setup_album(self):
         tempdir = tempfile.mkdtemp()
 
         orig_path = 'test_songs/album'
-        dest_path = os.path.join(tempdir, 'album')
+        dest_path = path.join(tempdir, 'album')
 
         shutil.copytree(orig_path, dest_path)
 
         return controller.build_albums(dest_path, False).next()
 
     def teardown_album(self, album):
-        root = os.path.dirname(album.path)
+        root = path.dirname(album.path)
         shutil.rmtree(root)
 
     def pytest_funcarg__album(self, request):
-        return request.cached_setup(self.setup_album, self.teardown_album,
+        return request.cached_setup(self.setup_album,
+                                    self.teardown_album,
+                                    scope='function')
+
+    def setup_collection(self):
+        tempdir = tempfile.mkdtemp()
+
+        orig_path = 'test_songs/album'
+        collection_root = path.join(tempdir, 'collection')
+        TestReorganize.collection_root = collection_root
+        dest_path = path.join(collection_root, 'album')
+
+        shutil.copytree(orig_path, dest_path)
+
+        return controller.build_albums('test_songs/album')
+
+    def teardown_collection(self, collection):
+        shutil.rmtree(TestReorganize.collection_root)
+
+    def pytest_funcarg__collection(self, request):
+        return request.cached_setup(self.setup_collection,
+                                    self.teardown_collection,
                                     scope='function')
 
     def test_rename_album_default_pattern(self, album):
-        root = os.path.dirname(album.path)
+        root = path.dirname(album.path)
 
         reorganize.rename_album(album)
 
         newpath = "{} - {}".format(album.date, album.album)
-        album_path = os.path.join(root, newpath)
+        album_path = path.join(root, newpath)
 
         assert album_path == album.path
-        assert os.path.exists(album_path)
+        assert path.exists(album_path)
 
         for track in album:
-            assert os.path.dirname(track.path) == album_path
+            assert path.dirname(track.path) == album_path
 
     def test_rename_tracks_default_pattern(self, album):
         reorganize.rename_tracks(album)
 
-        path = os.path.dirname(album.tracks[0].path)
-        pattern = os.path.join(path,
-                               'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
+        parent_path = path.dirname(album.tracks[0].path)
+        pattern = path.join(parent_path,
+                            'SomeArtist - {:0>2} - SomeTrack{:0>2}.ogg')
         track_paths = [pattern.format(x, x) for x in range(5, 0, -1)]
 
-        for path, track in zip(track_paths, album):
-            assert track.path == path
-            assert os.path.exists(track.path)
+        for track_path, track in zip(track_paths, album):
+            assert track.path == track_path
+            assert path.exists(track.path)
+
+    def test_rename_and_reorganize_collection(self, collection):
+        collection_root = TestReorganize.collection_root
+
+        reorganize.reorganize_and_rename_collection(
+            collection_root,
+            "{artist}/{date} - {album}/{tracknumber} - {title}")
+
+        for album, title in zip(collection, ('SomeAlbum', 'AnotherAlbum')):
+            album_name = '{} - {}'.format(album.date, album.album)
+            album_from_root = path.join(title, album_name)
+            complete_path = path.join(collection_root, album_from_root)
+
+            assert path.isdir(complete_path)
+
+            for track_number in range(6):
+                track_name = '{0} - SomeTrack{0:0>2}.ogg'.format(track_number)
+                track_path = path.join(complete_path, track_name)
+
+                assert path.isfile(track_path)
