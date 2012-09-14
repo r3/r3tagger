@@ -4,7 +4,7 @@ import shutil
 import os
 import tempfile
 
-from r3tagger.model.Album import Album
+from r3tagger.model.album import Album
 from r3tagger.controller import build_albums
 
 

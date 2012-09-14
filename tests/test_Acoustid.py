@@ -5,7 +5,7 @@ from mocks import MusicbrainzQueries
 from mocks import AcoustidQueries
 
 from r3tagger.query import Acoustid
-from r3tagger.model.Track import Track
+from r3tagger.model.track import Track
 
 
 class TestAcoustid():

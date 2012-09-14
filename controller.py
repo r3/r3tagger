@@ -44,8 +44,8 @@ import ConfigParser
 from mutagen import File
 
 from r3tagger import FileExistsError
-from r3tagger.model.Album import Album
-from r3tagger.model.Track import Track
+from r3tagger.model.album import Album
+from r3tagger.model.track import Track
 from r3tagger.library import filename, parent, extension
 
 # Configuration loading
