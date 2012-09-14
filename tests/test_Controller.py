@@ -7,7 +7,7 @@ import tempfile
 
 import pytest
 
-from r3tagger import Controller
+from r3tagger import controller
 from r3tagger.model.Album import Album
 
 
@@ -41,7 +41,7 @@ class TestCreateAlbum(object):
 
     def setup_controller(self):
         """Setup: Creates a test album with 5 dummy songs on it"""
-        return Controller
+        return controller
 
     def pytest_funcarg__controller(self, request):
         """Dependency Injection: Album"""
@@ -78,7 +78,7 @@ class TestCreateAlbum(object):
 
         shutil.copytree(orig_path, dest_path)
 
-        return Controller.build_albums(dest_path, False).next()
+        return controller.build_albums(dest_path, False).next()
 
     def teardown_album(self, album):
         root = os.path.dirname(album.path)
@@ -89,49 +89,49 @@ class TestCreateAlbum(object):
                                     scope='function')
 
     def test_fix_config_path_hack(self):
-        Controller.config_file = os.path.dirname(Controller.__file__)
+        controller.config_file = os.path.dirname(controller.__file__)
 
     def test_build_track_supported(self):
-        track = Controller.build_track('test_songs/PublicDomainSong.mp3')
+        track = controller.build_track('test_songs/PublicDomainSong.mp3')
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
             assert ''.join(fingerprint) == track.fingerprint
 
     def test_build_track_unsupported(self):
         with pytest.raises(NotImplementedError):
-            Controller.build_track('test_Controller.py')
+            controller.build_track('test_Controller.py')
 
     def test_build_track_missing(self):
-        with pytest.raises(Controller.NoFileFoundError):
-            Controller.build_track('.')
+        with pytest.raises(controller.NoFileFoundError):
+            controller.build_track('.')
 
     def test_single_album(self, path, persist):
-        test_album = Controller.build_albums(path).next()
+        test_album = controller.build_albums(path).next()
         assert persist.match(test_album) == 1.0
 
     def test_recursive_albums(self, path, persist):
-        for album in Controller.build_albums(path, True):
+        for album in controller.build_albums(path, True):
             assert persist.match(album) == 1.0
 
     def test_missing_album(self):
-        with pytest.raises(Controller.NoFileFoundError):
-            Controller.build_albums('.').next()
+        with pytest.raises(controller.NoFileFoundError):
+            controller.build_albums('.').next()
 
     def test_missing_fields_album(self, album):
         album.artist = None
-        assert Controller.missing_fields(album) == ['artist']
+        assert controller.missing_fields(album) == ['artist']
 
     def test_missing_fields_track(self, album):
         track = album.tracks[0]
         track.album = track.title = None
 
-        assert sorted(Controller.missing_fields(track)) == ['album', 'title']
+        assert sorted(controller.missing_fields(track)) == ['album', 'title']
 
     def test_get_fields_track(self, album):
         expected = {'album': u'SomeAlbum', 'title': u'SomeTrack05',
                     'artist': u'SomeArtist', 'date': u'2012',
                     'genre': u'SomeGenre', 'tracknumber': u'05'}
         track = album.tracks[0]
-        for name, field in Controller.get_fields(track).items():
+        for name, field in controller.get_fields(track).items():
             assert expected[name] == field
 
     def test_find_shared_tags_none(self, album, persist):
@@ -140,12 +140,12 @@ class TestCreateAlbum(object):
         album.tracks[0].genre = u'AnotherGenre'
         album.tracks[0].date = u'0'
 
-        assert Controller.find_shared_tags(album, persist) == {}
+        assert controller.find_shared_tags(album, persist) == {}
 
     def test_get_fields_album(self, album):
         expected = {'album': u'SomeAlbum', 'date': u'2012',
                     'genre': u'SomeGenre', 'artist': u'SomeArtist'}
-        for name, field in Controller.get_fields(album).items():
+        for name, field in controller.get_fields(album).items():
             assert expected[name] == field
 
     def test_find_shared_tags_partial(self, album, persist):
@@ -154,17 +154,17 @@ class TestCreateAlbum(object):
 
         album.tracks[0].artist = u'AnotherArtist'
 
-        assert Controller.find_shared_tags(album, persist) == expected
+        assert controller.find_shared_tags(album, persist) == expected
 
     def test_album_from_tracks(self, album, persist):
         tracks = album.tracks
-        new_album = Controller.album_from_tracks(tracks)
+        new_album = controller.album_from_tracks(tracks)
 
         assert new_album.match(persist) == 1
 
     def test_album_from_tracks_with_name(self, album, persist):
         tracks = album.tracks
-        new_album = Controller.album_from_tracks(tracks, name="AnotherAlbum")
+        new_album = controller.album_from_tracks(tracks, name="AnotherAlbum")
 
         assert 0.7 < new_album.match(persist) < 0.72
 
@@ -178,7 +178,7 @@ class TestAlbumManipulation():
 
         shutil.copytree(orig_path, dest_path)
 
-        return Controller.build_albums(dest_path, False).next()
+        return controller.build_albums(dest_path, False).next()
 
     def teardown_album(self, album):
         root = os.path.dirname(album.path)
@@ -199,7 +199,7 @@ class TestAlbumManipulation():
     def test_rename_album_default_pattern(self, album):
         root = os.path.dirname(album.path)
 
-        Controller.rename_album(album)
+        controller.rename_album(album)
 
         newpath = "{} - {}".format(album.date, album.album)
         album_path = os.path.join(root, newpath)
@@ -211,7 +211,7 @@ class TestAlbumManipulation():
             assert os.path.dirname(track.path) == album_path
 
     def test_rename_tracks_default_pattern(self, album):
-        Controller.rename_tracks(album)
+        controller.rename_tracks(album)
 
         path = os.path.dirname(album.tracks[0].path)
         pattern = os.path.join(path,
@@ -226,7 +226,7 @@ class TestAlbumManipulation():
         tags = {'artist': 'NewArtist', 'album': 'NewAlbum',
                 'date': '2013', 'genre': 'NewGenre'}
 
-        Controller.retag_album(album, tags)
+        controller.retag_album(album, tags)
 
         for name, tag in tags.items():
             assert getattr(album, name) == tag
@@ -239,7 +239,7 @@ class TestAlbumManipulation():
                 'date': '2013', 'genre': 'AnotherGenre'}
         track = album.tracks[0]
 
-        Controller.retag_track(track, tags)
+        controller.retag_track(track, tags)
 
         for name, tag in tags.items():
             assert getattr(track, name) == tag
@@ -250,7 +250,7 @@ class TestAlbumManipulation():
                   'date': '1',
                   'genre': 'UpdatedGenre'}
 
-        Controller.update_album(album, Album(source))
+        controller.update_album(album, Album(source))
 
         for name, field in source.items():
             assert getattr(album, name) == field
@@ -260,18 +260,18 @@ class TestAlbumManipulation():
         path = track.path
         artist = u'Foo'
         track.artist = artist
-        Controller.flush_changes(track)
+        controller.flush_changes(track)
 
-        changed_track = Controller.build_track(path)
+        changed_track = controller.build_track(path)
         assert changed_track.artist == artist
 
     def test_flush_changes_album(self, album):
         path = album.path
         artist = u'Foo'
-        Controller.retag_album(album, {'artist': artist})
-        Controller.flush_changes(album)
+        controller.retag_album(album, {'artist': artist})
+        controller.flush_changes(album)
 
-        changed_album = Controller.build_albums(path).next()
+        changed_album = controller.build_albums(path).next()
         assert changed_album.artist == artist
 
     def test_flush_changes_tracks(self, album):
@@ -282,8 +282,8 @@ class TestAlbumManipulation():
             track.artist = artist
 
         paths = [track.path for track in tracks]
-        Controller.flush_changes(*tracks)
+        controller.flush_changes(*tracks)
 
         for path in paths:
-            changed_track = Controller.build_track(path)
+            changed_track = controller.build_track(path)
             assert changed_track.artist == artist

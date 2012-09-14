@@ -5,7 +5,7 @@ import os
 import tempfile
 
 from r3tagger.model.Album import Album
-from r3tagger.Controller import build_albums
+from r3tagger.controller import build_albums
 
 
 class TestReadAlbum(object):
