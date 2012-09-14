@@ -8,7 +8,7 @@ import tempfile
 import pytest
 
 from r3tagger import controller
-from r3tagger.model.Album import Album
+from r3tagger.model.album import Album
 
 
 class TestCreateAlbum(object):

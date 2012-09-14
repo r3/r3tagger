@@ -3,7 +3,7 @@ import shutil
 import os
 import pytest
 
-from r3tagger.model import Track
+from r3tagger.model.track import Track
 
 
 class TestWriteTrack(object):
@@ -34,7 +34,7 @@ class TestWriteTrack(object):
 
             shutil.copyfile(orig_path, dest_path)
             TestWriteTrack.song = dest_path
-            return Track.Track(dest_path)
+            return Track(dest_path)
 
         def pytest_funcarg__song(self, request):
             return request.cached_setup(self.setup_song,
@@ -88,7 +88,7 @@ class TestWriteTrack(object):
         # Setup 'song' funcarg and setup/teardown
         def setup_song(self):
             """Setup: Open edited dummy song"""
-            return Track.Track(TestWriteTrack.song)
+            return Track(TestWriteTrack.song)
 
         def teardown_song(self, song):
             """Teardown: Delete directory containing dummy file"""
@@ -155,7 +155,7 @@ class TestAcoustid(object):
 
         shutil.copyfile(orig_path, dest_path)
         TestAcoustid.song = dest_path
-        return Track.Track(dest_path)
+        return Track(dest_path)
 
     def teardown_song(self, song):
         shutil.rmtree(TestAcoustid.dir)
@@ -192,7 +192,7 @@ class TestFailures(object):
 
         shutil.copyfile(orig_path, dest_path)
         TestAcoustid.song = dest_path
-        return Track.Track(dest_path)
+        return Track(dest_path)
 
     def teardown_song(self, song):
         """Teardown: Delete directory containing dummy file"""
@@ -206,7 +206,7 @@ class TestFailures(object):
     def test_unsupported_file(self):
         path = os.path.join('test_songs', 'Unsupported.file')
         with pytest.raises(NotImplementedError):
-            Track.Track(path)
+            Track(path)
 
     def test_missing_attrib(self, song):
         with pytest.raises(AttributeError):

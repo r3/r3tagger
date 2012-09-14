@@ -6,7 +6,7 @@ import musicbrainz2.webservice as ws
 import musicbrainz2.model as m
 
 from mocks import MusicbrainzQueries
-from r3tagger.query import Musicbrainz, QueryError
+from r3tagger.query import musicbrainz, QueryError
 
 RESPONSES = 'mocks/MusicbrainzResponses.shelve'
 SONG = 'Smells Like Teen Spirit'
@@ -27,7 +27,7 @@ class TestReadMusicbrainz(object):
     def pytest_funcarg__responses(self, request):
         """Dependency Injection: responses"""
         return request.cached_setup(self.setup_responses,
-                self.teardown_responses, scope='class')
+                                    self.teardown_responses, scope='class')
 
     def setup_shelf(self):
         shelf = shelve.open('./mocks/SomeAlbumInstance.shelve')
@@ -38,7 +38,7 @@ class TestReadMusicbrainz(object):
 
     def pytest_funcarg__shelf(self, request):
         return request.cached_setup(self.setup_shelf,
-                self.teardown_shelf, scope='class')
+                                    self.teardown_shelf, scope='class')
 
     def pytest_funcarg__album(self, request):
         response = {'artist': u"Nirvana",
@@ -73,7 +73,6 @@ class TestReadMusicbrainz(object):
 
             for a, b in items:
                 if a.getId() != b.getId():
-                    print("{} <= A | B => {}".format(a.getId(), b.getId()))
                     return False
 
             return True
@@ -81,31 +80,31 @@ class TestReadMusicbrainz(object):
     def test_setup_mock_hack(self, responses):
         """If MUSICBRAINZ_MOCK is set, inject the mock"""
         if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
-                'false', 'no'):
+                                                             'false', 'no'):
             # reticulating_splines()
-            MusicbrainzQueries.inject_mock(Musicbrainz)
+            MusicbrainzQueries.inject_mock(musicbrainz)
             MusicbrainzQueries.link_shelve(responses)
-            Musicbrainz.Backoff._set_delay(0)
+            musicbrainz.Backoff._set_delay(0)
 
     # Test Methods
     def test__find_artist(self):
-        for ident in Musicbrainz._find_artist(ARTIST):
+        for ident in musicbrainz._find_artist(ARTIST):
             assert ident.startswith('http://musicbrainz.org/artist/')
 
     def test__find_release_group(self):
-        for ident in Musicbrainz._find_release_group(ALBUM):
+        for ident in musicbrainz._find_release_group(ALBUM):
             assert ident.startswith('http://musicbrainz.org/release-group/')
 
     def test__find_track(self):
-        for ident in Musicbrainz._find_track(SONG):
+        for ident in musicbrainz._find_track(SONG):
             assert isinstance(ident, m.Track)
 
     def test__find_track_artists(self):
-        for ident in Musicbrainz._find_track_artists(SONG):
+        for ident in musicbrainz._find_track_artists(SONG):
             assert ident.startswith('http://musicbrainz.org/artist/')
 
     def test__find_track_releases(self):
-        for ident in Musicbrainz._find_track_releases(SONG):
+        for ident in musicbrainz._find_track_releases(SONG):
             assert ident.startswith('http://musicbrainz.org/release/')
 
     def test__lookup_artist_id(self, responses):
@@ -113,33 +112,33 @@ class TestReadMusicbrainz(object):
                  '5b11f4ce-a62d-471e-81fc-a69a8278c7da')
 
         assert self.same_mb_object(responses[ident],
-                Musicbrainz._lookup_artist_id(ident))
+                                   musicbrainz._lookup_artist_id(ident))
 
     def test__lookup_release_group_id(self, responses):
         ident = ('http://musicbrainz.org/release-group/'
                  '1b022e01-4da6-387b-8658-8678046e4cef')
         assert self.same_mb_object(responses[ident],
-                Musicbrainz._lookup_release_group_id(ident))
+                                   musicbrainz._lookup_release_group_id(ident))
 
     def test__lookup_release_id(self, responses):
         ident = ('http://musicbrainz.org/release/'
                  'b52a8f31-b5ab-34e9-92f4-f5b7110220f0')
-        release = Musicbrainz._lookup_release_id(ident)
+        release = musicbrainz._lookup_release_id(ident)
         assert self.same_mb_object(responses[ident], release)
 
     def test_get_album(self, responses):
         response = responses['get_album:Nevermind']
-        assert response.match(Musicbrainz.get_album(ALBUM).next()) == 1
+        assert response.match(musicbrainz.get_album(ALBUM).next()) == 1
 
     def test_get_album_with_artist(self, responses):
         response = responses['get_album:Nevermind']
-        mb_response = Musicbrainz.get_album(ALBUM, ARTIST).next()
+        mb_response = musicbrainz.get_album(ALBUM, ARTIST).next()
         assert response.match(mb_response) == 1
 
     def test_get_artist(self, responses):
         response = responses['get_artist:Nirvana']
         assert self.same_mb_object(response,
-                Musicbrainz.get_artist(ARTIST).next())
+                                   musicbrainz.get_artist(ARTIST).next())
 
     def test_album_tags(self, album, responses):
         # Get a release object
@@ -164,7 +163,7 @@ class TestReadMusicbrainz(object):
                                u'Something in the Way / Endless, Nameless']
                     }
 
-        assert Musicbrainz.album_tags(album) == response
+        assert musicbrainz.album_tags(album) == response
 
     def test_artist_releases(self, album, responses):
         # Get an artist object
@@ -172,7 +171,7 @@ class TestReadMusicbrainz(object):
                  '5b11f4ce-a62d-471e-81fc-a69a8278c7da')
         artist = responses[ident]
 
-        release = Musicbrainz.artist_releases(artist).next().getId()
+        release = musicbrainz.artist_releases(artist).next().getId()
         assert release.startswith('http://musicbrainz.org/release/')
 
 
@@ -186,7 +185,7 @@ class TestMusicbrainzFails():
     def pytest_funcarg__responses(self, request):
         """Dependency Injection: responses"""
         return request.cached_setup(self.setup_responses,
-                self.teardown_responses, scope='class')
+                                    self.teardown_responses, scope='class')
 
     def test_setup_mock_hack(self, responses):
         MusicbrainzQueries.raise_error(ws.WebServiceError)
@@ -197,7 +196,7 @@ class TestMusicbrainzFails():
                    '_lookup_release_id')
 
         if os.getenv('MUSICBRAINZ_MOCK', '').lower() not in (None,
-                'false', 'no'):
+                                                             'false', 'no'):
             for method in methods:
                 with pytest.raises(QueryError):
-                    getattr(Musicbrainz, method)('dummy_arg')
+                    getattr(musicbrainz, method)('dummy_arg')

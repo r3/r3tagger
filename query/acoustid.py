@@ -13,8 +13,8 @@ Provides Functions:
 import json
 import urllib2
 
-from r3tagger.model.Album import Album
-from r3tagger.query import QueryError, Musicbrainz
+from r3tagger.model.album import Album
+from r3tagger.query import QueryError, musicbrainz
 
 
 API_KEY = 'Eqin71st'
@@ -75,7 +75,7 @@ def get_releases(track):
     for match in results['results']:
         for release in match['releases']:
             print(release)
-            musicbrainz_album = Musicbrainz._lookup_release_id(release['id'])
-            tags_dict = Musicbrainz.album_tags(musicbrainz_album)
+            musicbrainz_album = musicbrainz._lookup_release_id(release['id'])
+            tags_dict = musicbrainz.album_tags(musicbrainz_album)
 
             yield(Album(tags_dict))
