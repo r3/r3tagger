@@ -3,6 +3,7 @@ import tempfile
 from os import path
 
 from r3tagger import controller
+from r3tagger.model.album import Album
 from r3tagger.library import reorganize
 
 
@@ -81,7 +82,15 @@ class TestReorganize():
             collection_root,
             "{artist}/{date} - {album}/{tracknumber} - {title}")
 
-        for album, title in zip(collection, ('SomeAlbum', 'AnotherAlbum')):
+        self._assert_exists(collection, collection_root)
+
+    def _assert_exists(self, target, collection_root):
+        if isinstance(target, Album):
+            collection = (target,)
+        else:
+            collection = target
+
+        for album in collection:
             album_name = '{} - {}'.format(album.date, album.album)
             complete_path = path.join(collection_root, album_name)
 
