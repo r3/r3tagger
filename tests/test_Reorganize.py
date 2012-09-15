@@ -4,11 +4,42 @@ from os import path
 
 from r3tagger import controller
 from r3tagger.model.album import Album
-from r3tagger.library import reorganize
+from r3tagger.library import reorganize, parent
 
 
 class TestReorganize():
     collection_root = None
+
+    def _assert_exists(self, target, collection_root):
+        if isinstance(target, Album):
+            collection = (target,)
+        else:
+            collection = target
+
+        for album in collection:
+            album_name = '{} - {}'.format(album.date, album.album)
+            complete_path = path.join(collection_root, album_name)
+
+            assert path.isdir(complete_path)
+
+            for track_number in range(1, 6):
+                track_name = '{0} - {1:0>2} - SomeTrack{1:0>2}.ogg'.format(
+                    album.artist,
+                    track_number)
+                track_path = path.join(complete_path, track_name)
+
+                assert path.isfile(track_path)
+
+    def setup_new_root(self):
+        TestReorganize.collection_root = tempfile.mkdtemp()
+        return None
+
+    def teardown_new_root(self, new_root):
+        shutil.rmtree(new_root)
+
+    def pytest_funcarg__new_root(self, request):
+        return request(self.setup_new_root, self.teardown_new_root,
+                       scope='function')
 
     def setup_album(self):
         tempdir = tempfile.mkdtemp()
@@ -84,22 +115,16 @@ class TestReorganize():
 
         self._assert_exists(collection, collection_root)
 
-    def _assert_exists(self, target, collection_root):
-        if isinstance(target, Album):
-            collection = (target,)
-        else:
-            collection = target
+    def test_rename_and_reorganize_collection_with_album(self, album):
+        reorganize.reorganize_and_rename_collection(
+            album.path,
+            "{artist}/{date} - {album}/{tracknumber} - {title}",
+            include_only=album)
 
-        for album in collection:
-            album_name = '{} - {}'.format(album.date, album.album)
-            complete_path = path.join(collection_root, album_name)
+        self._assert_exists(album, parent(album.path))
 
-            assert path.isdir(complete_path)
-
-            for track_number in range(1, 6):
-                track_name = '{0} - {1:0>2} - SomeTrack{1:0>2}.ogg'.format(
-                    album.artist,
-                    track_number)
-                track_path = path.join(complete_path, track_name)
-
-                assert path.isfile(track_path)
+#if __name__ == '__main__':
+    #instance = TestReorganize()
+    #album = instance.setup_album()
+    #reorganize.reorganize_and_rename_collection(album.path,
+                                                #include_only=album)

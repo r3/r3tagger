@@ -97,15 +97,16 @@ def reorganize_and_rename_collection(collection_root=None,
     if include_only:
         if isinstance(include_only, Album):
             collection = (include_only,)
-        collection = include_only
+        else:
+            collection = include_only
     else:
         collection = controller.build_albums(collection_root, recursive=True)
 
     for album in collection:
-        folder = os.path.basename(album.path)
-        destination = os.path.join(collection_root, folder)
-        shutil.move(album.path, destination)
-        controller.set_album_path(album, destination)
+        parent_dir = parent(album.path)
+        if parent_dir != collection_root:
+            shutil.move(album.path, collection_root)
+            controller.set_album_path(album, collection_root)
 
         rename_album(album, album_pattern)
         rename_tracks(album, track_pattern)
