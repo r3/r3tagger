@@ -53,7 +53,7 @@ class NoFileFoundError(Exception):
 
 # Functions
 def set_album_path(album, path):
-    """Correct a path to an Album or add a new one"""
+    """Change the path of an Album and each of its tracks"""
     album.path = path
 
     for track in album:
