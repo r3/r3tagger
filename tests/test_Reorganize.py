@@ -123,6 +123,19 @@ class TestReorganize():
 
         self._assert_exists(album, parent(album.path))
 
+    def test_move_album(self, album):
+        destination = tempfile.mkdtemp()
+        folder_name = path.basename(album.path)
+        reorganize.move_album(album, destination)
+        album_path = path.join(destination, folder_name)
+        assert path.isdir(destination)
+        assert album.path == album_path
+
+        pattern = path.join(album_path, '{:0>2}.ogg')
+        for track_path in [pattern.format(x, x) for x in range(5, 0, -1)]:
+            assert path.isfile(track_path)
+
+
 #if __name__ == '__main__':
     #instance = TestReorganize()
     #album = instance.setup_album()

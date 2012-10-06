@@ -2,8 +2,7 @@ import os
 import shutil
 import ConfigParser
 
-from r3tagger import controller
-from r3tagger import FileExistsError
+from r3tagger import controller, FileExistsError
 from r3tagger.model.album import Album
 from r3tagger.model.track import Track
 from r3tagger.library import parent, extension
@@ -47,6 +46,14 @@ def rename_tracks(target, pattern=None):
     else:
         for track in target:
             rename_track(track, pattern)
+
+
+def move_album(album, destination):
+    """Move an Album to destination"""
+    album_folder = os.path.basename(album.path)
+    full_destination_path = os.path.join(destination, album_folder)
+    shutil.move(album.path, destination)
+    controller.set_album_path(album, full_destination_path)
 
 
 def rename_album(album, pattern=None):
@@ -103,10 +110,10 @@ def reorganize_and_rename_collection(collection_root=None,
         collection = controller.build_albums(collection_root, recursive=True)
 
     for album in collection:
-        parent_dir = parent(album.path)
-        if parent_dir != collection_root:
-            shutil.move(album.path, collection_root)
-            controller.set_album_path(album, collection_root)
+        pass
+        #dest_name = os.path.join(os.path.basename(album.path))
+        #shutil.move(album.path, collection_root)
+        #controller.set_album_path(album, collection_root)
 
-        rename_album(album, album_pattern)
-        rename_tracks(album, track_pattern)
+        #rename_album(album, album_pattern)
+        #rename_tracks(album, track_pattern)
