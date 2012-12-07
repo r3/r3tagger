@@ -34,7 +34,7 @@ class TestReadAlbum(object):
     def pytest_funcarg__album(self, request):
         """Dependency Injection: Album"""
         return request.cached_setup(self.setup_album, self.teardown_album,
-                scope='class')
+                                    scope='class')
 
     # Test Methods
     def test_iterable(self, album):
@@ -59,7 +59,7 @@ class TestReadAlbum(object):
         assert album.genre == 'SomeGenre'
 
     def test_save_tracks(self, album):
-        assert album() == None
+        assert album() is None
 
     def test_getitem(self, album):
         first_track = list(album)[0]
@@ -149,7 +149,7 @@ class TestAlbumMatching(object):
     def pytest_funcarg__album(self, request):
         """Dependency Injection: Album"""
         return request.cached_setup(self.setup_album, self.teardown_album,
-                scope='class')
+                                    scope='class')
 
     def test_perfect_match(self, album, matchingmock):
         assert album.match(matchingmock) == 1.0
