@@ -1,10 +1,11 @@
 import shutil
 import tempfile
+import re
 from os import path
 
 from r3tagger import controller
 from r3tagger.model.album import Album
-from r3tagger.library import reorganize, parent
+from r3tagger.library import reorganize
 
 
 class TestReorganize():
@@ -17,8 +18,10 @@ class TestReorganize():
             collection = target
 
         for album in collection:
+            artist_name = album.artist
+            partial_path = path.join(collection_root, artist_name)
             album_name = '{} - {}'.format(album.date, album.album)
-            complete_path = path.join(collection_root, album_name)
+            complete_path = path.join(partial_path, album_name)
 
             assert path.isdir(complete_path)
 
@@ -35,10 +38,12 @@ class TestReorganize():
         return None
 
     def teardown_new_root(self, new_root):
-        shutil.rmtree(new_root)
+        #shutil.rmtree(new_root)
+        pass
 
     def pytest_funcarg__new_root(self, request):
-        return request(self.setup_new_root, self.teardown_new_root,
+        return request(self.setup_new_root,
+                       #self.teardown_new_root,
                        scope='function')
 
     def setup_album(self):
@@ -52,32 +57,33 @@ class TestReorganize():
         return controller.build_albums(dest_path, False).next()
 
     def teardown_album(self, album):
-        root = path.dirname(album.path)
-        shutil.rmtree(root)
+        tempdir = re.match(r'/tmp/[a-zA-Z0-9]+/', album.path)
+        if tempdir and path.exists(tempdir.group()):
+            #shutil.rmtree(tempdir.group())
+            pass
 
     def pytest_funcarg__album(self, request):
         return request.cached_setup(self.setup_album,
-                                    self.teardown_album,
+                                    #self.teardown_album,
                                     scope='function')
 
     def setup_collection(self):
         tempdir = tempfile.mkdtemp()
 
-        orig_path = 'test_songs/album'
-        collection_root = path.join(tempdir, 'collection')
-        TestReorganize.collection_root = collection_root
-        dest_path = path.join(collection_root, 'album')
-
+        orig_path = 'test_songs/album/nested-album'
+        dest_path = path.join(tempdir, 'album')
         shutil.copytree(orig_path, dest_path)
+        TestReorganize.collection_root = tempdir
 
-        return controller.build_albums('test_songs/album')
+        return tempdir
 
     def teardown_collection(self, collection):
-        shutil.rmtree(TestReorganize.collection_root)
+        #shutil.rmtree(TestReorganize.collection_root)
+        pass
 
     def pytest_funcarg__collection(self, request):
         return request.cached_setup(self.setup_collection,
-                                    self.teardown_collection,
+                                    #self.teardown_collection,
                                     scope='function')
 
     def test_rename_album_default_pattern(self, album):
@@ -107,37 +113,52 @@ class TestReorganize():
             assert path.exists(track.path)
 
     def test_rename_and_reorganize_collection(self, collection):
-        collection_root = TestReorganize.collection_root
+        albums = controller.build_albums(collection, True)
+        reorganize.reorganize_and_rename_collection(collection)
+        self._assert_exists(albums, collection)
+
+    def test_rename_and_reorganize_collection_with_album(self, collection):
+        album_path = path.join(collection, 'album')
+        album = next(controller.build_albums(album_path))
 
         reorganize.reorganize_and_rename_collection(
-            collection_root,
-            "{artist}/{date} - {album}/{tracknumber} - {title}")
+            collection, include_only=album)
 
-        self._assert_exists(collection, collection_root)
+        self._assert_exists(album, collection)
 
-    def test_rename_and_reorganize_collection_with_album(self, album):
-        reorganize.reorganize_and_rename_collection(
-            album.path,
-            "{artist}/{date} - {album}/{tracknumber} - {title}",
-            include_only=album)
-
-        self._assert_exists(album, parent(album.path))
-
-    def test_move_album(self, album):
+    def test_move_album_explicit_destination(self, album):
         destination = tempfile.mkdtemp()
         folder_name = path.basename(album.path)
-        reorganize.move_album(album, destination)
         album_path = path.join(destination, folder_name)
+        reorganize.move_album(album, album_path)
         assert path.isdir(destination)
+        assert path.isdir(album_path)
         assert album.path == album_path
 
         pattern = path.join(album_path, '{:0>2}.ogg')
         for track_path in [pattern.format(x, x) for x in range(5, 0, -1)]:
             assert path.isfile(track_path)
 
+    def test_move_album_into_dir(self, album):
+        destination = tempfile.mkdtemp()
+        folder_name = path.basename(album.path)
+        reorganize.move_album(album, destination)
+        album_path = path.join(destination, folder_name)
+        assert path.isdir(destination)
+        assert path.isdir(album_path)
+        assert album.path == album_path
 
-#if __name__ == '__main__':
-    #instance = TestReorganize()
-    #album = instance.setup_album()
-    #reorganize.reorganize_and_rename_collection(album.path,
-                                                #include_only=album)
+        pattern = path.join(album_path, '{:0>2}.ogg')
+        for track_path in [pattern.format(x, x) for x in range(5, 0, -1)]:
+            assert path.isfile(track_path)
+
+    def test_move_album_into_self_subdir(self, album):
+        destination = path.join(album.path, 'subdir')
+        reorganize.move_album(album, destination)
+        assert path.isdir(destination)
+        assert album.path == destination
+
+        pattern = path.join(destination, '{:0>2}.ogg')
+        for track_path in [pattern.format(x, x) for x in range(5, 0, -1)]:
+            assert path.isfile(track_path)
+            assert path.dirname(track_path) == destination

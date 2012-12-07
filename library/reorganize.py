@@ -131,6 +131,7 @@ def reorganize_and_rename_collection(collection_root=COLLECTION_ROOT,
         dest_path = tempdir
 
         for index, catagory in enumerate(organization_pattern.split('/')):
+            print(catagory)
             if catagory == 'ARTIST':
                 dest_path = _name_to_pattern(
                     album, dest_path, artist_pattern)
@@ -139,13 +140,20 @@ def reorganize_and_rename_collection(collection_root=COLLECTION_ROOT,
                     album, dest_path, album_pattern)
             elif catagory == 'TRACK':
                 rename_tracks(album, track_pattern)
+            else:
+                raise Exception(
+                    "{} is not a valid organization pattern token".format(
+                        catagory))
 
             if index == 0:
                 root_path = dest_path
 
-        #shutil.rmtree(orig_path)
+        if not os.path.isdir(collection_root):
+            os.mkdir(collection_root)
         shutil.move(root_path, collection_root)
+
         shutil.rmtree(tempdir)
+        shutil.rmtree(orig_path)
 
 
 def _name_to_pattern(album, dest_dir, pattern):
