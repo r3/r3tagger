@@ -30,7 +30,8 @@ class TestWriteTrack(object):
             TestWriteTrack.dir = tempfile.mkdtemp()
 
             orig_path = os.path.join('test_songs', TestWriteTrack.filename)
-            dest_path = os.path.join(TestWriteTrack.dir, TestWriteTrack.filename)
+            dest_path = os.path.join(
+                TestWriteTrack.dir, TestWriteTrack.filename)
 
             shutil.copyfile(orig_path, dest_path)
             TestWriteTrack.song = dest_path
@@ -133,7 +134,7 @@ class TestWriteTrack(object):
                                                'tracknumber', 'date', 'genre')
 
 
-class TestAcoustid(object):
+class TestTrackFingerprint(object):
     """Provides a test suite for ensuring that fingerprints are properly
        generated from an mp3 file. Asserts that a newly made fingerprint
        matches one pregenerated and stored in a file (it's a long string)
@@ -148,17 +149,18 @@ class TestAcoustid(object):
     filename = 'PublicDomainSong.mp3'
 
     def setup_song(self):
-        TestAcoustid.dir = tempfile.mkdtemp()
+        TestTrackFingerprint.dir = tempfile.mkdtemp()
 
-        orig_path = os.path.join('test_songs', TestAcoustid.filename)
-        dest_path = os.path.join(TestAcoustid.dir, TestAcoustid.filename)
+        orig_path = os.path.join('test_songs', TestTrackFingerprint.filename)
+        dest_path = os.path.join(TestTrackFingerprint.dir,
+                                 TestTrackFingerprint.filename)
 
         shutil.copyfile(orig_path, dest_path)
-        TestAcoustid.song = dest_path
+        TestTrackFingerprint.song = dest_path
         return Track(dest_path)
 
     def teardown_song(self, song):
-        shutil.rmtree(TestAcoustid.dir)
+        shutil.rmtree(TestTrackFingerprint.dir)
 
     def pytest_funcarg__song(self, request):
         return request.cached_setup(self.setup_song,
@@ -166,7 +168,8 @@ class TestAcoustid(object):
 
     def test_acoustid(self, song):
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
-            assert ''.join(fingerprint) == song.fingerprint
+            fp = ''.join(fingerprint).strip()
+            assert fp == song.fingerprint
 
 
 class TestFailures(object):
@@ -185,19 +188,19 @@ class TestFailures(object):
 
     def setup_song(self):
         #See below!
-        TestAcoustid.dir = tempfile.mkdtemp()
+        TestFailures.dir = tempfile.mkdtemp()
 
-        orig_path = os.path.join('test_songs', TestAcoustid.filename)
-        dest_path = os.path.join(TestAcoustid.dir, TestAcoustid.filename)
+        orig_path = os.path.join('test_songs', TestFailures.filename)
+        dest_path = os.path.join(TestFailures.dir, TestFailures.filename)
 
         shutil.copyfile(orig_path, dest_path)
-        TestAcoustid.song = dest_path
+        TestFailures.song = dest_path
         return Track(dest_path)
 
     def teardown_song(self, song):
         """Teardown: Delete directory containing dummy file"""
         #TODO: Ugly. Get the path from the song!
-        shutil.rmtree(TestAcoustid.dir)
+        shutil.rmtree(TestFailures.dir)
 
     def pytest_funcarg__song(self, request):
         return request.cached_setup(self.setup_song,
