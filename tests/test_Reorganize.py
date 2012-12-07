@@ -33,19 +33,6 @@ class TestReorganize():
 
                 assert path.isfile(track_path)
 
-    def setup_new_root(self):
-        TestReorganize.collection_root = tempfile.mkdtemp()
-        return None
-
-    def teardown_new_root(self, new_root):
-        #shutil.rmtree(new_root)
-        pass
-
-    def pytest_funcarg__new_root(self, request):
-        return request(self.setup_new_root,
-                       #self.teardown_new_root,
-                       scope='function')
-
     def setup_album(self):
         tempdir = tempfile.mkdtemp()
 
@@ -59,12 +46,11 @@ class TestReorganize():
     def teardown_album(self, album):
         tempdir = re.match(r'/tmp/[a-zA-Z0-9]+/', album.path)
         if tempdir and path.exists(tempdir.group()):
-            #shutil.rmtree(tempdir.group())
-            pass
+            shutil.rmtree(tempdir.group())
 
     def pytest_funcarg__album(self, request):
         return request.cached_setup(self.setup_album,
-                                    #self.teardown_album,
+                                    self.teardown_album,
                                     scope='function')
 
     def setup_collection(self):
@@ -78,12 +64,11 @@ class TestReorganize():
         return tempdir
 
     def teardown_collection(self, collection):
-        #shutil.rmtree(TestReorganize.collection_root)
-        pass
+        shutil.rmtree(TestReorganize.collection_root)
 
     def pytest_funcarg__collection(self, request):
         return request.cached_setup(self.setup_collection,
-                                    #self.teardown_collection,
+                                    self.teardown_collection,
                                     scope='function')
 
     def test_rename_album_default_pattern(self, album):
