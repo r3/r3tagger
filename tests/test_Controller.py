@@ -94,7 +94,8 @@ class TestCreateAlbum(object):
     def test_build_track_supported(self):
         track = controller.build_track('test_songs/PublicDomainSong.mp3')
         with open('test_songs/PublicDomainFingerprint.txt') as fingerprint:
-            assert ''.join(fingerprint) == track.fingerprint
+            fp = ''.join(fingerprint).strip()
+            assert fp == track.fingerprint
 
     def test_build_track_unsupported(self):
         with pytest.raises(NotImplementedError):
