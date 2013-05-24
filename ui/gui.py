@@ -8,7 +8,7 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
                           QApplication, QFormLayout, QKeySequence,
                           QMessageBox, QFileDialog)
 
-import AlbumCollection
+import albumcollection
 from r3tagger import controller
 import qrc_resources
 
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.fileSystemView.expanded.connect(self.fixFileSystemColumns)
         self.fileSystemView.collapsed.connect(self.fixFileSystemColumns)
         #  - Album View
-        self.albumView = AlbumCollection.MusicCollectionView()
+        self.albumView = albumcollection.MusicCollectionView()
         self.albumView.setSelectionMode(QAbstractItemView.MultiSelection)
         self.albumView.clicked.connect(self.updateEditing)
         self.albumView.expanded.connect(self.fixAlbumViewColumns)
@@ -278,22 +278,22 @@ class MainWindow(QMainWindow):
 
     def addPath(self, path):
         if os.path.isfile(path):
-            track = Controller.build_track(path)
-            containerAlbum = Controller.album_from_tracks([track], u'Singles')
+            track = controller.build_track(path)
+            containerAlbum = controller.album_from_tracks([track], u'Singles')
             self.albumView.model().addAlbum(containerAlbum)
 
         else:
-            for album in Controller.build_albums(path, recursive=True):
+            for album in controller.build_albums(path, recursive=True):
                 self.albumView.model().addAlbum(album)
 
     def updateEditing(self, index):
         self.albumView.correctListingSelection(index)
 
         selectedTracks = self.albumView.selectedTracks()
-        albumOfSingles = Controller.album_from_tracks(selectedTracks)
+        albumOfSingles = controller.album_from_tracks(selectedTracks)
         selected = self.albumView.selectedAlbums()
         selected.append(albumOfSingles)
-        tags = Controller.find_shared_tags(*selected) if selected else {}
+        tags = controller.find_shared_tags(*selected) if selected else {}
 
         for tag, edit in self.tagsToAttribs.items():
             if not tags:
@@ -312,10 +312,10 @@ class MainWindow(QMainWindow):
         view = self.albumView
 
         for album in view.selectedAlbums():
-            Controller.retag_album(album, tags)
+            controller.retag_album(album, tags)
 
         for track in view.selectedTracks():
-            Controller.retag_track(track, tags)
+            controller.retag_track(track, tags)
 
         self.saveChanges()
 
