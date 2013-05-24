@@ -24,14 +24,16 @@ import musicbrainz2.model as m
 
 from r3tagger.model.album import Album
 from r3tagger.query import Retry
-from r3tagger.library.Backoff import Backoff
+from r3tagger.library import LimitRequests
 
 DELAY = 1  # Seconds between query to API
+KEY = __name__  # Key for sharing delay between functions
+LIMIT = 1  # Queries that can occur in a given DELAY
 
 
 # === ID Finding ===
 @Retry(ws.WebServiceError)
-@Backoff(DELAY)
+@LimitRequests(KEY, DELAY, LIMIT)
 def _find_artist(artist):
     """Returns iterable of Artist Ids"""
     query = ws.Query()
@@ -43,7 +45,7 @@ def _find_artist(artist):
 
 
 @Retry(ws.WebServiceError)
-@Backoff(DELAY)
+@LimitRequests(KEY, DELAY, LIMIT)
 def _find_release_group(title, artist=None):
     """Returns iterable of releaseGroups"""
     if artist:
@@ -59,7 +61,7 @@ def _find_release_group(title, artist=None):
 
 
 @Retry(ws.WebServiceError)
-@Backoff(DELAY)
+@LimitRequests(KEY, DELAY, LIMIT)
 def _find_track(track):
     """Returns iterable of Artist Ids
     Really should be called from either:
@@ -93,7 +95,7 @@ def _find_track_artists(track):
 
 # === Look-ups of IDs ===
 @Retry(ws.WebServiceError)
-@Backoff(DELAY)
+@LimitRequests(KEY, DELAY, LIMIT)
 def _lookup_release_group_id(ident):
     """Returns musicbrainz releaseGroup object"""
     query = ws.Query()
@@ -103,7 +105,7 @@ def _lookup_release_group_id(ident):
 
 
 @Retry(ws.WebServiceError)
-@Backoff(DELAY)
+@LimitRequests(KEY, DELAY, LIMIT)
 def _lookup_artist_id(ident):
     """Returns musicbrainz Artist object"""
     query = ws.Query()
@@ -115,7 +117,7 @@ def _lookup_artist_id(ident):
 
 
 @Retry(ws.WebServiceError)
-@Backoff(DELAY)
+@LimitRequests(KEY, DELAY, LIMIT)
 def _lookup_release_id(ident):
     """Returns musicbrainz Release object"""
     query = ws.Query()

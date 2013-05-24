@@ -84,7 +84,7 @@ class TestReadMusicbrainz(object):
             # reticulating_splines()
             MusicbrainzQueries.inject_mock(musicbrainz)
             MusicbrainzQueries.link_shelve(responses)
-            musicbrainz.Backoff._set_delay(0)
+            musicbrainz.DELAY = 0
 
     # Test Methods
     def test__find_artist(self):
