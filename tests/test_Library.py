@@ -27,55 +27,50 @@ def test_filename():
     assert library.filename(path_file) == 'file.ext'
 
 
-def test_easy_TimedSemaphore():
-    """Five requests at one request per second"""
-    def dummy_request(record):
-        record.append(datetime.now())
-
-    requests_completed = []
-    threads = []
-    lock = library.TimedSemaphore()
-    for _ in range(5):
-        with lock:
-            thread = threading.Thread(target=dummy_request,
-                                    args=(requests_completed,))
-            threads.append(thread)
-            thread.start()
-
-    for index, time in enumerate(requests_completed[1:]):
-        time_diff = time - requests_completed[index - 1]
-        assert time_diff.seconds >= 1
-
-    assert len(requests_completed) == 5
-
-
-def test_stress_TimedSemaphore():
+def timed_semaphore_generic_test(queries, limit, delay):
     """One thousand reqeuests at one hundred per second"""
     def dummy_request(record):
         record.append(datetime.now())
 
-    number_of_queries = 1000
-    queries_per_limit = 100
-    delay = 1
-
     requests_completed = []
     threads = []
-    lock = library.TimedSemaphore(delay=delay, value=queries_per_limit)
+    lock = library.TimedSemaphore(delay=delay, value=limit)
     start_time = datetime.now()
-    for _ in range(number_of_queries):
+    for _ in range(queries):
         with lock:
             thread = threading.Thread(target=dummy_request,
                                     args=(requests_completed,))
             threads.append(thread)
             thread.start()
 
-    seconds_total = int(delay * (number_of_queries / queries_per_limit))
+    seconds_total = int(delay * (queries / limit))
     query_record = {second: 0 for second in range(seconds_total)}
     for query in requests_completed:
         seconds_since_start = (query - start_time).seconds
         query_record[seconds_since_start] += 1
 
-    for number_of_queries in query_record.values():
-        assert number_of_queries <= queries_per_limit
+    for queries_made in query_record.values():
+        assert queries_made <= limit
 
-    assert len(requests_completed) == 1000
+    assert len(requests_completed) == queries
+
+
+def test_easy_TimedSemaphore():
+    """Five requests at one request per second"""
+    timed_semaphore_generic_test(queries=5,
+                                 limit=1,
+                                 delay=1)
+
+
+def test_stress_TimedSemaphore():
+    timed_semaphore_generic_test(queries=1000,
+                                 limit=100,
+                                 delay=1)
+
+
+#def test_LimitRequests:
+    #@LimitRequests(key=__name__)
+    #def dummy_request(record):
+        #record.append(datetime.now())
+
+    #requests
