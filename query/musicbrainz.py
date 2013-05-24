@@ -26,6 +26,8 @@ from r3tagger.model.album import Album
 from r3tagger.query import Retry
 from r3tagger.library import LimitRequests
 
+
+APP_ID = 'r3tagger' # Id for r3tagger
 DELAY = 1  # Seconds between query to API
 KEY = __name__  # Key for sharing delay between functions
 LIMIT = 1  # Queries that can occur in a given DELAY
@@ -36,7 +38,7 @@ LIMIT = 1  # Queries that can occur in a given DELAY
 @LimitRequests(KEY, DELAY, LIMIT)
 def _find_artist(artist):
     """Returns iterable of Artist Ids"""
-    query = ws.Query()
+    query = ws.Query(clientId=APP_ID)
     filt = ws.ArtistFilter(name=artist)
 
     results = query.getArtists(filt)
@@ -54,7 +56,7 @@ def _find_release_group(title, artist=None):
         pattern = title
 
     filt = ws.ReleaseGroupFilter(query=pattern)
-    query = ws.Query()
+    query = ws.Query(clientId=APP_ID)
     results = query.getReleaseGroups(filt)
 
     return [x.getReleaseGroup().getId() for x in results]
@@ -68,7 +70,7 @@ def _find_track(track):
     _find_track_releases
     _find_track_artists
     """
-    query = ws.Query()
+    query = ws.Query(clientId=APP_ID)
     filt = ws.TrackFilter(track)
     results = query.getTracks(filt)
 
@@ -98,7 +100,7 @@ def _find_track_artists(track):
 @LimitRequests(KEY, DELAY, LIMIT)
 def _lookup_release_group_id(ident):
     """Returns musicbrainz releaseGroup object"""
-    query = ws.Query()
+    query = ws.Query(clientId=APP_ID)
     filt = ws.ReleaseGroupIncludes(artist=True, releases=True)
 
     return query.getReleaseGroupById(ident, filt)
@@ -108,7 +110,7 @@ def _lookup_release_group_id(ident):
 @LimitRequests(KEY, DELAY, LIMIT)
 def _lookup_artist_id(ident):
     """Returns musicbrainz Artist object"""
-    query = ws.Query()
+    query = ws.Query(clientId=APP_ID)
     filt = ws.ArtistIncludes(
             releases=(m.Release.TYPE_OFFICIAL, m.Release.TYPE_ALBUM),
             tags=True, releaseGroups=True)
@@ -120,7 +122,7 @@ def _lookup_artist_id(ident):
 @LimitRequests(KEY, DELAY, LIMIT)
 def _lookup_release_id(ident):
     """Returns musicbrainz Release object"""
-    query = ws.Query()
+    query = ws.Query(clientId=APP_ID)
     filt = ws.ReleaseIncludes(artist=True, tracks=True,
             releaseEvents=True)
 

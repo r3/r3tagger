@@ -15,6 +15,10 @@ Provides Classes:
 
 
 import musicbrainz2.webservice as ws
+import logging
+
+
+logging.basicConfig(filename='query_errors.log',level=logging.DEBUG)
 
 
 class QueryError(ws.WebServiceError):
@@ -31,8 +35,8 @@ class Retry(object):
             for attempt in range(self.attempts):
                 try:
                     return func(*args, **kwargs)
-                except self.error, e:
-                    pass
+                except self.error, err:
+                    logging.warning(err)
 
             raise QueryError("Query failed: {}".format(e))
 
