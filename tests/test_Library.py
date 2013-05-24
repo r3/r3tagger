@@ -28,7 +28,6 @@ def test_filename():
 
 
 def timed_semaphore_generic_test(queries, limit, delay):
-    """One thousand reqeuests at one hundred per second"""
     def dummy_request(record):
         record.append(datetime.now())
 
@@ -63,14 +62,34 @@ def test_easy_TimedSemaphore():
 
 
 def test_stress_TimedSemaphore():
+    """One thousand reqeuests at one hundred per second"""
     timed_semaphore_generic_test(queries=1000,
                                  limit=100,
                                  delay=1)
 
 
-#def test_LimitRequests:
-    #@LimitRequests(key=__name__)
-    #def dummy_request(record):
-        #record.append(datetime.now())
+def test_LimitRequests():
+    key = __name__
+    delay = 1
+    value = 1
 
-    #requests
+    @library.LimitRequests(key=key)
+    def dummy_request(record):
+        record.append(datetime.now())
+
+    requests_completed = []
+    threads = []
+    start_time = datetime.now()
+    for _ in range(value):
+        dummy_request(requests_completed)
+
+    seconds_total = int(delay * (value / delay))
+    query_record = {second: 0 for second in range(seconds_total)}
+    for query in requests_completed:
+        seconds_since_start = (query - start_time).seconds
+        query_record[seconds_since_start] += 1
+
+    for queries_made in query_record.values():
+        assert queries_made <= delay
+
+    assert len(requests_completed) == value
