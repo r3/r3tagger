@@ -18,7 +18,10 @@ import musicbrainz2.webservice as ws
 import logging
 
 
-logging.basicConfig(filename='query_errors.log',level=logging.DEBUG)
+#TODO: change logging level to logging.WARNING when publishing
+logging.basicConfig(filename='query_errors.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(message)s')
 
 
 class QueryError(ws.WebServiceError):
@@ -38,6 +41,6 @@ class Retry(object):
                 except self.error, err:
                     logging.warning(err)
 
-            raise QueryError("Query failed: {}".format(e))
+            raise QueryError("Query failed: {}".format(err))
 
         return wrapper

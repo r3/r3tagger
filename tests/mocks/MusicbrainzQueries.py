@@ -83,4 +83,4 @@ def link_shelve(shelve):
 def raise_error(error):
     """Want errors? Let me know what kind"""
     global ERROR
-    ERROR = error
+    ERROR = error("Error created by mock for testing purposes.")
