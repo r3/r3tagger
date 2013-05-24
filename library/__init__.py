@@ -14,6 +14,31 @@ Provides Functions:
 """
 
 import os
+from threading import _Semaphore, Timer
+
+
+class TimedSemaphore(_Semaphore):
+    def __init__(self, delay=1, *args, **kwargs):
+        """Semaphore with a delay prior to releasing
+        Adds a new argument, delay, the number of seconds to delay
+        prior to releasing the lock. An example use would be limiting
+        the number of requests made to some restricted remote API in
+        a given time period. For example the musicbrainz API restricts
+        queries to one per second, and this is used as the default
+        for this class.
+
+        (http://musicbrainz.org/doc/XML_Web_Service/Rate_Limiting)
+        """
+        self.delay = delay
+        super(TimedSemaphore, self).__init__(*args, **kwargs)
+
+    def release(self, *args, **kwargs):
+        release_func = super(TimedSemaphore, self).release
+        release_timer = Timer(self.delay,
+                              release_func,
+                              args=args,
+                              kwargs=kwargs)
+        release_timer.start()
 
 
 def extension(path):
