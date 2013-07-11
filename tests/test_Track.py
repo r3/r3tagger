@@ -214,3 +214,21 @@ class TestFailures(object):
     def test_missing_attrib(self, song):
         with pytest.raises(AttributeError):
             getattr(song, 'asnbrlAlkhasf')
+
+
+@pytest.fixture(scope='module')
+def untagged_mp3(request):
+    filename = 'untagged.mp3'
+    temp_path = tempfile.mkdtemp()
+    orig_path = os.path.join('test_songs', filename)
+    dest_path = os.path.join(temp_path, filename)
+
+    shutil.copyfile(orig_path, dest_path)
+
+    def delete_tempfile():
+        shutil.rmtree(temp_path)
+
+    request.addfinalizer(delete_tempfile)
+    return dest_path
+
+
