@@ -7,7 +7,7 @@ Provided Functions:
     Produce iterables of Albums on path
 
     find_shared_tags(album:Album)
-    Collects shard fields into a dict
+    Collects shared fields into a dict
 
     rename_album(album:Album)
     Renames an Album
@@ -46,12 +46,11 @@ from r3tagger.model.track import Track
 from r3tagger.library import filename
 
 
-# Classes
 class NoFileFoundError(Exception):
+    """Error for where a file is not found"""
     pass
 
 
-# Functions
 def set_album_path(album, path):
     """Change the path of an Album and each of its tracks"""
     album.path = path
@@ -121,6 +120,7 @@ def find_shared_tags(*albums):
         return None
 
     def is_shared(field, albums):
+        """Determines if a given field is the same in all given albums"""
         result = set()
         for album in albums:
             for track in album:
@@ -223,12 +223,12 @@ def album_from_tracks(tracks, name=None):
     return Album(args)
 
 
-def flush_changes(*tracks_and_albums):
+def flush_changes(*tracks_or_albums):
     """Flushes the changes made to given tracks and/or albums to disk
 
     Accepts any number of Track and/or Album objects
     """
-    for item in tracks_and_albums:
+    for item in tracks_or_albums:
         if isinstance(item, Album):
             for track in item:
                 track()
