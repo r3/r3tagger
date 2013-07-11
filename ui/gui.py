@@ -10,7 +10,7 @@ from PySide.QtGui import (QTreeView, QMainWindow, QFileSystemModel, QAction,
 
 import albumcollection
 from r3tagger import controller
-import qrc_resources
+#import qrc_resources
 
 
 class MainWindow(QMainWindow):
@@ -306,8 +306,7 @@ class MainWindow(QMainWindow):
         tags = {}
         for field, lineEdit in self.tagsToAttribs.items():
             tag = lineEdit.text()
-            if tag:
-                tags[field] = tag
+            tags[field] = tag
 
         view = self.albumView
 
