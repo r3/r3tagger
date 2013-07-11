@@ -25,13 +25,11 @@ class Track(object):
 
         If no additional fields are specified, the Track instance's fields
         will be populated by metadata from the audio file.
-
-        Compatible files: flac (*.flac), ogg vorbis (*.ogg)
         """
 
         self.path = path
         mutagen_song = File(path, easy=True)
-        if mutagen_song:
+        if mutagen_song is not None:
             self._song_file = mutagen_song
         else:
             raise NotImplementedError("File not compatible: {}".format(path))
@@ -72,6 +70,7 @@ class Track(object):
         self._song_file.save()
 
     def reset_tags(self):
+        """Reloads metadata from file."""
         self._song_file.load(self.path)
 
     @property
@@ -95,8 +94,5 @@ class Track(object):
 
     @classmethod
     def supported_fields(cls):
+        """List of the fields supported by this class"""
         return cls._supported_fields
-
-    @classmethod
-    def supported_filetypes(cls):
-        return cls._supported_filetypes
