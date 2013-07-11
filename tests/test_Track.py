@@ -217,7 +217,7 @@ class TestFailures(object):
 
 
 @pytest.fixture(scope='module')
-def untagged_mp3(request):
+def untagged_mp3_path(request):
     filename = 'untagged.mp3'
     temp_path = tempfile.mkdtemp()
     orig_path = os.path.join('test_songs', filename)
@@ -232,3 +232,5 @@ def untagged_mp3(request):
     return dest_path
 
 
+def test_instantiate_untagged_mp3(untagged_mp3_path):
+    Track(untagged_mp3_path)
