@@ -266,8 +266,8 @@ class TestAlbumManipulation():
 
 @pytest.fixture(scope='module')
 def album(request):
-    directory = 'nested-album'
-    path = 'test_songs/album'
+    directory = 'mistagged'
+    path = 'test_songs'
     temp_path = tempfile.mkdtemp()
     orig_path = os.path.join(path, directory)
     dest_path = os.path.join(temp_path, directory)
@@ -278,15 +278,18 @@ def album(request):
         shutil.rmtree(temp_path)
 
     request.addfinalizer(delete_tempfile)
-    return Album(dest_path)
+    albums = controller.build_albums(dest_path, False)
+    return next(albums)
 
 
 @pytest.mark.parametrize("fields", [
     ('artist', ['The Untempting', 'Disorienting Lag']),
     ('title', ['Uncharted Love', 'Drawn Away']),
-    ('date', ['2013', '2000']),
+    ('date', []),
     ('genre', ['Classic Rock', 'Jazz'])])
 def test_tags_by_frequency(album, fields):
     field, expected = fields
     for tag in expected:
+        controller.tags_by_frequency(album, field)
+        assert False
         assert list(controller.tags_by_frequency(album, field)) == tag
