@@ -245,5 +245,5 @@ def tags_by_frequency(album, field):
     tags that exist on those tracks in order of frequency.
     """
     tags = Counter(getattr(x, field) for x in album)
-    for tag, __ in sorted(tags.items(), key=tags.get):
+    for tag in sorted(tags, key=tags.get, reverse=True):
         yield tag

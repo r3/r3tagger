@@ -284,9 +284,10 @@ def album(request):
 
 @pytest.mark.parametrize("fields", [
     ('artist', ['The Untempting', 'Disorienting Lag']),
-    ('title', ['Uncharted Love', 'Drawn Away']),
-    ('date', []),
+    ('album', ['Uncharted Love', 'Drawn Away']),
+    ('date', ['']),
     ('genre', ['Classic Rock', 'Jazz'])])
 def test_tags_by_frequency(album, fields):
     field, expected = fields
+    controller.tags_by_frequency(album, field)
     assert list(controller.tags_by_frequency(album, field)) == expected
