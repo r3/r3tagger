@@ -235,3 +235,12 @@ def flush_changes(*tracks_or_albums):
 
         else:
             item()
+
+
+def tags_by_frequency(album, field):
+    """Yields tags in order of the most frequently occuring amongst tracks
+
+    Given an album with tracks, this function provides a generator over the
+    tags that exist on those tracks in order of frequency.
+    """
+    pass
