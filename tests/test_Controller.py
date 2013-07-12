@@ -262,3 +262,30 @@ class TestAlbumManipulation():
         for path in paths:
             changed_track = controller.build_track(path)
             assert changed_track.artist == artist
+
+
+@pytest.fixture(scope='module')
+def album(request):
+    directory = 'nested-album'
+    path = 'test_songs/album'
+    temp_path = tempfile.mkdtemp()
+    orig_path = os.path.join(path, directory)
+    dest_path = os.path.join(temp_path, directory)
+
+    shutil.copytree(orig_path, dest_path)
+
+    def delete_tempfile():
+        shutil.rmtree(temp_path)
+
+    request.addfinalizer(delete_tempfile)
+    return Album(dest_path)
+
+
+@pytest.mark._parametrize("fields", {
+    'artist': ['The Untempting', 'Disorienting Lag'],
+    'title': ['Uncharted Love', 'Drawn Away'],
+    'date': ['2013', '2000'],
+    'genre': ['Classic Rock', 'Jazz']})
+def test_tags_by_frequency(album, fields):
+    for field, expected in fields.items():
+        assert list(controller.tags_by_frequency(album, field)) == expected
