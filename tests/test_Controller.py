@@ -281,11 +281,12 @@ def album(request):
     return Album(dest_path)
 
 
-@pytest.mark._parametrize("fields", {
-    'artist': ['The Untempting', 'Disorienting Lag'],
-    'title': ['Uncharted Love', 'Drawn Away'],
-    'date': ['2013', '2000'],
-    'genre': ['Classic Rock', 'Jazz']})
+@pytest.mark.parametrize("fields", [
+    ('artist', ['The Untempting', 'Disorienting Lag']),
+    ('title', ['Uncharted Love', 'Drawn Away']),
+    ('date', ['2013', '2000']),
+    ('genre', ['Classic Rock', 'Jazz'])])
 def test_tags_by_frequency(album, fields):
-    for field, expected in fields.items():
-        assert list(controller.tags_by_frequency(album, field)) == expected
+    field, expected = fields
+    for tag in expected:
+        assert list(controller.tags_by_frequency(album, field)) == tag
