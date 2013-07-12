@@ -38,6 +38,7 @@ Provided Functions:
 """
 
 import os
+from collections import Counter
 
 from mutagen import File
 
@@ -243,4 +244,6 @@ def tags_by_frequency(album, field):
     Given an album with tracks, this function provides a generator over the
     tags that exist on those tracks in order of frequency.
     """
-    pass
+    tags = Counter(getattr(x, field) for x in album)
+    for tag, __ in sorted(tags.items(), key=tags.get):
+        yield tag

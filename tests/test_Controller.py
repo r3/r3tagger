@@ -289,6 +289,4 @@ def album(request):
     ('genre', ['Classic Rock', 'Jazz'])])
 def test_tags_by_frequency(album, fields):
     field, expected = fields
-    for tag in expected:
-        controller.tags_by_frequency(album, field)
-        assert list(controller.tags_by_frequency(album, field)) == tag
+    assert list(controller.tags_by_frequency(album, field)) == expected
