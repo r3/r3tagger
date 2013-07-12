@@ -291,5 +291,4 @@ def test_tags_by_frequency(album, fields):
     field, expected = fields
     for tag in expected:
         controller.tags_by_frequency(album, field)
-        assert False
         assert list(controller.tags_by_frequency(album, field)) == tag
